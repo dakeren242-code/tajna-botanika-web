@@ -1,0 +1,541 @@
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, ShoppingCart, Zap, Leaf, Info, AlertTriangle, Check, Users, TrendingUp, Star } from 'lucide-react';
+import { supabase, Product } from '../lib/supabase';
+import { useCart } from '../contexts/CartContext';
+import { useMetaTracking } from '../hooks/useMetaTracking';
+import CustomCursor from './CustomCursor';
+import ParticleBackground from './ParticleBackground';
+import Footer from './Footer';
+
+export default function ProductDetail() {
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { trackViewContent, trackAddToCart } = useMetaTracking();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedGramage, setSelectedGramage] = useState<number>(1);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [added, setAdded] = useState(false);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle();
+
+      if (error || !data) {
+        navigate('/');
+      } else {
+        setProduct(data);
+
+        if (data.meta_catalog_id) {
+          trackViewContent({
+            contentId: data.meta_catalog_id,
+            contentName: data.name,
+            contentCategory: data.category || 'Botanické vzorky',
+            contentType: 'product',
+            value: data.price,
+            currency: 'CZK',
+          });
+        } else if (import.meta.env.DEV) {
+          console.warn('[Meta] ViewContent skipped: meta_catalog_id missing for', data.slug);
+        }
+
+        const { data: related } = await supabase
+          .from('products')
+          .select('*')
+          .neq('slug', slug)
+          .limit(3);
+
+        if (related) {
+          setRelatedProducts(related);
+        }
+      }
+      setLoading(false);
+    };
+
+    fetchProduct();
+  }, [slug, navigate]);
+
+  const incrementQuantity = () => {
+    if (product && quantity < (product.stock || 0)) {
+      setQuantity(quantity + 1);
+    }
+  };
+
+  const decrementQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
+  };
+
+  const getGramagePrice = (gramage: number) => {
+    const prices: { [key: number]: number } = {
+      1: 190,
+      3: 490,
+      5: 690,
+      10: 1290,
+    };
+    return prices[gramage] || 0;
+  };
+
+  const calculatePrice = () => {
+    return getGramagePrice(selectedGramage) * quantity;
+  };
+
+  const handleAddToCart = async () => {
+    if (product && (product.stock || 0) > 0 && quantity <= (product.stock || 0)) {
+      const gramAmount = `${selectedGramage}g`;
+      await addToCart(product, gramAmount, quantity);
+
+      if (product.meta_catalog_id) {
+        trackAddToCart({
+          contentId: product.meta_catalog_id,
+          contentName: product.name,
+          value: calculatePrice(),
+          quantity: quantity,
+          currency: 'CZK',
+        });
+      } else if (import.meta.env.DEV) {
+        console.warn('[Meta] AddToCart skipped: meta_catalog_id missing for', product.slug);
+      }
+
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-gray-400">Načítání...</div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-black text-white overflow-x-hidden">
+      <CustomCursor />
+      <ParticleBackground />
+
+      <main className="relative z-10 pt-24">
+        <div className="container mx-auto px-4 py-8">
+          <button
+            onClick={() => {
+              window.location.href = '/#products';
+            }}
+            className="group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-950/40 to-emerald-950/40 border-2 border-green-500/30 rounded-full hover:border-green-400/50 hover:bg-gradient-to-r hover:from-green-900/50 hover:to-emerald-900/50 transition-all duration-500 hover:scale-110 hover:shadow-[0_0_30px_rgba(34,197,94,0.4)] backdrop-blur-xl"
+            data-cursor-hover
+          >
+            <div className="relative">
+              <ArrowLeft className="w-5 h-5 text-green-300 group-hover:text-green-200 transition-colors duration-300 group-hover:animate-pulse" />
+              <div className="absolute inset-0 bg-green-400 blur-md opacity-0 group-hover:opacity-50 transition-opacity duration-300" />
+            </div>
+            <span className="text-green-200 font-semibold group-hover:text-green-100 transition-colors duration-300">
+              Zpět na produkty
+            </span>
+          </button>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+            <div className="flex items-center justify-center relative">
+              <div
+                className="absolute inset-0 rounded-3xl blur-3xl opacity-40"
+                style={{ backgroundColor: product.glow_color }}
+              />
+              <div className="relative overflow-hidden rounded-3xl w-full h-full max-h-[600px]">
+                {product.image_url && (
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col justify-center space-y-8">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  {product.featured && (
+                    <span className="px-4 py-2 bg-yellow-400/20 border border-yellow-400/40 rounded-full text-xs font-bold text-yellow-300">
+                      FEATURED PRODUCT
+                    </span>
+                  )}
+                </div>
+                <h1 className="text-5xl lg:text-6xl font-black mb-4 bg-gradient-to-r from-white to-yellow-400 bg-clip-text text-transparent">
+                  {product.name}
+                </h1>
+                <div className="text-lg text-gray-300 leading-relaxed space-y-3 whitespace-pre-line">
+                  {product.description?.split('\n').map((paragraph: string, idx: number) => (
+                    <p key={idx} dangerouslySetInnerHTML={{ __html: paragraph }} />
+                  ))}
+                </div>
+              </div>
+
+              {
+                
+              }
+
+              {product.flavor_profile && (
+                <div className="p-6 bg-gradient-to-r from-white/5 to-transparent border border-white/10 rounded-2xl">
+                  <div className="text-gray-400 text-sm mb-2">Aromatický profil</div>
+                  <div className="text-white font-bold text-lg">{product.flavor_profile}</div>
+                </div>
+              )}
+
+              {product.effects && (
+                <div className="p-6 bg-gradient-to-r from-white/5 to-transparent border border-white/10 rounded-2xl">
+                  <div className="flex items-start gap-3">
+                    <Leaf className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1" />
+                    <div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-6 pt-8 border-t border-white/10">
+                <div>
+                  <div className="text-gray-400 text-sm mb-3 font-semibold">VYBERTE GRAMÁŽ</div>
+                  <div className="grid grid-cols-4 gap-3">
+                    {[1, 3, 5, 10].map((gram) => (
+                      <button
+                        key={gram}
+                        onClick={() => setSelectedGramage(gram)}
+                        className={`px-3 py-4 rounded-xl font-bold transition-all duration-300 ${
+                          selectedGramage === gram
+                            ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-black scale-105 shadow-lg shadow-yellow-500/30'
+                            : 'bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:scale-105'
+                        }`}
+                      >
+                        <div className="text-lg">{gram}g</div>
+                        <div className={`text-xs mt-1 ${selectedGramage === gram ? 'text-black/70' : 'text-gray-400'}`}>
+                          {getGramagePrice(gram)} Kč
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-gray-400 text-sm mb-3 font-semibold">POČET</div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={decrementQuantity}
+                      disabled={quantity <= 1}
+                      className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 text-white font-bold text-xl hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
+                    >
+                      -
+                    </button>
+                    <div className="flex-1 text-center">
+                      <div className="text-3xl font-black text-white">{quantity}</div>
+                    </div>
+                    <button
+                      onClick={incrementQuantity}
+                      disabled={quantity >= 100}
+                      className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 text-white font-bold text-xl hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center pt-4 space-y-6">
+                  <div className="text-center">
+                    <div className="text-gray-400 text-sm mb-2">Celková cena</div>
+                    <div className="text-5xl font-black text-white">
+                      {calculatePrice().toFixed(2)}
+                      <span className="text-2xl text-gray-400 ml-2">Kč</span>
+                    </div>
+                    <div className="text-sm text-gray-500 mt-2">
+                      {(product.stock || 0) > 0 ? (
+                        <div className="flex items-center justify-center gap-2 text-green-400">
+                          <Leaf className="w-4 h-4" />
+                          <span>Skladem: 100+ ks</span>
+                        </div>
+                      ) : (
+                        <span className="text-red-400">Vyprodáno</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={(product.stock || 0) === 0}
+                    className="relative px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 overflow-hidden hover:scale-105 group/btn disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    style={{
+                      backgroundColor: added ? '#10b981' : product.color_accent,
+                      boxShadow: (product.stock || 0) > 0 ? `0 0 40px ${product.glow_color}60` : 'none',
+                    }}
+                  >
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-all duration-500 shimmer-effect"
+                      style={{
+                        background: `linear-gradient(90deg, transparent, ${product.glow_color}40, transparent)`,
+                      }}
+                    />
+                    <div
+                      className="absolute -inset-1 rounded-full opacity-0 group-hover/btn:opacity-100 transition-all duration-300 blur-xl"
+                      style={{
+                        backgroundColor: product.glow_color,
+                      }}
+                    />
+                    <span className="relative z-10 flex items-center gap-3 text-black">
+                      {added ? (
+                        <>
+                          <Check className="w-5 h-5" />
+                          PŘIDÁNO DO KOŠÍKU
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingCart className="w-5 h-5" />
+                          PŘIDAT DO KOŠÍKU
+                        </>
+                      )}
+                    </span>
+                  </button>
+
+                  <style>{`
+                    @keyframes shimmer {
+                      0% {
+                        transform: translateX(-100%);
+                      }
+                      100% {
+                        transform: translateX(100%);
+                      }
+                    }
+
+                    .shimmer-effect {
+                      animation: shimmer 1.5s ease-in-out infinite;
+                    }
+                  `}</style>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="p-8 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all duration-300">
+              <div className="text-4xl font-black mb-4" style={{ color: product.color_accent }}>
+                ✓
+              </div>
+              <h3 className="text-lg font-bold mb-2 text-white">Prémiová Kvalita</h3>
+              <p className="text-gray-400 text-sm">Pečlivě vybrán a testován v nezávislých laboratořích pro absolutní jistotu.</p>
+            </div>
+
+            <div className="p-8 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all duration-300">
+              <div className="text-4xl font-black mb-4" style={{ color: product.color_accent }}>
+                🔬
+              </div>
+              <h3 className="text-lg font-bold mb-2 text-white">Certifikováno</h3>
+              <p className="text-gray-400 text-sm">Plná transparentnost složení a původu. Všechny hodnoty ověřeny laboratorně.</p>
+            </div>
+
+            <div className="p-8 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all duration-300">
+              <div className="text-4xl font-black mb-4" style={{ color: product.color_accent }}>
+                ⚡
+              </div>
+              <h3 className="text-lg font-bold mb-2 text-white">Unikátní Složení</h3>
+              <p className="text-gray-400 text-sm">Jedinečný profil přírodních silic a aromatických látek. Vzácná bylinkový vzorek pro sběratele.</p>
+            </div>
+
+            <div className="p-8 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all duration-300">
+              <div className="text-4xl font-black mb-4" style={{ color: product.color_accent }}>
+                ⚙️
+              </div>
+              <h3 className="text-lg font-bold mb-2 text-white">Vynikající Aroma</h3>
+              <p className="text-gray-400 text-sm">Precizně vyvážený aromatický profil a konzistence. Sběratelský botanický vzorek vysoké kvality.</p>
+            </div>
+          </div>
+
+          {relatedProducts.length > 0 && (
+            <div className="mt-20 border-t border-white/10 pt-20">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-3 mb-6 px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-400/30 backdrop-blur-xl">
+                  <Users className="w-5 h-5 text-emerald-400 animate-pulse" />
+                  <span className="text-emerald-300 text-sm font-bold tracking-wider">
+                    ŽIVÁ STATISTIKA
+                  </span>
+                  <TrendingUp className="w-5 h-5 text-cyan-400 animate-pulse" />
+                </div>
+                <h3 className="text-4xl md:text-5xl font-black text-white mb-4">
+                  Zákazníci také kupují
+                </h3>
+                <p className="text-lg text-gray-400">
+                  Oblíbené kombinace od našich zákazníků
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {relatedProducts.map((relatedProduct, idx) => (
+                  <div
+                    key={relatedProduct.id}
+                    onClick={() => navigate(`/product/${relatedProduct.slug}`)}
+                    className="group relative p-6 bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-2xl hover:border-emerald-400/50 hover:bg-white/10 transition-all duration-500 cursor-pointer hover:scale-105"
+                    style={{ animationDelay: `${idx * 100}ms` }}
+                  >
+                    <div className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 border border-emerald-400/40 rounded-full backdrop-blur-xl">
+                      <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                      <span className="text-emerald-300 text-xs font-bold">
+                        AKTIVNÍ
+                      </span>
+                    </div>
+
+                    <div className="mb-4 relative">
+                      <div
+                        className="absolute inset-0 rounded-xl blur-2xl opacity-30 group-hover:opacity-50 transition-opacity"
+                        style={{ backgroundColor: relatedProduct.glow_color }}
+                      />
+                      {relatedProduct.image_url && (
+                        <img
+                          src={relatedProduct.image_url}
+                          alt={relatedProduct.name}
+                          className="relative w-full object-cover rounded-xl"
+                        />
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 mb-3">
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      <span className="text-gray-400 text-xs ml-2">
+                        ({Math.floor(Math.random() * 50 + 120)} recenzí)
+                      </span>
+                    </div>
+
+                    <h4 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-300 transition-colors">
+                      {relatedProduct.name}
+                    </h4>
+
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 border border-green-400/40 rounded-lg">
+                        <Leaf className="w-4 h-4 text-green-400" />
+                        <span className="text-green-300 text-xs font-bold">
+                          Skladem
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-3 py-1 bg-orange-500/20 border border-orange-400/40 rounded-lg animate-pulse">
+                        <div className="w-2 h-2 bg-orange-400 rounded-full" />
+                        <span className="text-orange-300 text-xs font-bold">
+                          {Math.floor(Math.random() * 15 + 5)} lidí právě nakupuje
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                      <div>
+                        <div className="text-gray-400 text-xs mb-1">Od</div>
+                        <div className="text-2xl font-black text-white">
+                          190 <span className="text-sm text-gray-400">Kč</span>
+                        </div>
+                      </div>
+                      <div
+                        className="px-6 py-3 rounded-full font-bold text-sm text-black group-hover:scale-110 transition-transform"
+                        style={{ backgroundColor: relatedProduct.color_accent }}
+                      >
+                        Zobrazit
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-20 max-w-4xl mx-auto space-y-8">
+            <div className="p-8 bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border border-yellow-400/20 rounded-3xl">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="p-3 bg-yellow-400/20 rounded-xl">
+                  <Info className="w-6 h-6 text-yellow-400" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-white mb-3">Co jsou přírodní silice?</h3>
+                  <p className="text-gray-300 text-lg leading-relaxed">
+                    Přírodní silice jsou těkavé aromatické sloučeniny získávané z bylinných rostlin. Tvoří základ charakteristického aroma a jsou předmětem botanického výzkumu i sběratelského zájmu.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 bg-gradient-to-br from-red-500/10 to-red-600/5 border border-red-400/20 rounded-3xl">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="p-3 bg-red-400/20 rounded-xl flex-shrink-0">
+                  <AlertTriangle className="w-6 h-6 text-red-400" />
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-black text-white">UPOZORNĚNÍ</h3>
+                  <div className="space-y-3 text-gray-300 leading-relaxed">
+                    <p>
+                      Tento botanický materiál je určen výhradně ke sběratelským, studijním a aromaterapeutickým účelům.
+                      Není určen ke konzumaci, spalování ani ke kouření. Jedná se o sušené bylinné květy pro průmyslové,
+                      technické a zahradnické využití. Produkt podléhá přirozenému úbytku hmotnosti.
+                      Uchovávejte mimo dosah dětí a mladistvých.
+                    </p>
+                    <p>
+                      Výrobek splňuje všechny legislativní podmínky prodeje platné v ČR. Každá šarže je pravidelně
+                      testována v certifikovaných botanických laboratořích s přiloženým certifikátem analýzy.
+                    </p>
+                    <p className="font-semibold text-white">
+                      Produkt je prodáván výhradně ke sběratelským, technickým a zahradnickým účelům.
+                      Koupí produktu zákazník toto potvrzuje.
+                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                      <span className="px-4 py-2 bg-red-500/20 border border-red-400/30 rounded-full text-sm font-bold text-red-300">
+                        Na Slovensko neposíláme
+                      </span>
+                      <span className="px-4 py-2 bg-red-500/20 border border-red-400/30 rounded-full text-sm font-bold text-red-300">
+                        Legální pouze v ČR
+                      </span>
+                      <span className="px-4 py-2 bg-red-500/20 border border-red-400/30 rounded-full text-sm font-bold text-red-300">
+                        Zákaz prodeje mladším 18 let
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-32 border-t border-white/10 pt-32">
+            <div className="text-center mb-20">
+              <div className="inline-block mb-6 px-4 py-2 rounded-full bg-yellow-400/10 border border-yellow-400/20">
+                <span className="text-yellow-400 text-sm font-bold tracking-wider">
+                  DALŠÍ PRODUKTY
+                </span>
+              </div>
+              <h3 className="text-5xl md:text-6xl font-black mb-6 text-white">
+                Objevte Více{' '}
+                <span className="bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+                  Bylinných Vzorků
+                </span>
+              </h3>
+              <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+                Vrátit se na hlavní stránku a vybrat si další produkty z naší exkluzivní kolekce.
+              </p>
+
+              <button
+                onClick={() => navigate('/')}
+                className="mt-8 px-12 py-4 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold text-lg rounded-full hover:scale-105 hover:shadow-[0_0_40px_rgba(255,215,0,0.6)] transition-all duration-300"
+              >
+                Zpět na Kolekci
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
