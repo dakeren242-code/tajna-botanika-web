@@ -194,6 +194,7 @@ export function useMetaTracking() {
     country?: string;
   }) => {
     if (!META_PIXEL_ID) return;
+    const loggedInUserData = getLoggedInUserData();
 
     await trackMetaEvent(
       MetaEvents.AddPaymentInfo,
@@ -206,14 +207,15 @@ export function useMetaTracking() {
         ...(params.contents ? { contents: params.contents } : {}),
       },
       {
-        email: params.email || user?.email,
-        phone: params.phone,
-        firstName: params.firstName,
-        lastName: params.lastName,
+        ...loggedInUserData,
+        email: params.email || loggedInUserData?.email,
+        phone: params.phone || loggedInUserData?.phone,
+        firstName: params.firstName || loggedInUserData?.firstName,
+        lastName: params.lastName || loggedInUserData?.lastName,
         city: params.city,
         zip: params.zip,
         country: params.country || 'CZ',
-        externalId: user?.id,
+        externalId: loggedInUserData?.externalId,
       }
     );
   };
@@ -244,6 +246,7 @@ export function useMetaTracking() {
     country?: string;
   }) => {
     if (!META_PIXEL_ID) return;
+    const loggedInUserData = getLoggedInUserData();
 
     await trackMetaEvent(
       MetaEvents.Purchase,
@@ -259,14 +262,15 @@ export function useMetaTracking() {
         shipping_method: params.shippingMethod,
       },
       {
-        email: params.email || user?.email,
-        phone: params.phone,
-        firstName: params.firstName,
-        lastName: params.lastName,
+        ...loggedInUserData,
+        email: params.email || loggedInUserData?.email,
+        phone: params.phone || loggedInUserData?.phone,
+        firstName: params.firstName || loggedInUserData?.firstName,
+        lastName: params.lastName || loggedInUserData?.lastName,
         city: params.city,
         zip: params.zip,
         country: params.country || 'CZ',
-        externalId: user?.id,
+        externalId: loggedInUserData?.externalId,
       }
     );
   };
@@ -282,6 +286,7 @@ export function useMetaTracking() {
     registrationMethod?: string;
   }) => {
     if (!META_PIXEL_ID) return;
+    const loggedInUserData = getLoggedInUserData();
 
     await trackMetaEvent(
       MetaEvents.CompleteRegistration,
@@ -292,10 +297,11 @@ export function useMetaTracking() {
         registration_method: params?.registrationMethod || 'email',
       },
       {
-        email: params?.email || user?.email,
-        firstName: params?.firstName,
-        lastName: params?.lastName,
-        externalId: user?.id,
+        ...loggedInUserData,
+        email: params?.email || loggedInUserData?.email,
+        firstName: params?.firstName || loggedInUserData?.firstName,
+        lastName: params?.lastName || loggedInUserData?.lastName,
+        externalId: loggedInUserData?.externalId,
       }
     );
   };
@@ -310,6 +316,7 @@ export function useMetaTracking() {
     contentName?: string;
   }) => {
     if (!META_PIXEL_ID) return;
+    const loggedInUserData = getLoggedInUserData();
 
     await trackMetaEvent(
       MetaEvents.Lead,
@@ -319,9 +326,10 @@ export function useMetaTracking() {
         value: 0,
       },
       {
-        email: params?.email || user?.email,
-        phone: params?.phone,
-        externalId: user?.id,
+        ...loggedInUserData,
+        email: params?.email || loggedInUserData?.email,
+        phone: params?.phone || loggedInUserData?.phone,
+        externalId: loggedInUserData?.externalId,
       }
     );
   };
@@ -363,7 +371,7 @@ export function useMetaTracking() {
 
   // ─────────────────────────────────────────
   // TIME ON PAGE (custom)
-  // ─────────────────────────────────────────
+  // ───────────────────────────
 
   const trackTimeOnPage = async (seconds: number) => {
     if (!META_PIXEL_ID) return;

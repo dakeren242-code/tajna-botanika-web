@@ -21,9 +21,6 @@ export default function ProductCard({ product, index }: ProductCardProps) {
   const isBundle = product.category === 'bundle';
   const gramOptions = ['1g', '3g', '5g', '10g'];
 
-  // Use product.price from DB as base (1g price),
-  // scale for other gram options proportionally using the standard price map.
-  // If you ever make prices fully dynamic per variant in the DB, replace this.
   const calculatePrice = (grams: string): number => {
     const priceMap: Record<string, number> = {
       '1g': 190,
@@ -39,28 +36,27 @@ export default function ProductCard({ product, index }: ProductCardProps) {
   };
 
   const handleAddToCart = async (e: React.MouseEvent) => {
-    console.log('product.id:', product.id);
-    console.log('full product:', product);
     e.stopPropagation();
 
     if ((product.stock || 0) === 0) return;
 
     const grams = isBundle ? 'bundle' : selectedGrams;
     const price = isBundle ? product.price : calculatePrice(selectedGrams);
-
+    
     await addToCart(product, grams);
 
-    if (product.meta_catalog_id) {
-      await trackAddToCart({
-        contentId: product.meta_catalog_id,
-        contentName: product.name,
-        value: price,
-        quantity: 1,
-        currency: 'CZK',
-      });
-    } else if (import.meta.env.DEV) {
-      console.warn('[Meta] AddToCart skipped: meta_catalog_id missing for', product.slug);
+    const contentId = product.meta_catalog_id || product.id;
+    if (import.meta.env.DEV && !product.meta_catalog_id) {
+      console.warn(`[Meta] Produkt ${product.slug} nemá meta_catalog_id. Používám interní ID: ${product.id}. Pro lepší výsledky kampaní toto ID přidejte do Meta katalogu.`);
     }
+
+    await trackAddToCart({
+      contentId: contentId.toString(),
+      contentName: product.name,
+      value: price,
+      quantity: 1,
+      currency: 'CZK',
+    });
 
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);

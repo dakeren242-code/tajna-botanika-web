@@ -33,18 +33,19 @@ export default function ProductDetail() {
       } else {
         setProduct(data);
 
-        if (data.meta_catalog_id) {
-          trackViewContent({
-            contentId: data.meta_catalog_id,
-            contentName: data.name,
-            contentCategory: data.category || 'Botanické vzorky',
-            contentType: 'product',
-            value: data.price,
-            currency: 'CZK',
-          });
-        } else if (import.meta.env.DEV) {
-          console.warn('[Meta] ViewContent skipped: meta_catalog_id missing for', data.slug);
+        const contentId = data.meta_catalog_id || data.id;
+        if (import.meta.env.DEV && !data.meta_catalog_id) {
+          console.warn(`[Meta] Produkt ${data.slug} nemá meta_catalog_id. Používám interní ID: ${data.id}. Pro lepší výsledky kampaní toto ID přidejte do Meta katalogu.`);
         }
+
+        trackViewContent({
+          contentId: contentId.toString(),
+          contentName: data.name,
+          contentCategory: data.category || 'Botanické vzorky',
+          contentType: 'product',
+          value: data.price,
+          currency: 'CZK',
+        });
 
         const { data: related } = await supabase
           .from('products')
@@ -60,7 +61,7 @@ export default function ProductDetail() {
     };
 
     fetchProduct();
-  }, [slug, navigate]);
+  }, [slug, navigate, trackViewContent]);
 
   const incrementQuantity = () => {
     if (product && quantity < (product.stock || 0)) {
@@ -93,17 +94,18 @@ export default function ProductDetail() {
       const gramAmount = `${selectedGramage}g`;
       await addToCart(product, gramAmount, quantity);
 
-      if (product.meta_catalog_id) {
-        trackAddToCart({
-          contentId: product.meta_catalog_id,
-          contentName: product.name,
-          value: calculatePrice(),
-          quantity: quantity,
-          currency: 'CZK',
-        });
-      } else if (import.meta.env.DEV) {
-        console.warn('[Meta] AddToCart skipped: meta_catalog_id missing for', product.slug);
+      const contentId = product.meta_catalog_id || product.id;
+      if (import.meta.env.DEV && !product.meta_catalog_id) {
+        console.warn(`[Meta] Produkt ${product.slug} nemá meta_catalog_id. Používám interní ID: ${product.id}. Pro lepší výsledky kampaní toto ID přidejte do Meta katalogu.`);
       }
+
+      trackAddToCart({
+        contentId: contentId.toString(),
+        contentName: product.name,
+        value: calculatePrice(),
+        quantity: quantity,
+        currency: 'CZK',
+      });
 
       setAdded(true);
       setTimeout(() => setAdded(false), 2000);

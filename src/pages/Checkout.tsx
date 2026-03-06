@@ -107,54 +107,45 @@ export default function Checkout() {
       return;
     }
 
-    // Fire InitiateCheckout once when checkout page loads with items
-    const catalogItems = items.filter(item => item.product.meta_catalog_id);
-    if (catalogItems.length > 0) {
-      const priceMap: Record<string, number> = { '1g': 190, '3g': 490, '5g': 690, '10g': 1290 };
-      trackInitiateCheckout({
-        contentIds: catalogItems.map(item => item.product.meta_catalog_id as string),
-        value: totalPrice,
-        numItems: items.reduce((sum, item) => sum + item.quantity, 0),
-        currency: 'CZK',
-        contents: catalogItems.map(item => ({
-          id: item.product.meta_catalog_id as string,
-          quantity: item.quantity,
-          item_price: priceMap[item.gramAmount] ?? item.product.price,
-        })),
-      });
-    } else if (import.meta.env.DEV) {
-      console.warn('[Meta] InitiateCheckout skipped: no items have meta_catalog_id');
-    }
-  }, []); // intentionally run once on mount only
+    const priceMap: Record<string, number> = { '1g': 190, '3g': 490, '5g': 690, '10g': 1290 };
+    
+    trackInitiateCheckout({
+      contentIds: items.map(item => (item.product.meta_catalog_id || item.product.id).toString()),
+      value: totalPrice,
+      numItems: items.reduce((sum, item) => sum + item.quantity, 0),
+      currency: 'CZK',
+      contents: items.map(item => ({
+        id: (item.product.meta_catalog_id || item.product.id).toString(),
+        quantity: item.quantity,
+        item_price: priceMap[item.gramAmount] ?? item.product.price,
+      })),
+    });
+  }, []);
 
   const handleCompleteOrder = async (paymentMethod: string, shippingMethod: string, customerData: CustomerData) => {
     setError('');
     setLoading(true);
 
     try {
-      // Fire AddPaymentInfo immediately when user submits checkout
-      const catalogItemsForPayment = items.filter(item => item.product.meta_catalog_id);
-      if (catalogItemsForPayment.length > 0) {
-        const priceMapPayment: Record<string, number> = { '1g': 190, '3g': 490, '5g': 690, '10g': 1290 };
-        await trackAddPaymentInfo({
-          contentIds: catalogItemsForPayment.map(item => item.product.meta_catalog_id as string),
-          value: totalPrice,
-          currency: 'CZK',
-          paymentMethod,
-          contents: catalogItemsForPayment.map(item => ({
-            id: item.product.meta_catalog_id as string,
-            quantity: item.quantity,
-            item_price: priceMapPayment[item.gramAmount] ?? item.product.price,
-          })),
-          email: customerData.email,
-          phone: customerData.phone,
-          firstName: customerData.firstName,
-          lastName: customerData.lastName,
-          city: customerData.city,
-          zip: customerData.zip,
-          country: 'CZ',
-        });
-      }
+      const priceMapPayment: Record<string, number> = { '1g': 190, '3g': 490, '5g': 690, '10g': 1290 };
+      await trackAddPaymentInfo({
+        contentIds: items.map(item => (item.product.meta_catalog_id || item.product.id).toString()),
+        value: totalPrice,
+        currency: 'CZK',
+        paymentMethod,
+        contents: items.map(item => ({
+          id: (item.product.meta_catalog_id || item.product.id).toString(),
+          quantity: item.quantity,
+          item_price: priceMapPayment[item.gramAmount] ?? item.product.price,
+        })),
+        email: customerData.email,
+        phone: customerData.phone,
+        firstName: customerData.firstName,
+        lastName: customerData.lastName,
+        city: customerData.city,
+        zip: customerData.zip,
+        country: 'CZ',
+      });
 
       for (const item of items) {
         const { data: product, error: productError } = await supabase
@@ -304,12 +295,12 @@ export default function Checkout() {
         sessionStorage.setItem(
           PURCHASE_SESSION_KEY,
           JSON.stringify({
-            contentIds: items.filter(item => item.product.meta_catalog_id).map(item => item.product.meta_catalog_id as string),
+            contentIds: items.map(item => (item.product.meta_catalog_id || item.product.id).toString()),
             value: finalTotal,
             numItems: items.reduce((sum, item) => sum + item.quantity, 0),
             currency: 'CZK',
-            contents: items.filter(item => item.product.meta_catalog_id).map(item => ({
-              id: item.product.meta_catalog_id as string,
+            contents: items.map(item => ({
+              id: (item.product.meta_catalog_id || item.product.id).toString(),
               quantity: item.quantity,
               item_price: orderItems.find(o => o.product_id === item.product.id)?.unit_price ?? item.product.price,
             })),
@@ -365,12 +356,12 @@ export default function Checkout() {
       // ── NON-CARD PAYMENT (bank transfer / COD / personal pickup) ───
       // Fire Purchase immediately since there's no redirect.
       await trackPurchase({
-        contentIds: items.filter(item => item.product.meta_catalog_id).map(item => item.product.meta_catalog_id as string),
+        contentIds: items.map(item => (item.product.meta_catalog_id || item.product.id).toString()),
         value: finalTotal,
         numItems: items.reduce((sum, item) => sum + item.quantity, 0),
         currency: 'CZK',
-        contents: items.filter(item => item.product.meta_catalog_id).map(item => ({
-          id: item.product.meta_catalog_id as string,
+        contents: items.map(item => ({
+          id: (item.product.meta_catalog_id || item.product.id).toString(),
           quantity: item.quantity,
           item_price: orderItems.find(o => o.product_id === item.product.id)?.unit_price ?? item.product.price,
         })),
