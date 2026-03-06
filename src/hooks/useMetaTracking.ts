@@ -45,6 +45,7 @@ export function useMetaTracking() {
       firstName: nameParts[0] || undefined,
       lastName: nameParts.length > 1 ? nameParts.slice(1).join(' ') : undefined,
       externalId: user.id,
+      state: profile?.state || undefined,
     };
   };
 
@@ -191,6 +192,7 @@ export function useMetaTracking() {
     lastName?: string;
     city?: string;
     zip?: string;
+    state?: string;
     country?: string;
   }) => {
     if (!META_PIXEL_ID) return;
@@ -214,6 +216,7 @@ export function useMetaTracking() {
         lastName: params.lastName || loggedInUserData?.lastName,
         city: params.city,
         zip: params.zip,
+        state: params.state || loggedInUserData?.state,
         country: params.country || 'CZ',
         externalId: loggedInUserData?.externalId,
       }
@@ -243,6 +246,7 @@ export function useMetaTracking() {
     lastName?: string;
     city?: string;
     zip?: string;
+    state?: string;
     country?: string;
   }) => {
     if (!META_PIXEL_ID) return;
@@ -269,6 +273,7 @@ export function useMetaTracking() {
         lastName: params.lastName || loggedInUserData?.lastName,
         city: params.city,
         zip: params.zip,
+        state: params.state || loggedInUserData?.state,
         country: params.country || 'CZ',
         externalId: loggedInUserData?.externalId,
       }

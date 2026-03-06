@@ -362,6 +362,7 @@ export async function initMetaPixelWithAdvancedMatching(
     zip?: string;
     country?: string;
     externalId?: string;
+    state?: string;
   }
 ): Promise<void> {
   if (typeof window === 'undefined' || !pixelId) return;
@@ -391,6 +392,9 @@ export async function initMetaPixelWithAdvancedMatching(
     }
     if (userData.country) {
       advancedMatching.country = await sha256(normalize(userData.country));
+    }
+    if (userData.state) {
+      advancedMatching.st = await sha256(normalize(userData.state));
     }
     if (userData.externalId) {
       advancedMatching.external_id = await sha256(normalize(userData.externalId));
