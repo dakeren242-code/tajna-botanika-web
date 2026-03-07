@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, Send, X, Clock, Check, CheckCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -30,20 +30,13 @@ export default function ChatManagement() {
   const [adminName] = useState('Podpora Botanika');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    loadConversations();
-    subscribeToConversations();
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   }, []);
 
-  useEffect(() => {
-    if (selectedConv) {
-      loadMessages(selectedConv.id);
-      subscribeToMessages(selectedConv.id);
-      markAsRead(selectedConv.id);
-    }
-  }, [selectedConv]);
-
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     try {
       const { data } = await supabase
         .from('chat_conversations')
@@ -57,9 +50,9 @@ export default function ChatManagement() {
     } catch (error) {
       console.error('Error loading conversations:', error);
     }
-  };
+  }, []);
 
-  const subscribeToConversations = () => {
+  const subscribeToConversations = useCallback(() => {
     const channel = supabase
       .channel('admin_conversations')
       .on(
@@ -78,9 +71,9 @@ export default function ChatManagement() {
     return () => {
       supabase.removeChannel(channel);
     };
-  };
+  }, [loadConversations]);
 
-  const loadMessages = async (convId: string) => {
+  const loadMessages = useCallback(async (convId: string) => {
     try {
       const { data } = await supabase
         .from('chat_messages')
@@ -95,9 +88,9 @@ export default function ChatManagement() {
     } catch (error) {
       console.error('Error loading messages:', error);
     }
-  };
+  }, [scrollToBottom]);
 
-  const subscribeToMessages = (convId: string) => {
+  const subscribeToMessages = useCallback((convId: string) => {
     const channel = supabase
       .channel(`admin_chat_${convId}`)
       .on(
@@ -112,8 +105,6 @@ export default function ChatManagement() {
           const newMsg = payload.new as Message;
           setMessages((prev) => [...prev, newMsg]);
           scrollToBottom();
-
-          // Aktualizovat conversation list
           loadConversations();
         }
       )
@@ -122,9 +113,9 @@ export default function ChatManagement() {
     return () => {
       supabase.removeChannel(channel);
     };
-  };
+  }, [loadConversations, scrollToBottom]);
 
-  const markAsRead = async (convId: string) => {
+  const markAsRead = useCallback(async (convId: string) => {
     try {
       await supabase
         .from('chat_conversations')
@@ -133,7 +124,22 @@ export default function ChatManagement() {
     } catch (error) {
       console.error('Error marking as read:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadConversations();
+    const unsubscribe = subscribeToConversations();
+    return () => unsubscribe();
+  }, [loadConversations, subscribeToConversations]);
+
+  useEffect(() => {
+    if (selectedConv) {
+      loadMessages(selectedConv.id);
+      const unsubscribe = subscribeToMessages(selectedConv.id);
+      markAsRead(selectedConv.id);
+      return () => unsubscribe();
+    }
+  }, [selectedConv, loadMessages, subscribeToMessages, markAsRead]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,12 +175,6 @@ export default function ChatManagement() {
     } catch (error) {
       console.error('Error closing conversation:', error);
     }
-  };
-
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
   };
 
   const formatTime = (timestamp: string) => {
@@ -219,7 +219,6 @@ export default function ChatManagement() {
       </div>
 
       <div className="grid grid-cols-12 gap-6 h-[700px]">
-        {/* Conversations list */}
         <div className="col-span-4 bg-black/20 rounded-xl overflow-hidden flex flex-col">
           <div className="p-4 bg-zinc-800/50 border-b border-zinc-700">
             <h3 className="font-bold text-white">Konverzace</h3>
@@ -264,11 +263,9 @@ export default function ChatManagement() {
           </div>
         </div>
 
-        {/* Messages area */}
         <div className="col-span-8 bg-black/20 rounded-xl overflow-hidden flex flex-col">
           {selectedConv ? (
             <>
-              {/* Chat header */}
               <div className="p-4 bg-gradient-to-r from-emerald-600 to-emerald-700 border-b border-emerald-600 flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-white">
@@ -290,7 +287,6 @@ export default function ChatManagement() {
                 </button>
               </div>
 
-              {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.map((msg) => (
                   <div
@@ -332,7 +328,6 @@ export default function ChatManagement() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input */}
               <div className="p-4 bg-zinc-800/50 border-t border-zinc-700">
                 <form onSubmit={handleSendMessage} className="flex gap-3">
                   <input

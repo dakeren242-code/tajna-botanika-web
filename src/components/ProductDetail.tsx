@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Zap, Leaf, Info, AlertTriangle, Check, Users, TrendingUp, Star } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Leaf, Info, AlertTriangle, Check, Users, TrendingUp, Star } from 'lucide-react';
 import { supabase, Product } from '../lib/supabase';
 import { useCart } from '../contexts/CartContext';
 import { useMetaTracking } from '../hooks/useMetaTracking';
@@ -61,7 +61,7 @@ export default function ProductDetail() {
     };
 
     fetchProduct();
-  }, [slug, navigate, trackViewContent]);
+  }, [slug]);
 
   const incrementQuantity = () => {
     if (product && quantity < (product.stock || 0)) {

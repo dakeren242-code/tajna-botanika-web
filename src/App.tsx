@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense } from 'react';
+import { useEffect, lazy, Suspense, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -57,14 +57,11 @@ function RouteChangeTracker() {
   const { trackPageView } = useMetaTracking();
 
   useEffect(() => {
-    // Inicializuj fbc persistenci při každé route change — zachytí fbclid po redirectu
-    // i obnoví cookie z localStorage pokud expirovala nebo zmizela po redirectu
     initFbcPersistence();
-
     if (!isAdminRoute(location.pathname)) {
       trackPageView();
     }
-  }, [location.pathname, location.search]);
+  }, [location.pathname, location.search, trackPageView]);
 
   return null;
 }

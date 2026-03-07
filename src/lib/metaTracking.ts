@@ -422,8 +422,7 @@ export async function trackMetaEvent(
   userData?: Parameters<typeof prepareUserData>[0]
 ): Promise<string> {
   const eventId = generateEventId();
-  const eventTime = Math.floor(Date.now() / 1000);
-
+  
   const isStandardEvent = Object.values(MetaEvents).includes(eventName as any) &&
     !['ViewCart', 'ScrollDepth', 'TimeOnPage'].includes(eventName);
 
@@ -441,50 +440,11 @@ export async function trackMetaEvent(
     }
   }
 
-  // 2. Prepare hashed user data
-  const user_data = await prepareUserData(userData);
-
-  // 3. Build CAPI payload
-  const eventData: MetaEventData = {
-    event_name: eventName,
-    event_id: eventId,
-    event_time: eventTime,
-    event_source_url: typeof window !== 'undefined' ? window.location.href : '',
-    action_source: 'website',
-    user_data,
-    custom_data: enrichedCustomData,
-  };
-
-  // 4. Send to Supabase CAPI edge function
-  try {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const capiKey = import.meta.env.VITE_META_CAPI_KEY;
-
-    if (!supabaseUrl || !capiKey) {
-      console.warn('CAPI not configured: missing VITE_SUPABASE_URL or VITE_META_CAPI_KEY');
-      return eventId;
-    }
-
-    const response = await fetch(
-      `${supabaseUrl}/functions/v1/meta-conversions-api`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': capiKey,
-        },
-        body: JSON.stringify(eventData),
-      }
-    );
-
-    if (!response.ok) {
-      console.error('CAPI error:', response.status, await response.text());
-    } else if (import.meta.env.DEV) {
-      const result = await response.json();
-      console.log('CAPI event sent:', eventName, '| event_id:', eventId, result);
-    }
-  } catch (error) {
-    console.error('Failed to send CAPI event:', error);
+  // The CAPI (server-side) event has been removed to prevent duplication.
+  // We'll address server-side tracking separately.
+  
+  if (import.meta.env.DEV) {
+    console.log('[Meta Pixel] Event fired:', { eventName, eventId, customData });
   }
 
   return eventId;

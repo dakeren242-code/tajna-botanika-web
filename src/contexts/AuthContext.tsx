@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase, UserProfile } from '../lib/supabase';
 
 interface AuthContextType {
@@ -9,11 +9,11 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{ error: any }>;
-  updateProfile: (data: Partial<UserProfile>) => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  updateProfile: (data: Partial<UserProfile>) => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,7 +26,7 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+const AuthProviderComponent = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    let subscription: any;
+    let subscription: { unsubscribe: () => void; } | undefined;
 
     const initAuth = async () => {
       const { data: { session: currentSession } } = await supabase.auth.getSession();
@@ -73,20 +73,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
 
       const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-        (_event, newSession) => {
-          (async () => {
-            setSession(newSession);
-            setUser(newSession?.user ?? null);
+        async (_event, newSession) => {
+          setSession(newSession);
+          setUser(newSession?.user ?? null);
 
-            if (newSession?.user) {
-              await loadUserProfile(newSession.user.id);
-              await checkAdminStatus(newSession.user.id);
-            } else {
-              setProfile(null);
-              setIsAdmin(false);
-              setIsSuperAdmin(false);
-            }
-          })();
+          if (newSession?.user) {
+            await loadUserProfile(newSession.user.id);
+            await checkAdminStatus(newSession.user.id);
+          } else {
+            setProfile(null);
+            setIsAdmin(false);
+            setIsSuperAdmin(false);
+          }
         }
       );
 
@@ -118,7 +116,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
 
       if (profileError) {
-        return { error: profileError };
+        return { error: profileError as AuthError };
       }
     }
 
@@ -151,7 +149,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const updateProfile = useCallback(async (data: Partial<UserProfile>) => {
     if (!user) {
-      return { error: new Error('No user logged in') };
+      return { error: new AuthError('No user logged in') };
     }
 
     const { error } = await supabase
@@ -163,7 +161,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await loadUserProfile(user.id);
     }
 
-    return { error };
+    return { error: error as AuthError | null };
   }, [user, loadUserProfile]);
 
   const value = useMemo(() => ({
@@ -182,3 +180,5 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
+export const AuthProvider = AuthProviderComponent;

@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { CreditCard, Building2, Truck, Package, Check, ChevronRight, MapPin, Clock, User, Mail, Phone as PhoneIcon, Banknote } from 'lucide-react';
+import { CreditCard, Building2, Package, Check, ChevronRight, MapPin, Clock, User, Mail, Phone as PhoneIcon, Banknote } from 'lucide-react';
 import { useMetaTracking } from '../../hooks/useMetaTracking';
 
 interface PaymentAndShippingProps {
   totalPrice: number;
-  totalGrams: number;
   onComplete: (paymentMethod: string, shippingMethod: string, customerData: {
     firstName: string;
     lastName: string;
@@ -21,9 +20,8 @@ interface PaymentAndShippingProps {
 const FREE_SHIPPING_THRESHOLD = 1000;
 const SHIPPING_COST = 79;
 const COD_FEE = 49;
-const PERSONAL_PICKUP_MIN_GRAMS = 10;
 
-export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete, loading }: PaymentAndShippingProps) {
+export default function PaymentAndShipping({ totalPrice, onComplete, loading }: PaymentAndShippingProps) {
   const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'card' | 'cash_on_delivery'>('bank_transfer');
   const [shippingMethod, setShippingMethod] = useState<'zasilkovna' | 'personal_pickup' | 'personal_invoice' | undefined>(undefined);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -36,8 +34,6 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
   const [showValidation, setShowValidation] = useState(false);
   const validationRef = useRef<HTMLDivElement>(null);
   const { trackAddPaymentInfo } = useMetaTracking();
-
-  const canUsePersonalPickup = totalGrams > PERSONAL_PICKUP_MIN_GRAMS;
 
   useEffect(() => {
     if (showValidation && validationRef.current) {

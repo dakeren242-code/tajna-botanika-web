@@ -1,4 +1,4 @@
-import { ShoppingCart, Zap, Check, Star, Calendar } from 'lucide-react';
+import { ShoppingCart, Check, Star, Calendar } from 'lucide-react';
 import { Product } from '../lib/supabase';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -7,10 +7,9 @@ import { useMetaTracking } from '../hooks/useMetaTracking';
 
 interface ProductCardProps {
   product: Product;
-  index: number;
 }
 
-export default function ProductCard({ product, index }: ProductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [added, setAdded] = useState(false);
   const [selectedGrams, setSelectedGrams] = useState('1g');

@@ -1,42 +1,42 @@
-import React, { useState } from 'react'
-import { supabase } from '../../lib/supabase'
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react';
+import { supabase } from '../../lib/supabase';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface LoginFormProps {
-  onSuccess?: () => void
+  onSuccess?: () => void;
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setMessage(null)
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-      })
+      });
 
       if (error) {
-        setMessage({ type: 'error', text: error.message })
+        setMessage({ type: 'error', text: error.message });
       } else {
-        setMessage({ type: 'success', text: 'Úspěšně přihlášen!' })
-        onSuccess?.()
+        setMessage({ type: 'success', text: 'Úspěšně přihlášen!' });
+        onSuccess?.();
       }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Došlo k neočekávané chybě' })
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Došlo k neočekávané chybě' });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -110,5 +110,5 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         {loading ? 'Přihlašování...' : 'Přihlásit se'}
       </button>
     </form>
-  )
+  );
 }

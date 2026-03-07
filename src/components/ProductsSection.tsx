@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase, Product } from '../lib/supabase';
 import ProductCard from './ProductCard';
-import { Loader2, Sparkles, Zap, Leaf } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 
 export default function ProductsSection() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -10,33 +10,8 @@ export default function ProductsSection() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  useEffect(() => {
-    filterAndSortProducts();
-  }, [products, activeFilter, sortBy]);
-
-  const loadProducts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('featured', { ascending: false })
-        .order('name');
-
-      if (error) throw error;
-      setProducts(data || []);
-    } catch (error) {
-      console.error('Error loading products:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterAndSortProducts = () => {
-    let filtered = [...products];
+  const filterAndSortProducts = useCallback(() => {
+    const filtered = [...products];
 
     const getRelevanceScore = (product: Product) => {
       if (activeFilter === 'all') return 0;
@@ -77,6 +52,31 @@ export default function ProductsSection() {
     });
 
     setFilteredProducts(filtered);
+  }, [products, activeFilter, sortBy]);
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  useEffect(() => {
+    filterAndSortProducts();
+  }, [filterAndSortProducts]);
+
+  const loadProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('featured', { ascending: false })
+        .order('name');
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Error loading products:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {

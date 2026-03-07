@@ -108,6 +108,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     };
 
     validateCart();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [validationDone]); // Run once on mount
 
   // Load variant prices from database
@@ -160,19 +161,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     };
 
     loadPrices();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items.map(i => `${i.product.id}-${i.gramAmount}`).join(',')]);
 
   const addToCart = useCallback(async (product: Product, gramAmount: string, quantity: number = 1) => {
-    // Load price from database
-    const { data: variant } = await supabase
-      .from('product_variants')
-      .select('price')
-      .eq('product_id', product.id)
-      .eq('variant_name', gramAmount)
-      .maybeSingle();
-
-    const itemPrice = variant?.price || 190;
-    const totalValue = itemPrice * quantity;
 
     setItems((current) => {
       const existingItem = current.find(

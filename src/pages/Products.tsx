@@ -90,7 +90,7 @@ function ProductCard({ product, onVisible }: ProductCardProps) {
         </p>
 
         {/* Cannabinoid Info */}
-        {(/*product.thc_percentage || product.cbd_percentage || product.cbg_percentage) && (
+        {/*(product.thc_percentage || product.cbd_percentage || product.cbg_percentage) && (
           <div className="mb-4 p-3 bg-gray-50 rounded-lg">
             <div className="grid grid-cols-3 gap-2 text-xs">
               {product.thc_percentage && (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ElementType } from 'react';
 import { ShoppingCart, Eye, CheckCircle, TrendingUp, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -6,7 +6,7 @@ interface Notification {
   id: number;
   type: 'cart' | 'view' | 'order';
   message: string;
-  icon: any;
+  icon: ElementType;
   time: string;
 }
 

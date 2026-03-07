@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, X, Send, Minimize2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -9,13 +9,6 @@ interface Message {
   message: string;
   created_at: string;
   read_at: string | null;
-}
-
-interface Conversation {
-  id: string;
-  session_id: string;
-  status: string;
-  unread_customer_count: number;
 }
 
 export default function LiveChat() {
@@ -32,58 +25,13 @@ export default function LiveChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const welcomeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Generování nebo načtení session ID
-  useEffect(() => {
-    let sid = localStorage.getItem('chat_session_id');
-    if (!sid) {
-      sid = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      localStorage.setItem('chat_session_id', sid);
-    }
-    setSessionId(sid);
-    loadExistingConversation(sid);
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   }, []);
 
-  // Automatická uvítací zpráva po 2 minutách
-  useEffect(() => {
-    if (!conversationId && sessionId && !hasStartedChat) {
-      welcomeTimerRef.current = setTimeout(() => {
-        sendWelcomeMessage();
-      }, 15 * 1000); // 15 sekund
-
-      return () => {
-        if (welcomeTimerRef.current) {
-          clearTimeout(welcomeTimerRef.current);
-        }
-      };
-    }
-  }, [conversationId, sessionId, hasStartedChat]);
-
-  // Načtení existující konverzace
-  const loadExistingConversation = async (sid: string) => {
-    try {
-      const { data: conversations } = await supabase
-        .from('chat_conversations')
-        .select('*')
-        .eq('session_id', sid)
-        .eq('status', 'open')
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (conversations && conversations.length > 0) {
-        const conv = conversations[0];
-        setConversationId(conv.id);
-        setHasStartedChat(true);
-        setUnreadCount(conv.unread_customer_count || 0);
-        loadMessages(conv.id);
-        subscribeToMessages(conv.id);
-      }
-    } catch (error) {
-      console.error('Error loading conversation:', error);
-    }
-  };
-
-  // Načtení zpráv
-  const loadMessages = async (convId: string) => {
+  const loadMessages = useCallback(async (convId: string) => {
     try {
       const { data } = await supabase
         .from('chat_messages')
@@ -98,10 +46,9 @@ export default function LiveChat() {
     } catch (error) {
       console.error('Error loading messages:', error);
     }
-  };
+  }, [scrollToBottom]);
 
-  // Realtime odběr zpráv
-  const subscribeToMessages = (convId: string) => {
+  const subscribeToMessages = useCallback((convId: string) => {
     const channel = supabase
       .channel(`chat_${convId}`)
       .on(
@@ -129,10 +76,43 @@ export default function LiveChat() {
     return () => {
       supabase.removeChannel(channel);
     };
-  };
+  }, [isOpen, scrollToBottom]);
 
-  // Odeslání uvítací zprávy
-  const sendWelcomeMessage = async () => {
+  const loadExistingConversation = useCallback(async (sid: string) => {
+    try {
+      const { data: conversations } = await supabase
+        .from('chat_conversations')
+        .select('*')
+        .eq('session_id', sid)
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (conversations && conversations.length > 0) {
+        const conv = conversations[0];
+        setConversationId(conv.id);
+        setHasStartedChat(true);
+        setUnreadCount(conv.unread_customer_count || 0);
+        loadMessages(conv.id);
+        subscribeToMessages(conv.id);
+      }
+    } catch (error) {
+      console.error('Error loading conversation:', error);
+    }
+  }, [loadMessages, subscribeToMessages]);
+
+  // Generování nebo načtení session ID
+  useEffect(() => {
+    let sid = localStorage.getItem('chat_session_id');
+    if (!sid) {
+      sid = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('chat_session_id', sid);
+    }
+    setSessionId(sid);
+    loadExistingConversation(sid);
+  }, [loadExistingConversation]);
+
+  const sendWelcomeMessage = useCallback(async () => {
     if (conversationId || hasStartedChat) return;
 
     try {
@@ -166,10 +146,25 @@ export default function LiveChat() {
     } catch (error) {
       console.error('Error sending welcome message:', error);
     }
-  };
+  }, [conversationId, hasStartedChat, loadMessages, subscribeToMessages, sessionId]);
 
-  // Vytvoření nové konverzace při první zprávě
-  const createConversation = async () => {
+
+  // Automatická uvítací zpráva po 2 minutách
+  useEffect(() => {
+    if (!conversationId && sessionId && !hasStartedChat) {
+      welcomeTimerRef.current = setTimeout(() => {
+        sendWelcomeMessage();
+      }, 15 * 1000); // 15 sekund
+
+      return () => {
+        if (welcomeTimerRef.current) {
+          clearTimeout(welcomeTimerRef.current);
+        }
+      };
+    }
+  }, [conversationId, sessionId, hasStartedChat, sendWelcomeMessage]);
+
+  const createConversation = useCallback(async () => {
     try {
       const { data: newConv } = await supabase
         .from('chat_conversations')
@@ -192,7 +187,7 @@ export default function LiveChat() {
       console.error('Error creating conversation:', error);
     }
     return null;
-  };
+  }, [customerEmail, customerName, sessionId, subscribeToMessages]);
 
   // Odeslání zprávy
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -243,13 +238,6 @@ export default function LiveChat() {
     }
 
     scrollToBottom();
-  };
-
-  // Scroll dolů
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
   };
 
   // Formátování času

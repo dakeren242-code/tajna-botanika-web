@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import {
   initMetaPixel,
@@ -36,7 +36,7 @@ export function useMetaTracking() {
     }
   }, [user?.id, profile?.full_name, profile?.phone]);
 
-  const getLoggedInUserData = () => {
+  const getLoggedInUserData = useCallback(() => {
     if (!user?.email) return undefined;
     const nameParts = profile?.full_name?.trim().split(/\s+/) ?? [];
     return {
@@ -47,13 +47,13 @@ export function useMetaTracking() {
       externalId: user.id,
       state: profile?.state || undefined,
     };
-  };
+  }, [user, profile]);
 
   // ─────────────────────────────────────────
   // PAGE VIEW
   // ─────────────────────────────────────────
 
-  const trackPageView = async () => {
+  const trackPageView = useCallback(async () => {
     if (!META_PIXEL_ID) return;
 
     await trackMetaEvent(
@@ -61,13 +61,13 @@ export function useMetaTracking() {
       { content_name: document.title },
       getLoggedInUserData()
     );
-  };
+  }, [getLoggedInUserData]);
 
   // ─────────────────────────────────────────
   // VIEW CONTENT
   // ─────────────────────────────────────────
 
-  const trackViewContent = async (params: {
+  const trackViewContent = useCallback(async (params: {
     contentId: string;
     contentName: string;
     contentCategory?: string;
@@ -89,13 +89,13 @@ export function useMetaTracking() {
       },
       getLoggedInUserData()
     );
-  };
+  }, [getLoggedInUserData]);
 
   // ─────────────────────────────────────────
   // ADD TO CART
   // ─────────────────────────────────────────
 
-  const trackAddToCart = async (params: {
+  const trackAddToCart = useCallback(async (params: {
     contentId: string;
     contentName: string;
     value: number;
@@ -120,13 +120,13 @@ export function useMetaTracking() {
       },
       getLoggedInUserData()
     );
-  };
+  }, [getLoggedInUserData]);
 
   // ─────────────────────────────────────────
   // VIEW CART (custom)
   // ─────────────────────────────────────────
 
-  const trackViewCart = async (params: {
+  const trackViewCart = useCallback(async (params: {
     contentIds: string[];
     value: number;
     numItems: number;
@@ -147,13 +147,13 @@ export function useMetaTracking() {
       },
       getLoggedInUserData()
     );
-  };
+  }, [getLoggedInUserData]);
 
   // ─────────────────────────────────────────
   // INITIATE CHECKOUT
   // ─────────────────────────────────────────
 
-  const trackInitiateCheckout = async (params: {
+  const trackInitiateCheckout = useCallback(async (params: {
     contentIds: string[];
     value: number;
     numItems: number;
@@ -174,13 +174,13 @@ export function useMetaTracking() {
       },
       getLoggedInUserData()
     );
-  };
+  }, [getLoggedInUserData]);
 
   // ─────────────────────────────────────────
   // ADD PAYMENT INFO
   // ─────────────────────────────────────────
 
-  const trackAddPaymentInfo = async (params: {
+  const trackAddPaymentInfo = useCallback(async (params: {
     contentIds: string[];
     value: number;
     currency?: string;
@@ -221,13 +221,13 @@ export function useMetaTracking() {
         externalId: loggedInUserData?.externalId,
       }
     );
-  };
+  }, [getLoggedInUserData]);
 
   // ─────────────────────────────────────────
   // PURCHASE
   // ─────────────────────────────────────────
 
-  const trackPurchase = async (params: {
+  const trackPurchase = useCallback(async (params: {
     contentIds: string[];
     value: number;
     numItems: number;
@@ -278,13 +278,13 @@ export function useMetaTracking() {
         externalId: loggedInUserData?.externalId,
       }
     );
-  };
+  }, [getLoggedInUserData]);
 
   // ─────────────────────────────────────────
   // COMPLETE REGISTRATION
   // ─────────────────────────────────────────
 
-  const trackCompleteRegistration = async (params?: {
+  const trackCompleteRegistration = useCallback(async (params?: {
     email?: string;
     firstName?: string;
     lastName?: string;
@@ -309,13 +309,13 @@ export function useMetaTracking() {
         externalId: loggedInUserData?.externalId,
       }
     );
-  };
+  }, [getLoggedInUserData]);
 
   // ─────────────────────────────────────────
   // LEAD
   // ─────────────────────────────────────────
 
-  const trackLead = async (params?: {
+  const trackLead = useCallback(async (params?: {
     email?: string;
     phone?: string;
     contentName?: string;
@@ -337,13 +337,13 @@ export function useMetaTracking() {
         externalId: loggedInUserData?.externalId,
       }
     );
-  };
+  }, [getLoggedInUserData]);
 
   // ─────────────────────────────────────────
   // SEARCH
   // ─────────────────────────────────────────
 
-  const trackSearch = async (searchQuery: string) => {
+  const trackSearch = useCallback(async (searchQuery: string) => {
     if (!META_PIXEL_ID) return;
 
     await trackMetaEvent(
@@ -355,13 +355,13 @@ export function useMetaTracking() {
       },
       getLoggedInUserData()
     );
-  };
+  }, [getLoggedInUserData]);
 
   // ─────────────────────────────────────────
   // SCROLL DEPTH (custom)
   // ─────────────────────────────────────────
 
-  const trackScrollDepth = async (depth: number) => {
+  const trackScrollDepth = useCallback(async (depth: number) => {
     if (!META_PIXEL_ID) return;
 
     await trackMetaEvent(
@@ -372,13 +372,13 @@ export function useMetaTracking() {
       },
       getLoggedInUserData()
     );
-  };
+  }, [getLoggedInUserData]);
 
   // ─────────────────────────────────────────
   // TIME ON PAGE (custom)
   // ───────────────────────────
 
-  const trackTimeOnPage = async (seconds: number) => {
+  const trackTimeOnPage = useCallback(async (seconds: number) => {
     if (!META_PIXEL_ID) return;
 
     await trackMetaEvent(
@@ -389,7 +389,7 @@ export function useMetaTracking() {
       },
       getLoggedInUserData()
     );
-  };
+  }, [getLoggedInUserData]);
 
   return {
     trackPageView,
