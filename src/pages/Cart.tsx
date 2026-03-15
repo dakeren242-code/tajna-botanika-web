@@ -1,46 +1,26 @@
-import { useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShoppingCart, Minus, Plus, Trash2, ArrowLeft, ShoppingBag, Truck } from 'lucide-react';
-import { useMetaTracking } from '../hooks/useMetaTracking';
 
 const FREE_SHIPPING_THRESHOLD = 1000;
 const SHIPPING_COST = 79;
 
 export default function Cart() {
-  const { items, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
+  const { items, removeFromCart, updateQuantity, totalPrice } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { trackViewCart } = useMetaTracking();
 
   const isFreeShipping = totalPrice >= FREE_SHIPPING_THRESHOLD;
-
-  useEffect(() => {
-    if (items.length === 0) return;
-    const priceMap: Record<string, number> = { '1g': 190, '3g': 490, '5g': 690, '10g': 1290 };
-    const itemsWithCatalogId = items.filter(i => i.product.meta_catalog_id);
-    if (itemsWithCatalogId.length === 0) {
-      if (import.meta.env.DEV) console.warn('[Meta] ViewCart skipped: no items have meta_catalog_id');
-      return;
-    }
-    trackViewCart({
-      contentIds: itemsWithCatalogId.map(i => i.product.meta_catalog_id as string),
-      value: totalPrice,
-      numItems: items.reduce((s, i) => s + i.quantity, 0),
-      currency: 'CZK',
-      contents: itemsWithCatalogId.map(i => ({
-        id: i.product.meta_catalog_id as string,
-        quantity: i.quantity,
-        item_price: priceMap[i.gramAmount] || 190,
-      })),
-    });
-  }, []);
   const shippingCost = isFreeShipping ? 0 : SHIPPING_COST;
   const remainingForFreeShipping = FREE_SHIPPING_THRESHOLD - totalPrice;
   const freeShippingProgress = Math.min((totalPrice / FREE_SHIPPING_THRESHOLD) * 100, 100);
 
   const handleCheckout = () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     navigate('/checkout');
   };
 
@@ -81,23 +61,10 @@ export default function Cart() {
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="bg-black/50 backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <ShoppingCart className="w-6 h-6 text-emerald-400" />
-                  <h1 className="text-2xl font-bold text-white">Nákupní košík</h1>
-                  <span className="text-gray-400">({items.length})</span>
-                </div>
-                <button
-                  onClick={() => {
-                    if (confirm('Opravdu chcete vyprázdnit košík?')) {
-                      clearCart();
-                    }
-                  }}
-                  className="flex items-center gap-2 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-medium rounded-lg transition-colors border border-red-500/20"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Vyprázdnit košík
-                </button>
+              <div className="flex items-center gap-3 mb-6">
+                <ShoppingCart className="w-6 h-6 text-emerald-400" />
+                <h1 className="text-2xl font-bold text-white">Nákupní košík</h1>
+                <span className="text-gray-400">({items.length})</span>
               </div>
 
               <div className="space-y-4">
@@ -220,13 +187,9 @@ export default function Cart() {
                 Pokračovat k pokladně
               </button>
 
-              {user ? (
-                <p className="text-sm text-emerald-400 text-center mt-4 flex items-center justify-center gap-1">
-                  <span>Přihlášen jako {user.email}</span>
-                </p>
-              ) : (
+              {!user && (
                 <p className="text-sm text-gray-400 text-center mt-4">
-                  Můžete nakoupit i bez registrace
+                  Pro dokončení objednávky se musíte přihlásit
                 </p>
               )}
             </div>

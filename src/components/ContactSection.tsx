@@ -1,4 +1,4 @@
-import { MessageCircle, Clock, MapPin } from 'lucide-react';
+import { Mail, MessageCircle, Clock, MapPin } from 'lucide-react';
 
 export default function ContactSection() {
   return (

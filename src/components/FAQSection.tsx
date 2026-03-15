@@ -6,28 +6,28 @@ export default function FAQSection() {
 
   const faqs = [
     {
-      question: 'K čemu jsou produkty určeny?',
-      answer: 'Všechny produkty jsou botanické vzorky určené výhradně ke sběratelským, studijním a analytickým účelům. Nejsou určeny ke konzumaci ani k jakémukoli jinému použití. Prodej probíhá v souladu s platnou legislativou EU.',
-    },
-    {
-      question: 'Jsou produkty testovány?',
-      answer: 'Ano, každá šarže je testována v nezávislé botanické laboratoři. Ke každému produktu je přiložen certifikát o analýze (COA), který obsahuje přesné hodnoty přírodních silic, aromatických látek a potvrzení absence nežádoucích příměsí.',
+      question: 'Jsou produkty legální?',
+      answer: 'Všechny naše produkty jsou plně legální a splňují veškeré požadavky EU legislativy. Každá šarže je testována v nezávislých laboratořích a obsahuje certifikáty o analýze. THC-X je syntetický kanabinoid, který je legální v ČR. Produkty jsou určeny výhradně ke sběratelským účelům.',
     },
     {
       question: 'Jak rychlé je doručení?',
-      answer: 'Objednávky expedujeme do 24 hodin od potvrzení platby. Standardní doručení trvá 1-3 pracovní dny v rámci ČR. Nabízíme také expresní doručení. Všechny zásilky jsou diskrétně zabalené.',
+      answer: 'Objednávky expedujeme do 24 hodin od potvrzení platby. Standardní doručení trvá 1-3 pracovní dny v rámci ČR. Nabízíme také expresní doručení do 24 hodin. Všechny zásilky jsou diskrétně zabalené bez náznaku obsahu.',
     },
     {
       question: 'Jaké jsou platební možnosti?',
-      answer: 'Akceptujeme platební karty (Visa, Mastercard) a bankovní převody. Všechny online platby jsou zabezpečené pomocí šifrování SSL.',
+      answer: 'Akceptujeme platební karty (Visa, Mastercard), bankovní převody a platbu na dobírku. Všechny online platby jsou 100% zabezpečené pomocí šifrování SSL. Vaše platební údaje jsou v bezpečí.',
     },
     {
-      question: 'Mohu produkt vrátit?',
-      answer: 'Ano, nevyužité produkty v původním, neotevřeném stavu lze vrátit do 14 dnů od obdržení v souladu se spotřebitelskými právy. Po otevření produktu z hygienických důvodů vracení není možné.',
+      question: 'Mohu vrátit produkt?',
+      answer: 'Ano, nabízíme 30denní záruku vrácení peněz. Pokud nejste spokojeni s produktem, můžete jej vrátit v původním, neotevřeném stavu. Peníze vám vrátíme bez zbytečných otázek.',
     },
     {
-      question: 'Jak skladovat vzorky?',
-      answer: 'Vzorky skladujte na chladném, tmavém a suchém místě mimo dosah dětí a domácích zvířat. Ideální teplota je 15-21°C. Uchovávejte v originálním obalu. Při správném skladování vydrží materiál stabilní až 12 měsíců.',
+      question: 'Jak skladovat produkty?',
+      answer: 'Produkty skladujte na chladném, tmavém a suchém místě mimo dosah dětí. Ideální teplota je 15-21°C. Uchovávejte v originálním obalu pro zachování čerstvosti a kvality. Při správném skladování vydrží produkt čerstvý až 12 měsíců.',
+    },
+    {
+      question: 'Jsou laboratorní testy dostupné?',
+      answer: 'Ano, ke každému produktu poskytujeme certifikát o laboratorní analýze (COA), který obsahuje přesné hodnoty kanabinoidů, terpeny a potvrzení absence těžkých kovů, pesticidů a mikrobů. Dokumenty jsou dostupné na požádání.',
     },
   ];
 
@@ -49,13 +49,13 @@ export default function FAQSection() {
             </span>
           </div>
           <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
-            Potřebujete{' '}
+            Máte{' '}
             <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-              Informace?
+              Otázky?
             </span>
           </h2>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Odpovědi na nejčastější dotazy o našich botanických vzorcích
+            Odpovědi na nejčastější dotazy našich zákazníků
           </p>
         </div>
 
@@ -104,16 +104,16 @@ export default function FAQSection() {
 
         <div className="mt-12 text-center p-8 rounded-2xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-400/20">
           <h3 className="text-2xl font-black text-white mb-3">
-            Další otázky?
+            Nenašli jste odpověď?
           </h3>
           <p className="text-gray-400 mb-6">
-            Kontaktujte náš zákaznický tým pro další informace
+            Náš zákaznický tým je připraven vám pomoci 24/7
           </p>
           <button
             data-cursor-hover
             className="px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-full hover:scale-105 hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all duration-300"
           >
-            KONTAKTOVAT
+            KONTAKTOVAT PODPORU
           </button>
         </div>
       </div>

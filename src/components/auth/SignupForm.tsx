@@ -1,38 +1,36 @@
-import React, { useState } from 'react';
-import { supabase } from '../../lib/supabase';
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-import { useMetaTracking } from '../../hooks/useMetaTracking';
+import React, { useState } from 'react'
+import { supabase } from '../../lib/supabase'
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react'
 
 interface SignupFormProps {
-  onSuccess?: () => void;
+  onSuccess?: () => void
 }
 
 export function SignupForm({ onSuccess }: SignupFormProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const { trackCompleteRegistration } = useMetaTracking();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage(null);
+    e.preventDefault()
+    setLoading(true)
+    setMessage(null)
 
     if (password !== confirmPassword) {
-      setMessage({ type: 'error', text: 'Hesla se neshodují' });
-      setLoading(false);
-      return;
+      setMessage({ type: 'error', text: 'Hesla se neshodují' })
+      setLoading(false)
+      return
     }
 
     if (password.length < 6) {
-      setMessage({ type: 'error', text: 'Heslo musí mít alespoň 6 znaků' });
-      setLoading(false);
-      return;
+      setMessage({ type: 'error', text: 'Heslo musí mít alespoň 6 znaků' })
+      setLoading(false)
+      return
     }
 
     try {
@@ -42,26 +40,22 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         options: {
           data: {
             full_name: fullName,
-          },
-        },
-      });
+          }
+        }
+      })
 
       if (error) {
-        setMessage({ type: 'error', text: error.message });
+        setMessage({ type: 'error', text: error.message })
       } else {
-        const nameParts = fullName.trim().split(' ');
-        const firstName = nameParts[0] || undefined;
-        const lastName = nameParts.slice(1).join(' ') || undefined;
-        trackCompleteRegistration({ email, firstName, lastName, registrationMethod: 'email' });
-        setMessage({ type: 'success', text: 'Účet byl úspěšně vytvořen!' });
-        onSuccess?.();
+        setMessage({ type: 'success', text: 'Účet byl úspěšně vytvořen!' })
+        onSuccess?.()
       }
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Došlo k neočekávané chybě' });
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Došlo k neočekávané chybě' })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -169,5 +163,5 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         {loading ? 'Registrace...' : 'Registrovat se'}
       </button>
     </form>
-  );
+  )
 }

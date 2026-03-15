@@ -2,32 +2,13 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Package, Home } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
-import { useMetaTracking } from '../hooks/useMetaTracking';
-import { PURCHASE_SESSION_KEY } from './Checkout';
 
 export default function PaymentOk() {
   const { clearCart } = useCart();
-  const { trackPurchase } = useMetaTracking();
 
   useEffect(() => {
     clearCart();
-
-    // Read purchase data saved to sessionStorage before Mollie redirect
-    const raw = sessionStorage.getItem(PURCHASE_SESSION_KEY);
-    if (!raw) return;
-
-    try {
-      const purchaseData = JSON.parse(raw);
-
-      trackPurchase(purchaseData);
-
-      // Clean up so it doesn't fire again on re-renders or back navigation
-      sessionStorage.removeItem(PURCHASE_SESSION_KEY);
-    } catch (err) {
-      console.error('Failed to fire Purchase event from PaymentOk:', err);
-      sessionStorage.removeItem(PURCHASE_SESSION_KEY);
-    }
-  }, []);
+  }, [clearCart]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-emerald-950 to-black py-20 px-4">
@@ -39,12 +20,15 @@ export default function PaymentOk() {
               <CheckCircle className="w-24 h-24 text-emerald-400 relative" />
             </div>
           </div>
+
           <h1 className="text-4xl font-bold text-white mb-4">
             Platba proběhla úspěšně!
           </h1>
+
           <p className="text-xl text-gray-300 mb-8">
             Děkujeme za vaši objednávku. Platba byla úspěšně zpracována.
           </p>
+
           <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-6 mb-8">
             <div className="flex items-start gap-3 text-left">
               <Package className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1" />
@@ -59,9 +43,10 @@ export default function PaymentOk() {
               </div>
             </div>
           </div>
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/orders"
+              to="/order-history"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all"
             >
               <Package className="w-5 h-5" />

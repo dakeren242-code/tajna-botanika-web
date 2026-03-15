@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MessageCircle, X, Send, Phone, Gift, Clock } from 'lucide-react';
+import { MessageCircle, X, Send, Phone, Mail, Gift, Clock } from 'lucide-react';
 
 export default function FloatingActionButton() {
   const [isOpen, setIsOpen] = useState(false);

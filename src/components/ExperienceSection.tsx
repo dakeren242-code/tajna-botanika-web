@@ -1,29 +1,29 @@
-import { Microscope, Shield, Award, FileText } from 'lucide-react';
+import { Sparkles, Shield, Award, Zap } from 'lucide-react';
 
 export default function ExperienceSection() {
   const features = [
     {
-      icon: Microscope,
-      title: 'Laboratorní Analýza',
-      description: 'Každá šarže je testována v nezávislé laboratoři. Výsledky analýz jsou přiloženy k produktu.',
+      icon: Sparkles,
+      title: 'Prémiová Kvalita',
+      description: 'Pečlivě vybrán a testován v nezávislých laboratořích pro absolutní jistotu.',
       color: '#FFD700',
     },
     {
       icon: Shield,
       title: 'Certifikováno',
-      description: 'Plná transparentnost složení a původu. Všechny hodnoty přírodních silic a aromatických látek jsou ověřeny a zdokumentovány.',
+      description: 'Plná transparentnost složení a původu. Všechny hodnoty ověřeny laboratorně.',
       color: '#06B6D4',
     },
     {
       icon: Award,
-      title: 'Standardizované Složení',
-      description: 'Přesně definovaný profil přírodních silic a bylinných látek. Vhodné pro srovnávací botanické studium a dokumentaci.',
+      title: 'Unikátní Složení',
+      description: 'Jedinečný profil kanabinoidů a terpénů. Vzácná kombinace pro sběratele.',
       color: '#34D399',
     },
     {
-      icon: FileText,
-      title: 'Technická Dokumentace',
-      description: 'Ke každému vzorku je přiložen certifikát s detailními údaji o složení a metodách analýzy.',
+      icon: Zap,
+      title: 'Vynikající Profil',
+      description: 'Precizně vyvážené aróma, chuť a konzistence. Sběratelský kousek nejvyšší kvality.',
       color: '#C084FC',
     },
   ];
@@ -31,27 +31,27 @@ export default function ExperienceSection() {
   return (
     <section className="relative py-20 px-6 overflow-hidden">
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-emerald-950/10 to-black" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-yellow-950/10 to-black" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="text-center mb-20">
-          <div className="inline-block mb-6 px-4 py-2 rounded-full bg-emerald-400/10 border border-emerald-400/20">
-            <span className="text-emerald-400 text-sm font-bold tracking-wider">
-              TECHNICKÉ PARAMETRY
+          <div className="inline-block mb-6 px-4 py-2 rounded-full bg-yellow-400/10 border border-yellow-400/20">
+            <span className="text-yellow-400 text-sm font-bold tracking-wider">
+              PRÉMIOVÁ KVALITA
             </span>
           </div>
           <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
-            Charakteristika{' '}
-            <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-              Materiálů
+            Proč Si Vybrat{' '}
+            <span className="bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+              THC-X?
             </span>
           </h2>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Botanické vzorky jsou dodávány s kompletní technickou dokumentací
-            a certifikátem o analýze složení.
+            Nejde jen o produkt. Jde o precizní řemeslo, moderní technologii a
+            absolutní oddanost kvalitě.
           </p>
         </div>
 
@@ -88,7 +88,7 @@ export default function ExperienceSection() {
                   />
                 </div>
 
-                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-emerald-400 transition-colors duration-300">
+                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-yellow-400 transition-colors duration-300">
                   {feature.title}
                 </h3>
 
@@ -105,25 +105,25 @@ export default function ExperienceSection() {
           ))}
         </div>
 
-        <div className="mt-20 p-12 rounded-3xl bg-gradient-to-br from-emerald-400/10 via-transparent to-teal-400/10 border border-emerald-400/20 backdrop-blur-md relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/5 to-teal-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        <div className="mt-20 p-12 rounded-3xl bg-gradient-to-br from-yellow-400/10 via-transparent to-purple-400/10 border border-yellow-400/20 backdrop-blur-md relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/5 to-purple-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
           <div className="relative z-10 text-center max-w-3xl mx-auto">
             <h3 className="text-4xl md:text-5xl font-black mb-6 text-white">
-              Určeno pro{' '}
-              <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                studijní účely
+              Připraveni rozšířit{' '}
+              <span className="bg-gradient-to-r from-yellow-400 to-purple-400 bg-clip-text text-transparent">
+                sbírku?
               </span>
             </h3>
             <p className="text-xl text-gray-300 mb-8">
-              Všechny vzorky jsou určeny výhradně ke sběratelským, studijním a analytickým účelům.
-              Dodávány v souladu s platnými právními předpisy EU.
+              Každý květ je unikátním kusem do vaší kolekce. Precizně vypěstovaný, laboratorně testovaný,
+              botanicky vzácný.
             </p>
             <button
               data-cursor-hover
-              className="px-10 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-lg rounded-full hover:scale-105 hover:shadow-[0_0_40px_rgba(16,185,129,0.6)] transition-all duration-300"
+              className="px-10 py-4 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-bold text-lg rounded-full hover:scale-105 hover:shadow-[0_0_40px_rgba(255,215,0,0.6)] transition-all duration-300"
             >
-              ZOBRAZIT KATALOG
+              ZAČÍT PROZKOUMÁVAT
             </button>
           </div>
         </div>

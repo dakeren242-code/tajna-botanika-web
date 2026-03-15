@@ -5,58 +5,58 @@ export default function TestimonialsSection() {
     {
       name: 'Martin K.',
       rating: 5,
-      text: 'Dodání proběhlo včas, balíček diskrétní. Laboratorní certifikát je přiložen, vše odpovídá popisu. Pečlivé balení.',
-      product: 'Vzorek A',
-      gradient: 'from-emerald-500/20 to-teal-500/20',
+      text: 'Absolutně skvělá kvalita! Každý květný detail je vidět. Botanický profil přesně jak bylo popsáno. Už jsem si objednal znovu.',
+      product: 'Cosmic Dream',
+      gradient: 'from-purple-500/20 to-pink-500/20',
     },
     {
       name: 'Jana P.',
       rating: 5,
-      text: 'Dokumentace je kompletní, hodnoty přírodních silic odpovídají certifikátu. Vhodné pro srovnávací botanické studium.',
-      product: 'Vzorek B',
-      gradient: 'from-teal-500/20 to-cyan-500/20',
+      text: 'Konečně produkt, který drží slovo. Laboratorní testy jsou vidět na první pohled. Úžasná chuť a aroma!',
+      product: 'Golden Haze',
+      gradient: 'from-yellow-500/20 to-orange-500/20',
     },
     {
       name: 'Petr S.',
       rating: 5,
-      text: 'Rychlé doručení, profesionální komunikace. Materiál odpovídá technickému popisu. Doporučuji.',
-      product: 'Vzorek C',
-      gradient: 'from-cyan-500/20 to-blue-500/20',
+      text: 'Nejlepší co jsem kdy měl. Rychlé doručení, diskrétní balení a produkt premium kvality. Doporučuji všem!',
+      product: 'Electric Lime',
+      gradient: 'from-green-500/20 to-emerald-500/20',
     },
     {
       name: 'Lucie M.',
       rating: 5,
-      text: 'Solidní balení, jasné informace o složení. Certifikát přiložen. Pro sběratelské účely odpovídající.',
-      product: 'Vzorek D',
-      gradient: 'from-blue-500/20 to-emerald-500/20',
+      text: 'Precizní balení, skvělá komunikace a produkt, který překonal všechna očekávání. Budu nakupovat pravidelně.',
+      product: 'Sunset Bliss',
+      gradient: 'from-orange-500/20 to-red-500/20',
     },
   ];
 
   return (
     <section className="relative py-20 px-6 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-emerald-950/20 to-black" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-950/20 to-black" />
 
       <div className="absolute inset-0">
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse-slow" />
+        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="text-center mb-20">
-          <div className="inline-block mb-6 px-4 py-2 rounded-full bg-emerald-400/10 border border-emerald-400/20">
-            <span className="text-emerald-400 text-sm font-bold tracking-wider">
-              REFERENCE ZÁKAZNÍKŮ
+          <div className="inline-block mb-6 px-4 py-2 rounded-full bg-yellow-400/10 border border-yellow-400/20">
+            <span className="text-yellow-400 text-sm font-bold tracking-wider">
+              CO ŘÍKAJÍ ZÁKAZNÍCI
             </span>
           </div>
           <h2 className="text-5xl md:text-6xl font-black mb-6 text-white">
-            Zkušenosti{' '}
-            <span className="bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
-              Zákazníků
+            Spokojení{' '}
+            <span className="bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent">
+              Zákazníci
             </span>
           </h2>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Reference od zákazníků, kteří si zakoupili naše botanické vzorky
-            pro své soukromé sbírky a dokumentační účely.
+            Přidejte se k tisícům spokojených zákazníků, kteří již objevili
+            prémiovou kvalitu našich produktů.
           </p>
         </div>
 
@@ -74,13 +74,13 @@ export default function TestimonialsSection() {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent rounded-2xl pointer-events-none" />
 
-              <Quote className="w-8 h-8 text-emerald-400 mb-4 opacity-50" />
+              <Quote className="w-8 h-8 text-yellow-400 mb-4 opacity-50" />
 
               <div className="flex gap-1 mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
                   <Star
                     key={i}
-                    className="w-4 h-4 fill-emerald-400 text-emerald-400"
+                    className="w-4 h-4 fill-yellow-400 text-yellow-400"
                   />
                 ))}
               </div>
@@ -98,7 +98,7 @@ export default function TestimonialsSection() {
                 </div>
               </div>
 
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-400/10 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-400/10 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </div>
           ))}
         </div>
@@ -109,7 +109,7 @@ export default function TestimonialsSection() {
               {[...Array(5)].map((_, i) => (
                 <div
                   key={i}
-                  className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 border-2 border-black flex items-center justify-center text-xs font-black text-black"
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 border-2 border-black flex items-center justify-center text-xs font-black text-black"
                 >
                   {String.fromCharCode(65 + i)}
                 </div>
@@ -117,11 +117,11 @@ export default function TestimonialsSection() {
             </div>
             <div className="text-left">
               <div className="text-white font-bold text-sm">
-                Registrovaných zákazníků
+                2,500+ spokojených zákazníků
               </div>
               <div className="flex items-center gap-1 text-xs text-gray-400">
-                <Star className="w-3 h-3 fill-emerald-400 text-emerald-400" />
-                <span className="text-emerald-400 font-bold">4.8/5</span>
+                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                <span className="text-yellow-400 font-bold">4.9/5</span>
                 <span>průměrné hodnocení</span>
               </div>
             </div>

@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { ShoppingCart, User, LogIn, Shield } from 'lucide-react';
+import { usePerformance } from '../contexts/PerformanceContext';
+import { ShoppingCart, User, LogIn, Shield, Gauge, ChevronDown } from 'lucide-react';
 
 export default function Header() {
   const { user, isAdmin } = useAuth();
   const { totalItems } = useCart();
+  const { mode, manualLevel, currentLevel, fps, setMode, setManualLevel } = usePerformance();
+  const [showPerformanceMenu, setShowPerformanceMenu] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
   const location = useLocation();
   const isHomePage = location.pathname === '/';
@@ -42,6 +45,13 @@ export default function Header() {
     };
   }, [isHomePage]);
 
+  const performanceLevelLabel = {
+    high: 'Vysoký',
+    medium: 'Střední',
+    low: 'Nízký',
+    potato: 'Ultra nízký',
+  };
+
   return (
     <>
       <header
@@ -51,29 +61,102 @@ export default function Header() {
           transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)'
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-3" style={{ overflow: 'visible' }}>
+          <div className="flex items-center justify-between relative" style={{ overflow: 'visible' }}>
             <div className="flex-1" />
 
-            <button
-              onClick={() => {
-                if (location.pathname === '/') {
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                  window.location.href = '/';
-                }
-              }}
-              className="flex items-center gap-3 group cursor-pointer"
-              style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', willChange: 'transform' }}
-            >
+            <Link to="/" className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-3 group">
               <img
                 src="/logo_botanika.png"
                 alt="Tajná Botanika"
                 className="h-12 w-12 object-cover rounded-full group-hover:scale-105 transition-transform drop-shadow-lg"
               />
-            </button>
+              <span className="text-2xl font-serif font-bold bg-gradient-to-br from-white via-yellow-100 to-yellow-600 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)] group-hover:drop-shadow-[0_2px_12px_rgba(250,204,21,0.5)] transition-all tracking-wide">
+                Tajná Botanika
+              </span>
+            </Link>
 
-            <nav className="flex items-center gap-4 flex-1 justify-end">
+            <nav className="flex items-center gap-4 flex-1 justify-end" style={{ overflow: 'visible' }}>
+            <div className="relative">
+              <button
+                onClick={() => setShowPerformanceMenu(!showPerformanceMenu)}
+                className="flex items-center gap-2 px-3 py-2 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 rounded-lg transition-all"
+                title={mode === 'auto' ? `FPS: ${fps}` : 'Výkon'}
+              >
+                <Gauge className="w-5 h-5" />
+                {mode === 'auto' && (
+                  <span className="hidden sm:inline text-xs">{fps} FPS</span>
+                )}
+                <ChevronDown className="w-4 h-4" />
+              </button>
+
+              {showPerformanceMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowPerformanceMenu(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-56 bg-gray-900/95 backdrop-blur-xl border border-cyan-500/30 rounded-lg shadow-xl z-50">
+                    <div className="p-3 border-b border-cyan-500/20">
+                      <div className="text-cyan-400 font-semibold text-sm mb-2">
+                        Režim výkonu
+                      </div>
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => setMode('auto')}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
+                            mode === 'auto'
+                              ? 'bg-cyan-500/20 text-cyan-300'
+                              : 'text-gray-300 hover:bg-cyan-500/10'
+                          }`}
+                        >
+                          <div className="font-medium">Automaticky</div>
+                          {mode === 'auto' && (
+                            <div className="text-xs mt-1">
+                              {fps} FPS - {performanceLevelLabel[currentLevel]}
+                            </div>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => setMode('manual')}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
+                            mode === 'manual'
+                              ? 'bg-cyan-500/20 text-cyan-300'
+                              : 'text-gray-300 hover:bg-cyan-500/10'
+                          }`}
+                        >
+                          <div className="font-medium">Ručně</div>
+                        </button>
+                      </div>
+                    </div>
+
+                    {mode === 'manual' && (
+                      <div className="p-3">
+                        <div className="text-cyan-400 font-semibold text-sm mb-2">
+                          Úroveň výkonu
+                        </div>
+                        <div className="space-y-1">
+                          {(['high', 'medium', 'low', 'potato'] as const).map((level) => (
+                            <button
+                              key={level}
+                              onClick={() => setManualLevel(level)}
+                              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                                manualLevel === level
+                                  ? 'bg-cyan-500/20 text-cyan-300'
+                                  : 'text-gray-300 hover:bg-cyan-500/10'
+                              }`}
+                            >
+                              {performanceLevelLabel[level]}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
             {isAdmin && (
               <Link
                 to="/admin"

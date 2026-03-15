@@ -1,53 +1,155 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePerformance } from '../contexts/PerformanceContext';
 
 interface UFO {
   id: number;
   x: number;
   y: number;
+  baseY: number;
+  velocityX: number;
+  velocityY: number;
   size: number;
-  speed: number;
-  wobbleOffset: number;
+  fleeing: boolean;
+  fleeTime: number;
+  scared: boolean;
 }
 
 export default function FlyingUFOs() {
   const { enableAnimations } = usePerformance();
   const [ufos, setUfos] = useState<UFO[]>([]);
+  const mousePos = useRef({ x: -999, y: -999 });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const animationFrame = useRef<number>();
 
   useEffect(() => {
     if (!enableAnimations) return;
 
-    const newUfos: UFO[] = Array.from({ length: 4 }, (_, i) => ({
+    const newUfos: UFO[] = Array.from({ length: 6 }, (_, i) => ({
       id: i,
-      x: Math.random() * 100,
-      y: 10 + Math.random() * 30,
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * 150 + 50,
+      baseY: Math.random() * 150 + 50,
+      velocityX: 1.5 + Math.random() * 1.5,
+      velocityY: 0,
       size: 50 + Math.random() * 35,
-      speed: 15 + Math.random() * 10,
-      wobbleOffset: Math.random() * Math.PI * 2,
+      fleeing: false,
+      fleeTime: 0,
+      scared: false,
     }));
     setUfos(newUfos);
   }, [enableAnimations]);
+
+  useEffect(() => {
+    if (!enableAnimations || ufos.length === 0) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+
+      if (e.clientY < rect.bottom && e.clientY > rect.top) {
+        mousePos.current = { x: e.clientX, y: e.clientY };
+      } else {
+        mousePos.current = { x: -999, y: -999 };
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    const animate = () => {
+      setUfos(prevUfos => prevUfos.map(ufo => {
+        const newUfo = { ...ufo };
+
+        const dx = mousePos.current.x - newUfo.x;
+        const dy = mousePos.current.y - newUfo.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const fleeRadius = 150;
+        const pushRadius = 100;
+
+        if (distance < pushRadius && mousePos.current.x > -500) {
+          newUfo.scared = true;
+          newUfo.fleeing = true;
+          newUfo.fleeTime = Date.now();
+
+          const pushForce = (pushRadius - distance) / pushRadius;
+          newUfo.velocityX += (-dx / distance) * pushForce * 8;
+          newUfo.velocityY += (-dy / distance) * pushForce * 8;
+        } else if (distance < fleeRadius && mousePos.current.x > -500) {
+          newUfo.fleeing = true;
+          newUfo.fleeTime = Date.now();
+
+          const fleeForce = (fleeRadius - distance) / fleeRadius;
+          newUfo.velocityX += (-dx / distance) * fleeForce * 3;
+          newUfo.velocityY += (-dy / distance) * fleeForce * 3;
+        } else {
+          if (Date.now() - newUfo.fleeTime > 1000) {
+            newUfo.fleeing = false;
+          }
+          if (Date.now() - newUfo.fleeTime > 500) {
+            newUfo.scared = false;
+          }
+        }
+
+        if (!newUfo.fleeing) {
+          const returnForce = (newUfo.baseY - newUfo.y) * 0.01;
+          newUfo.velocityY += returnForce;
+
+          if (Math.abs(newUfo.velocityX) < 1) {
+            newUfo.velocityX += 0.05;
+          }
+        }
+
+        newUfo.velocityX *= 0.95;
+        newUfo.velocityY *= 0.95;
+
+        newUfo.x += newUfo.velocityX;
+        newUfo.y += newUfo.velocityY;
+
+        if (newUfo.x > window.innerWidth + 150) {
+          newUfo.x = -150;
+          newUfo.y = Math.random() * 150 + 50;
+          newUfo.baseY = newUfo.y;
+          newUfo.velocityX = 1.5 + Math.random() * 1.5;
+          newUfo.velocityY = 0;
+          newUfo.fleeing = false;
+          newUfo.scared = false;
+        }
+
+        return newUfo;
+      }));
+
+      animationFrame.current = requestAnimationFrame(animate);
+    };
+
+    animationFrame.current = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (animationFrame.current) {
+        cancelAnimationFrame(animationFrame.current);
+      }
+    };
+  }, [enableAnimations, ufos.length]);
 
   if (!enableAnimations) {
     return null;
   }
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-5">
+    <div ref={containerRef} className="absolute inset-0 overflow-hidden pointer-events-none z-5">
       {ufos.map((ufo) => (
         <div
           key={ufo.id}
-          className="absolute animate-ufo-fly"
+          className="absolute"
           style={{
-            left: `${ufo.x}%`,
-            top: `${ufo.y}%`,
+            left: `${ufo.x}px`,
+            top: `${ufo.y}px`,
             width: `${ufo.size}px`,
             height: `${ufo.size}px`,
-            animationDuration: `${ufo.speed}s`,
-            animationDelay: `${ufo.wobbleOffset}s`,
+            transform: `translate(-50%, -50%) ${ufo.scared ? 'scale(0.85)' : 'scale(1)'}`,
+            transition: 'transform 0.2s ease-out',
           }}
         >
-          <div className="relative w-full h-full animate-ufo-wobble">
+          <div className={`relative w-full h-full ${ufo.fleeing ? 'animate-ufo-panic' : 'animate-ufo-wobble'}`}>
             <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[45%] h-[35%] bg-gradient-to-b from-cyan-300/80 via-cyan-400/60 to-transparent rounded-full blur-sm"
                  style={{ clipPath: 'ellipse(50% 50% at 50% 50%)' }} />
 
@@ -58,7 +160,7 @@ export default function FlyingUFOs() {
                  }}>
               <div className="absolute top-[30%] left-[30%] w-[40%] h-[50%] bg-white/40 rounded-full blur-sm" />
 
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] animate-alien-peek">
+              <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] ${ufo.scared ? 'animate-alien-scared' : 'animate-alien-peek'}`}>
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[70%] h-[50%] bg-green-400 rounded-full" />
                 <div className="absolute top-[20%] left-[25%] w-[20%] h-[25%] bg-gray-900 rounded-full">
                   <div className="absolute top-[20%] left-[20%] w-[40%] h-[40%] bg-white rounded-full" />
@@ -83,25 +185,25 @@ export default function FlyingUFOs() {
                  }}>
               <div className="absolute top-[10%] left-0 right-0 h-[20%] bg-gradient-to-b from-gray-400/40 to-transparent rounded-full" />
 
-              <div className="absolute bottom-[20%] left-[15%] w-[15%] h-[40%] bg-yellow-300 animate-pulse-light"
+              <div className={`absolute bottom-[20%] left-[15%] w-[15%] h-[40%] ${ufo.scared ? 'bg-red-500' : 'bg-yellow-300'} ${ufo.scared ? 'animate-panic-light' : 'animate-pulse-light'}`}
                    style={{
                      clipPath: 'polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%)',
                      filter: 'blur(2px)',
                      animationDelay: '0s'
                    }} />
-              <div className="absolute bottom-[20%] left-[37.5%] w-[15%] h-[40%] bg-cyan-300 animate-pulse-light"
+              <div className={`absolute bottom-[20%] left-[37.5%] w-[15%] h-[40%] ${ufo.scared ? 'bg-red-500' : 'bg-cyan-300'} ${ufo.scared ? 'animate-panic-light' : 'animate-pulse-light'}`}
                    style={{
                      clipPath: 'polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%)',
                      filter: 'blur(2px)',
                      animationDelay: '0.2s'
                    }} />
-              <div className="absolute bottom-[20%] right-[37.5%] w-[15%] h-[40%] bg-pink-300 animate-pulse-light"
+              <div className={`absolute bottom-[20%] right-[37.5%] w-[15%] h-[40%] ${ufo.scared ? 'bg-red-500' : 'bg-pink-300'} ${ufo.scared ? 'animate-panic-light' : 'animate-pulse-light'}`}
                    style={{
                      clipPath: 'polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%)',
                      filter: 'blur(2px)',
                      animationDelay: '0.4s'
                    }} />
-              <div className="absolute bottom-[20%] right-[15%] w-[15%] h-[40%] bg-yellow-300 animate-pulse-light"
+              <div className={`absolute bottom-[20%] right-[15%] w-[15%] h-[40%] ${ufo.scared ? 'bg-red-500' : 'bg-yellow-300'} ${ufo.scared ? 'animate-panic-light' : 'animate-pulse-light'}`}
                    style={{
                      clipPath: 'polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%)',
                      filter: 'blur(2px)',
@@ -113,25 +215,6 @@ export default function FlyingUFOs() {
       ))}
 
       <style>{`
-        @keyframes ufo-fly {
-          0% {
-            transform: translateX(-150px);
-            opacity: 0;
-          }
-          5% {
-            opacity: 1;
-          }
-          95% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateX(calc(100vw + 150px));
-            opacity: 0;
-          }
-        }
-        .animate-ufo-fly {
-          animation: ufo-fly linear infinite;
-        }
         @keyframes ufo-wobble {
           0%, 100% {
             transform: rotate(-5deg) translateY(0px);
@@ -149,6 +232,23 @@ export default function FlyingUFOs() {
         .animate-ufo-wobble {
           animation: ufo-wobble 2s ease-in-out infinite;
         }
+        @keyframes ufo-panic {
+          0%, 100% {
+            transform: rotate(-15deg) translateY(-3px) translateX(-3px);
+          }
+          25% {
+            transform: rotate(15deg) translateY(3px) translateX(3px);
+          }
+          50% {
+            transform: rotate(-10deg) translateY(-2px) translateX(-2px);
+          }
+          75% {
+            transform: rotate(10deg) translateY(2px) translateX(2px);
+          }
+        }
+        .animate-ufo-panic {
+          animation: ufo-panic 0.3s ease-in-out infinite;
+        }
         @keyframes alien-peek {
           0%, 100% {
             opacity: 1;
@@ -162,6 +262,19 @@ export default function FlyingUFOs() {
         .animate-alien-peek {
           animation: alien-peek 3s ease-in-out infinite;
         }
+        @keyframes alien-scared {
+          0%, 100% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+          }
+          50% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.15);
+          }
+        }
+        .animate-alien-scared {
+          animation: alien-scared 0.2s ease-in-out infinite;
+        }
         @keyframes pulse-light {
           0%, 100% {
             opacity: 0.5;
@@ -172,6 +285,17 @@ export default function FlyingUFOs() {
         }
         .animate-pulse-light {
           animation: pulse-light 1s ease-in-out infinite;
+        }
+        @keyframes panic-light {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.3;
+          }
+        }
+        .animate-panic-light {
+          animation: panic-light 0.15s ease-in-out infinite;
         }
       `}</style>
     </div>

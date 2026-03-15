@@ -47,7 +47,6 @@ export type Database = {
           is_subscription: boolean | null
           subscription_period: string | null
           discount_percentage: number | null
-          meta_catalog_id: string | null
         }
         Insert: {
           id?: string
@@ -81,7 +80,6 @@ export type Database = {
           is_subscription?: boolean | null
           subscription_period?: string | null
           discount_percentage?: number | null
-          meta_catalog_id?: string | null
         }
         Update: {
           id?: string
@@ -115,7 +113,6 @@ export type Database = {
           is_subscription?: boolean | null
           subscription_period?: string | null
           discount_percentage?: number | null
-          meta_catalog_id?: string | null
         }
       }
       stripe_user_subscriptions: {
@@ -177,10 +174,10 @@ export interface Address {
 
 export interface Order {
   id: string;
-  user_id: string | null;
+  user_id: string;
   order_number: string;
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'failed';
-  payment_status: 'pending' | 'awaiting_confirmation' | 'paid' | 'failed' | 'refunded' | 'partially_refunded';
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
   total_amount: number;
   currency: string;
   delivery_address_id: string | null;
@@ -191,20 +188,8 @@ export interface Order {
   paid_at: string | null;
   shipped_at: string | null;
   delivered_at: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  customer_first_name?: string | null;
-  customer_last_name?: string | null;
-  customer_email?: string | null;
-  customer_phone?: string | null;
-  payment_method?: string | null;
-  shipping_method?: string | null;
-  shipping_address?: { street?: string; city?: string; zip?: string } | null;
-  billing_address?: any | null;
-  packeta_point_id?: string | null;
-  packeta_point_name?: string | null;
+  stripe_payment_intent_id?: string | null;
+  stripe_checkout_session_id?: string | null;
 }
 
 export interface OrderItem {

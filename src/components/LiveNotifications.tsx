@@ -1,4 +1,4 @@
-import { useEffect, useState, ElementType } from 'react';
+import { useEffect, useState } from 'react';
 import { ShoppingCart, Eye, CheckCircle, TrendingUp, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -6,7 +6,7 @@ interface Notification {
   id: number;
   type: 'cart' | 'view' | 'order';
   message: string;
-  icon: ElementType;
+  icon: any;
   time: string;
 }
 
@@ -107,7 +107,7 @@ export default function LiveNotifications() {
       }, 5000);
     };
 
-    const interval = setInterval(showNotification, 48000);
+    const interval = setInterval(showNotification, 8000);
     showNotification();
 
     return () => clearInterval(interval);

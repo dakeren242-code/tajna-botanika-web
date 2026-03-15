@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { CheckoutButton } from '../components/checkout/CheckoutButton'
 import { stripeProducts } from '../stripe-config'
 import { Leaf, Star } from 'lucide-react'
-import { useMetaTracking } from '../hooks/useMetaTracking'
 
 interface Product {
   id: string
@@ -20,155 +19,10 @@ interface Product {
   flavor_profile: string | null
 }
 
-// ─────────────────────────────────────────
-// PRODUCT CARD
-// Fires ViewContent once when card enters viewport.
-// ─────────────────────────────────────────
-
-interface ProductCardProps {
-  product: Product
-  onVisible: (product: Product) => void
-}
-
-function ProductCard({ product, onVisible }: ProductCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null)
-  const hasFired = useRef(false)
-
-  const stripeProduct = stripeProducts.find(sp =>
-    sp.name.toLowerCase().includes(product.name.toLowerCase().replace(/\s+/g, ' '))
-  )
-
-  useEffect(() => {
-    const el = cardRef.current
-    if (!el) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && !hasFired.current) {
-            hasFired.current = true
-            onVisible(product)
-            observer.disconnect() // stop observing after first fire
-          }
-        })
-      },
-      { threshold: 0.5 } // card must be 50% visible before firing
-    )
-
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [product, onVisible])
-
-  return (
-    <div ref={cardRef} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-      {product.featured && (
-        <div className="bg-green-600 text-white px-3 py-1 rounded-t-lg text-sm font-medium flex items-center gap-1">
-          <Star className="w-4 h-4" />
-          Featured
-        </div>
-      )}
-
-      <div className="h-48 bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center rounded-t-lg">
-        {product.image_url ? (
-          <img
-            src={product.image_url}
-            alt={product.name}
-            className="w-full h-full object-cover rounded-t-lg"
-          />
-        ) : (
-          <Leaf className="w-16 h-16 text-green-600" />
-        )}
-      </div>
-
-      <div className="p-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          {product.name}
-        </h3>
-
-        <p className="text-gray-600 mb-4 text-sm">
-          {product.description}
-        </p>
-
-        {/* Cannabinoid Info */}
-        {/*(product.thc_percentage || product.cbd_percentage || product.cbg_percentage) && (
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              {product.thc_percentage && (
-                <div className="text-center">
-                  <div className="font-medium text-gray-900">THC</div>
-                  <div className="text-gray-600">{product.thc_percentage}%</div>
-                </div>
-              )}
-              {product.cbd_percentage && (
-                <div className="text-center">
-                  <div className="font-medium text-gray-900">CBD</div>
-                  <div className="text-gray-600">{product.cbd_percentage}%</div>
-                </div>
-              )}
-              {product.cbg_percentage && (
-                <div className="text-center">
-                  <div className="font-medium text-gray-900">CBG</div>
-                  <div className="text-gray-600">{product.cbg_percentage}%</div>
-                </div>
-              )}
-            </div>
-          </div>
-        )*/}
-
-        {/* Effects and Flavor */}
-        {(product.effects || product.flavor_profile) && (
-          <div className="mb-4 space-y-2 text-sm">
-            {product.effects && (
-              <div>
-                <span className="font-medium text-gray-900">Effects:</span>
-                <span className="text-gray-600 ml-1">{product.effects}</span>
-              </div>
-            )}
-            {product.flavor_profile && (
-              <div>
-                <span className="font-medium text-gray-900">Flavor:</span>
-                <span className="text-gray-600 ml-1">{product.flavor_profile}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-gray-900">
-            {product.price} Kč
-          </div>
-
-          {stripeProduct ? (
-            <CheckoutButton
-              priceId={stripeProduct.priceId}
-              mode={stripeProduct.mode}
-              className="text-sm"
-            >
-              Buy Now
-            </CheckoutButton>
-          ) : (
-            <button
-              disabled
-              className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed text-sm"
-            >
-              Unavailable
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────
-// PRODUCTS PAGE
-// ─────────────────────────────────────────
-
 export function Products() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const { trackViewContent } = useMetaTracking()
 
   useEffect(() => {
     fetchProducts()
@@ -191,17 +45,11 @@ export function Products() {
     }
   }
 
-  // Stable callback so ProductCard's useEffect doesn't re-run on re-renders
-  const handleProductVisible = useCallback((product: Product) => {
-    trackViewContent({
-      contentId: product.id,
-      contentName: product.name,
-      contentCategory: product.category || undefined,
-      contentType: 'product',
-      value: product.price,
-      currency: 'CZK',
-    })
-  }, [trackViewContent])
+  const getStripeProduct = (productName: string) => {
+    return stripeProducts.find(sp => 
+      sp.name.toLowerCase().includes(productName.toLowerCase().replace(/\s+/g, ' '))
+    )
+  }
 
   const filteredProducts = products.filter(product => {
     if (selectedCategory === 'all') return true
@@ -212,7 +60,7 @@ export function Products() {
     { id: 'all', name: 'All Products' },
     { id: 'energizing', name: 'Energizing' },
     { id: 'relaxing', name: 'Relaxing' },
-    { id: 'balanced', name: 'Balanced' },
+    { id: 'balanced', name: 'Balanced' }
   ]
 
   if (loading) {
@@ -270,13 +118,109 @@ export function Products() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onVisible={handleProductVisible}
-            />
-          ))}
+          {filteredProducts.map((product) => {
+            const stripeProduct = getStripeProduct(product.name)
+            
+            return (
+              <div key={product.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
+                {product.featured && (
+                  <div className="bg-green-600 text-white px-3 py-1 rounded-t-lg text-sm font-medium flex items-center gap-1">
+                    <Star className="w-4 h-4" />
+                    Featured
+                  </div>
+                )}
+                
+                <div className="h-48 bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center rounded-t-lg">
+                  {product.image_url ? (
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="w-full h-full object-cover rounded-t-lg"
+                    />
+                  ) : (
+                    <Leaf className="w-16 h-16 text-green-600" />
+                  )}
+                </div>
+                
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {product.name}
+                  </h3>
+                  
+                  <p className="text-gray-600 mb-4 text-sm">
+                    {product.description}
+                  </p>
+
+                  {/* Cannabinoid Info */}
+                  {(product.thc_percentage || product.cbd_percentage || product.cbg_percentage) && (
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        {product.thc_percentage && (
+                          <div className="text-center">
+                            <div className="font-medium text-gray-900">THC</div>
+                            <div className="text-gray-600">{product.thc_percentage}%</div>
+                          </div>
+                        )}
+                        {product.cbd_percentage && (
+                          <div className="text-center">
+                            <div className="font-medium text-gray-900">CBD</div>
+                            <div className="text-gray-600">{product.cbd_percentage}%</div>
+                          </div>
+                        )}
+                        {product.cbg_percentage && (
+                          <div className="text-center">
+                            <div className="font-medium text-gray-900">CBG</div>
+                            <div className="text-gray-600">{product.cbg_percentage}%</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Effects and Flavor */}
+                  {(product.effects || product.flavor_profile) && (
+                    <div className="mb-4 space-y-2 text-sm">
+                      {product.effects && (
+                        <div>
+                          <span className="font-medium text-gray-900">Effects:</span>
+                          <span className="text-gray-600 ml-1">{product.effects}</span>
+                        </div>
+                      )}
+                      {product.flavor_profile && (
+                        <div>
+                          <span className="font-medium text-gray-900">Flavor:</span>
+                          <span className="text-gray-600 ml-1">{product.flavor_profile}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-2xl font-bold text-gray-900">
+                      190 Kč
+                    </div>
+                    
+                    {stripeProduct ? (
+                      <CheckoutButton
+                        priceId={stripeProduct.priceId}
+                        mode={stripeProduct.mode}
+                        className="text-sm"
+                      >
+                        Buy Now
+                      </CheckoutButton>
+                    ) : (
+                      <button
+                        disabled
+                        className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed text-sm"
+                      >
+                        Unavailable
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </div>
 
         {filteredProducts.length === 0 && (

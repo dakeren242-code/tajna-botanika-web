@@ -2,27 +2,21 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Order, OrderItem, Address } from '../lib/supabase';
-import { ArrowLeft, Package, MapPin, CreditCard, FileText, User, Truck } from 'lucide-react';
-import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS, PAYMENT_METHOD_LABELS, SHIPPING_METHOD_LABELS } from '../lib/constants';
-import { getOrderStatusClasses, getPaymentStatusClasses } from '../lib/orderHelpers';
+import { ArrowLeft, Package, MapPin, CreditCard, FileText } from 'lucide-react';
 
 const statusLabels = {
-  pending: { label: ORDER_STATUS_LABELS.pending, color: getOrderStatusClasses('pending') },
-  confirmed: { label: ORDER_STATUS_LABELS.confirmed, color: getOrderStatusClasses('confirmed') },
-  processing: { label: ORDER_STATUS_LABELS.processing, color: getOrderStatusClasses('processing') },
-  shipped: { label: ORDER_STATUS_LABELS.shipped, color: getOrderStatusClasses('shipped') },
-  delivered: { label: ORDER_STATUS_LABELS.delivered, color: getOrderStatusClasses('delivered') },
-  cancelled: { label: ORDER_STATUS_LABELS.cancelled, color: getOrderStatusClasses('cancelled') },
-  failed: { label: ORDER_STATUS_LABELS.failed, color: getOrderStatusClasses('failed') },
+  pending: { label: 'Čeká na zpracování', color: 'text-yellow-400 bg-yellow-500/10' },
+  processing: { label: 'Zpracovává se', color: 'text-blue-400 bg-blue-500/10' },
+  shipped: { label: 'Odesláno', color: 'text-purple-400 bg-purple-500/10' },
+  delivered: { label: 'Doručeno', color: 'text-emerald-400 bg-emerald-500/10' },
+  cancelled: { label: 'Zrušeno', color: 'text-red-400 bg-red-500/10' },
 };
 
 const paymentStatusLabels = {
-  pending: { label: PAYMENT_STATUS_LABELS.pending, color: getPaymentStatusClasses('pending') },
-  awaiting_confirmation: { label: PAYMENT_STATUS_LABELS.awaiting_confirmation, color: getPaymentStatusClasses('awaiting_confirmation') },
-  paid: { label: PAYMENT_STATUS_LABELS.paid, color: getPaymentStatusClasses('paid') },
-  failed: { label: PAYMENT_STATUS_LABELS.failed, color: getPaymentStatusClasses('failed') },
-  refunded: { label: PAYMENT_STATUS_LABELS.refunded, color: getPaymentStatusClasses('refunded') },
-  partially_refunded: { label: PAYMENT_STATUS_LABELS.partially_refunded, color: getPaymentStatusClasses('partially_refunded') },
+  pending: { label: 'Čeká na platbu', color: 'text-yellow-400 bg-yellow-500/10' },
+  paid: { label: 'Zaplaceno', color: 'text-emerald-400 bg-emerald-500/10' },
+  failed: { label: 'Platba selhala', color: 'text-red-400 bg-red-500/10' },
+  refunded: { label: 'Vráceno', color: 'text-gray-400 bg-gray-500/10' },
 };
 
 export default function OrderDetail() {
@@ -55,6 +49,7 @@ export default function OrderDetail() {
       .from('orders')
       .select('*')
       .eq('id', orderId)
+      .eq('user_id', user.id)
       .maybeSingle();
 
     if (orderError || !orderData) {
@@ -145,122 +140,49 @@ export default function OrderDetail() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Customer Information */}
               <div className="bg-white/5 border border-emerald-500/10 rounded-xl p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <User className="w-5 h-5 text-emerald-400" />
-                  <h2 className="text-xl font-semibold text-white">Zákazník</h2>
+                  <MapPin className="w-5 h-5 text-emerald-400" />
+                  <h2 className="text-xl font-semibold text-white">Doručovací adresa</h2>
                 </div>
-                <div className="text-gray-300 space-y-2">
-                  {((order as any).customer_first_name || order.first_name) && ((order as any).customer_last_name || order.last_name) && (
-                    <p className="font-semibold text-white">
-                      {(order as any).customer_first_name || order.first_name} {(order as any).customer_last_name || order.last_name}
-                    </p>
-                  )}
-                  {((order as any).customer_email || order.email) && (
-                    <p className="text-sm">
-                      <span className="text-gray-400">Email:</span> {(order as any).customer_email || order.email}
-                    </p>
-                  )}
-                  {((order as any).customer_phone || order.phone) && (
-                    <p className="text-sm">
-                      <span className="text-gray-400">Telefon:</span> {(order as any).customer_phone || order.phone}
-                    </p>
-                  )}
-                </div>
+                {address ? (
+                  <div className="text-gray-300 space-y-1">
+                    <p className="font-semibold text-white">{address.full_name}</p>
+                    <p>{address.street}</p>
+                    <p>{address.city}, {address.postal_code}</p>
+                    <p>{address.country}</p>
+                    <p className="pt-2 text-sm text-gray-400">Tel: {address.phone}</p>
+                  </div>
+                ) : (
+                  <p className="text-gray-400">Adresa není k dispozici</p>
+                )}
               </div>
 
-              {/* Delivery Information */}
-              <div className="bg-white/5 border border-emerald-500/10 rounded-xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Truck className="w-5 h-5 text-emerald-400" />
-                  <h2 className="text-xl font-semibold text-white">Doprava</h2>
-                </div>
-                <div className="space-y-2">
-                  {order.shipping_method && (
-                    <div>
-                      <p className="text-gray-400 text-sm">Způsob dopravy</p>
-                      <p className="text-white font-medium">
-                        {SHIPPING_METHOD_LABELS[order.shipping_method as keyof typeof SHIPPING_METHOD_LABELS] || order.shipping_method}
-                      </p>
-                    </div>
-                  )}
-
-                  {order.shipping_method === 'zasilkovna' && order.packeta_point_name && (
-                    <div className="mt-3">
-                      <p className="text-gray-400 text-sm">Výdejní místo</p>
-                      <p className="text-white">{order.packeta_point_name}</p>
-                    </div>
-                  )}
-
-                  {order.shipping_method === 'zasilkovna' && (order.shipping_address || address) && (
-                    <div className="mt-3">
-                      <p className="text-gray-400 text-sm">Doručovací adresa</p>
-                      <div className="text-sm text-gray-300 space-y-1">
-                        {order.shipping_address ? (
-                          <>
-                            {order.shipping_address.street && <p>{order.shipping_address.street}</p>}
-                            {order.shipping_address.city && order.shipping_address.zip && (
-                              <p>{order.shipping_address.city}, {order.shipping_address.zip}</p>
-                            )}
-                          </>
-                        ) : address && (
-                          <>
-                            <p>{address.street}</p>
-                            <p>{address.city}, {address.postal_code}</p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {(order.shipping_method === 'personal_pickup' || order.shipping_method === 'personal_invoice') && (
-                    <div className="mt-2">
-                      <p className="text-emerald-400 text-sm">Odběr na prodejně v Praze</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Payment Information */}
               <div className="bg-white/5 border border-emerald-500/10 rounded-xl p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <CreditCard className="w-5 h-5 text-emerald-400" />
-                  <h2 className="text-xl font-semibold text-white">Platba</h2>
+                  <h2 className="text-xl font-semibold text-white">Platební informace</h2>
                 </div>
                 <div className="space-y-3">
-                  {order.payment_method && (
-                    <div>
-                      <p className="text-gray-400 text-sm">Způsob platby</p>
-                      <p className="text-white font-medium">
-                        {PAYMENT_METHOD_LABELS[order.payment_method as keyof typeof PAYMENT_METHOD_LABELS] || order.payment_method}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="pt-2">
-                    <p className="text-gray-400 text-sm">Stav platby</p>
-                    <span className={`inline-block mt-1 px-3 py-1 rounded-lg text-sm font-medium ${paymentStatusLabels[order.payment_status].color}`}>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Stav platby</span>
+                    <span className={`px-3 py-1 rounded-lg text-sm font-medium ${paymentStatusLabels[order.payment_status].color}`}>
                       {paymentStatusLabels[order.payment_status].label}
                     </span>
                   </div>
-
                   {order.paid_at && (
-                    <div className="pt-2">
-                      <p className="text-gray-400 text-sm">Zaplaceno</p>
-                      <p className="text-white">
-                        {new Date(order.paid_at).toLocaleDateString('cs-CZ')}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="pt-3 border-t border-emerald-500/20">
                     <div className="flex justify-between">
-                      <span className="text-white font-semibold">Celková částka</span>
-                      <span className="text-emerald-400 font-bold text-lg">
-                        {order.total_amount.toFixed(2)} {order.currency}
+                      <span className="text-gray-400">Zaplaceno</span>
+                      <span className="text-white">
+                        {new Date(order.paid_at).toLocaleDateString('cs-CZ')}
                       </span>
                     </div>
+                  )}
+                  <div className="flex justify-between pt-3 border-t border-emerald-500/20">
+                    <span className="text-white font-semibold">Celková částka</span>
+                    <span className="text-emerald-400 font-bold text-lg">
+                      {order.total_amount.toFixed(2)} {order.currency}
+                    </span>
                   </div>
                 </div>
               </div>

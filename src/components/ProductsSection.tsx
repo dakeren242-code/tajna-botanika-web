@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase, Product } from '../lib/supabase';
 import ProductCard from './ProductCard';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles, Zap, Leaf } from 'lucide-react';
 
 export default function ProductsSection() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -10,8 +10,33 @@ export default function ProductsSection() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
 
-  const filterAndSortProducts = useCallback(() => {
-    const filtered = [...products];
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  useEffect(() => {
+    filterAndSortProducts();
+  }, [products, activeFilter, sortBy]);
+
+  const loadProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('featured', { ascending: false })
+        .order('name');
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Error loading products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterAndSortProducts = () => {
+    let filtered = [...products];
 
     const getRelevanceScore = (product: Product) => {
       if (activeFilter === 'all') return 0;
@@ -52,31 +77,6 @@ export default function ProductsSection() {
     });
 
     setFilteredProducts(filtered);
-  }, [products, activeFilter, sortBy]);
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  useEffect(() => {
-    filterAndSortProducts();
-  }, [filterAndSortProducts]);
-
-  const loadProducts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('featured', { ascending: false })
-        .order('name');
-
-      if (error) throw error;
-      setProducts(data || []);
-    } catch (error) {
-      console.error('Error loading products:', error);
-    } finally {
-      setLoading(false);
-    }
   };
 
   if (loading) {
@@ -106,8 +106,8 @@ export default function ProductsSection() {
             </span>
           </h2>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Objevte jedinečné bylinné vzorky s precizně zdokumentovanými botanickými profily.
-            Každý produkt je certifikován a laboratorně testován.
+            Objevte jedinečné květy s precizně vyvážeými profily.
+            Každý produkt je certifikován a testován.
           </p>
         </div>
 
@@ -115,6 +115,9 @@ export default function ProductsSection() {
           <div className="flex flex-wrap gap-3 justify-center">
             {[
               { id: 'all', label: 'Vše', icon: Sparkles },
+              { id: 'relaxing', label: 'Indica Dominant', icon: Leaf },
+              { id: 'energizing', label: 'Sativa Dominant', icon: Zap },
+              { id: 'balanced', label: 'Hybrid', icon: Leaf },
             ].map((filter) => (
               <button
                 key={filter.id}
@@ -142,7 +145,7 @@ export default function ProductsSection() {
               <option value="featured">Doporučené</option>
               <option value="price-low">Cena: Nejnižší</option>
               <option value="price-high">Cena: Nejvyšší</option>
-              <option value="thc-high">Obsah silic: Nejvyšší</option>
+              <option value="thc-high">THC-X: Nejvyšší</option>
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-yellow-400">
               ▼

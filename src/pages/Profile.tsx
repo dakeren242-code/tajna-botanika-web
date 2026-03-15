@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { User, Mail, Phone, Save, LogOut, Package, AlertCircle, CheckCircle, Lock } from 'lucide-react';
+import { User, Mail, Phone, Save, LogOut, Package, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function Profile() {
   const { user, profile, updateProfile, signOut } = useAuth();
@@ -12,13 +11,6 @@ export default function Profile() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [passwordSuccess, setPasswordSuccess] = useState(false);
-  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -57,58 +49,6 @@ export default function Profile() {
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
-  };
-
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPasswordError('');
-    setPasswordSuccess(false);
-    setPasswordLoading(true);
-
-    if (newPassword !== confirmPassword) {
-      setPasswordError('Nová hesla se neshodují');
-      setPasswordLoading(false);
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      setPasswordError('Heslo musí mít alespoň 6 znaků');
-      setPasswordLoading(false);
-      return;
-    }
-
-    try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user?.email || '',
-        password: currentPassword,
-      });
-
-      if (signInError) {
-        setPasswordError('Současné heslo je nesprávné');
-        setPasswordLoading(false);
-        return;
-      }
-
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (updateError) {
-        setPasswordError('Chyba při změně hesla');
-        setPasswordLoading(false);
-        return;
-      }
-
-      setPasswordSuccess(true);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setPasswordLoading(false);
-      setTimeout(() => setPasswordSuccess(false), 3000);
-    } catch (err) {
-      setPasswordError('Neočekávaná chyba při změně hesla');
-      setPasswordLoading(false);
-    }
   };
 
   if (!user) {
@@ -210,91 +150,6 @@ export default function Profile() {
               {loading ? 'Ukládání...' : 'Uložit změny'}
             </button>
           </form>
-
-          <div className="border-t border-emerald-500/20 pt-8 mb-8">
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Lock className="w-6 h-6 text-emerald-400" />
-              Změna hesla
-            </h2>
-
-            {passwordError && (
-              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                <p className="text-red-400 text-sm">{passwordError}</p>
-              </div>
-            )}
-
-            {passwordSuccess && (
-              <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                <p className="text-emerald-400 text-sm">Heslo bylo úspěšně změněno</p>
-              </div>
-            )}
-
-            <form onSubmit={handlePasswordChange} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Současné heslo
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    required
-                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-emerald-500/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                    placeholder="Zadejte současné heslo"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Nové heslo
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-emerald-500/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                    placeholder="Zadejte nové heslo (min. 6 znaků)"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Potvrzení nového hesla
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-emerald-500/20 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                    placeholder="Potvrďte nové heslo"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={passwordLoading}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Save className="w-5 h-5" />
-                {passwordLoading ? 'Ukládání...' : 'Změnit heslo'}
-              </button>
-            </form>
-          </div>
 
           <div className="border-t border-emerald-500/20 pt-8">
             <h2 className="text-xl font-bold text-white mb-4">Rychlé odkazy</h2>

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react';
-import { User, Session, AuthError } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
 import { supabase, UserProfile } from '../lib/supabase';
 
 interface AuthContextType {
@@ -8,12 +8,11 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isAdmin: boolean;
-  isSuperAdmin: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
-  updateProfile: (data: Partial<UserProfile>) => Promise<{ error: AuthError | null }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updateProfile: (data: Partial<UserProfile>) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,13 +25,12 @@ export const useAuth = () => {
   return context;
 };
 
-const AuthProviderComponent = ({ children }: { children: ReactNode }) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   const loadUserProfile = useCallback(async (userId: string) => {
     const { data, error } = await supabase
@@ -49,16 +47,15 @@ const AuthProviderComponent = ({ children }: { children: ReactNode }) => {
   const checkAdminStatus = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from('admin_users')
-      .select('role')
+      .select('user_id')
       .eq('user_id', userId)
       .maybeSingle();
 
     setIsAdmin(!!data);
-    setIsSuperAdmin(data?.role === 'super_admin');
   }, []);
 
   useEffect(() => {
-    let subscription: { unsubscribe: () => void; } | undefined;
+    let subscription: any;
 
     const initAuth = async () => {
       const { data: { session: currentSession } } = await supabase.auth.getSession();
@@ -73,18 +70,19 @@ const AuthProviderComponent = ({ children }: { children: ReactNode }) => {
       setLoading(false);
 
       const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-        async (_event, newSession) => {
-          setSession(newSession);
-          setUser(newSession?.user ?? null);
+        (_event, newSession) => {
+          (async () => {
+            setSession(newSession);
+            setUser(newSession?.user ?? null);
 
-          if (newSession?.user) {
-            await loadUserProfile(newSession.user.id);
-            await checkAdminStatus(newSession.user.id);
-          } else {
-            setProfile(null);
-            setIsAdmin(false);
-            setIsSuperAdmin(false);
-          }
+            if (newSession?.user) {
+              await loadUserProfile(newSession.user.id);
+              await checkAdminStatus(newSession.user.id);
+            } else {
+              setProfile(null);
+              setIsAdmin(false);
+            }
+          })();
         }
       );
 
@@ -116,7 +114,7 @@ const AuthProviderComponent = ({ children }: { children: ReactNode }) => {
         });
 
       if (profileError) {
-        return { error: profileError as AuthError };
+        return { error: profileError };
       }
     }
 
@@ -136,7 +134,6 @@ const AuthProviderComponent = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
     setProfile(null);
     setIsAdmin(false);
-    setIsSuperAdmin(false);
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
@@ -149,7 +146,7 @@ const AuthProviderComponent = ({ children }: { children: ReactNode }) => {
 
   const updateProfile = useCallback(async (data: Partial<UserProfile>) => {
     if (!user) {
-      return { error: new AuthError('No user logged in') };
+      return { error: new Error('No user logged in') };
     }
 
     const { error } = await supabase
@@ -161,7 +158,7 @@ const AuthProviderComponent = ({ children }: { children: ReactNode }) => {
       await loadUserProfile(user.id);
     }
 
-    return { error: error as AuthError | null };
+    return { error };
   }, [user, loadUserProfile]);
 
   const value = useMemo(() => ({
@@ -170,15 +167,12 @@ const AuthProviderComponent = ({ children }: { children: ReactNode }) => {
     session,
     loading,
     isAdmin,
-    isSuperAdmin,
     signUp,
     signIn,
     signOut,
     resetPassword,
     updateProfile,
-  }), [user, profile, session, loading, isAdmin, isSuperAdmin, signUp, signIn, signOut, resetPassword, updateProfile]);
+  }), [user, profile, session, loading, isAdmin, signUp, signIn, signOut, resetPassword, updateProfile]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-export const AuthProvider = AuthProviderComponent;

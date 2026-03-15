@@ -3,26 +3,20 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase, Order } from '../lib/supabase';
 import { Package, ChevronRight, ShoppingBag, ArrowLeft } from 'lucide-react';
-import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from '../lib/constants';
-import { getOrderStatusClasses, getPaymentStatusClasses } from '../lib/orderHelpers';
 
 const statusLabels = {
-  pending: { label: ORDER_STATUS_LABELS.pending, color: getOrderStatusClasses('pending') },
-  confirmed: { label: ORDER_STATUS_LABELS.confirmed, color: getOrderStatusClasses('confirmed') },
-  processing: { label: ORDER_STATUS_LABELS.processing, color: getOrderStatusClasses('processing') },
-  shipped: { label: ORDER_STATUS_LABELS.shipped, color: getOrderStatusClasses('shipped') },
-  delivered: { label: ORDER_STATUS_LABELS.delivered, color: getOrderStatusClasses('delivered') },
-  cancelled: { label: ORDER_STATUS_LABELS.cancelled, color: getOrderStatusClasses('cancelled') },
-  failed: { label: ORDER_STATUS_LABELS.failed, color: getOrderStatusClasses('failed') },
+  pending: { label: 'Čeká na zpracování', color: 'text-yellow-400 bg-yellow-500/10' },
+  processing: { label: 'Zpracovává se', color: 'text-blue-400 bg-blue-500/10' },
+  shipped: { label: 'Odesláno', color: 'text-purple-400 bg-purple-500/10' },
+  delivered: { label: 'Doručeno', color: 'text-emerald-400 bg-emerald-500/10' },
+  cancelled: { label: 'Zrušeno', color: 'text-red-400 bg-red-500/10' },
 };
 
 const paymentStatusLabels = {
-  pending: { label: PAYMENT_STATUS_LABELS.pending, color: getPaymentStatusClasses('pending') },
-  awaiting_confirmation: { label: PAYMENT_STATUS_LABELS.awaiting_confirmation, color: getPaymentStatusClasses('awaiting_confirmation') },
-  paid: { label: PAYMENT_STATUS_LABELS.paid, color: getPaymentStatusClasses('paid') },
-  failed: { label: PAYMENT_STATUS_LABELS.failed, color: getPaymentStatusClasses('failed') },
-  refunded: { label: PAYMENT_STATUS_LABELS.refunded, color: getPaymentStatusClasses('refunded') },
-  partially_refunded: { label: PAYMENT_STATUS_LABELS.partially_refunded, color: getPaymentStatusClasses('partially_refunded') },
+  pending: { label: 'Čeká na platbu', color: 'text-yellow-400 bg-yellow-500/10' },
+  paid: { label: 'Zaplaceno', color: 'text-emerald-400 bg-emerald-500/10' },
+  failed: { label: 'Platba selhala', color: 'text-red-400 bg-red-500/10' },
+  refunded: { label: 'Vráceno', color: 'text-gray-400 bg-gray-500/10' },
 };
 
 export default function OrderHistory() {

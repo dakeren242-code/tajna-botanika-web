@@ -8,6 +8,7 @@
   * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   html {
@@ -29,7 +30,6 @@
   }
 
   button:active, a:active {
-    -webkit-transform: scale(0.98);
     transform: scale(0.98);
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }

@@ -2,43 +2,28 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase, Order } from '../lib/supabase';
-import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag, MessageCircle } from 'lucide-react';
+import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag } from 'lucide-react';
 import ProductManagement from '../components/admin/ProductManagement';
-import ChatManagement from '../components/admin/ChatManagement';
-import {
-  ORDER_STATUS,
-  PAYMENT_STATUS,
-  ORDER_STATUS_LABELS,
-  PAYMENT_STATUS_LABELS,
-  ORDER_STATUS_LIST,
-  PAYMENT_STATUS_LIST,
-} from '../lib/constants';
-import { getOrderStatusClasses, getPaymentStatusClasses } from '../lib/orderHelpers';
-import { sendOrderStatusUpdateEmail } from '../lib/emailService';
 
 const statusLabels = {
-  [ORDER_STATUS.PENDING]: { label: ORDER_STATUS_LABELS.pending, color: getOrderStatusClasses(ORDER_STATUS.PENDING) },
-  [ORDER_STATUS.CONFIRMED]: { label: ORDER_STATUS_LABELS.confirmed, color: getOrderStatusClasses(ORDER_STATUS.CONFIRMED) },
-  [ORDER_STATUS.PROCESSING]: { label: ORDER_STATUS_LABELS.processing, color: getOrderStatusClasses(ORDER_STATUS.PROCESSING) },
-  [ORDER_STATUS.SHIPPED]: { label: ORDER_STATUS_LABELS.shipped, color: getOrderStatusClasses(ORDER_STATUS.SHIPPED) },
-  [ORDER_STATUS.DELIVERED]: { label: ORDER_STATUS_LABELS.delivered, color: getOrderStatusClasses(ORDER_STATUS.DELIVERED) },
-  [ORDER_STATUS.CANCELLED]: { label: ORDER_STATUS_LABELS.cancelled, color: getOrderStatusClasses(ORDER_STATUS.CANCELLED) },
-  [ORDER_STATUS.FAILED]: { label: ORDER_STATUS_LABELS.failed, color: getOrderStatusClasses(ORDER_STATUS.FAILED) },
+  pending: { label: 'Čeká na zpracování', color: 'text-yellow-400 bg-yellow-500/10' },
+  processing: { label: 'Zpracovává se', color: 'text-blue-400 bg-blue-500/10' },
+  shipped: { label: 'Odesláno', color: 'text-purple-400 bg-purple-500/10' },
+  delivered: { label: 'Doručeno', color: 'text-emerald-400 bg-emerald-500/10' },
+  cancelled: { label: 'Zrušeno', color: 'text-red-400 bg-red-500/10' },
 };
 
 const paymentStatusLabels = {
-  [PAYMENT_STATUS.PENDING]: { label: PAYMENT_STATUS_LABELS.pending, color: getPaymentStatusClasses(PAYMENT_STATUS.PENDING) },
-  [PAYMENT_STATUS.AWAITING_CONFIRMATION]: { label: PAYMENT_STATUS_LABELS.awaiting_confirmation, color: getPaymentStatusClasses(PAYMENT_STATUS.AWAITING_CONFIRMATION) },
-  [PAYMENT_STATUS.PAID]: { label: PAYMENT_STATUS_LABELS.paid, color: getPaymentStatusClasses(PAYMENT_STATUS.PAID) },
-  [PAYMENT_STATUS.FAILED]: { label: PAYMENT_STATUS_LABELS.failed, color: getPaymentStatusClasses(PAYMENT_STATUS.FAILED) },
-  [PAYMENT_STATUS.REFUNDED]: { label: PAYMENT_STATUS_LABELS.refunded, color: getPaymentStatusClasses(PAYMENT_STATUS.REFUNDED) },
-  [PAYMENT_STATUS.PARTIALLY_REFUNDED]: { label: PAYMENT_STATUS_LABELS.partially_refunded, color: getPaymentStatusClasses(PAYMENT_STATUS.PARTIALLY_REFUNDED) },
+  pending: { label: 'Čeká na platbu', color: 'text-yellow-400 bg-yellow-500/10' },
+  paid: { label: 'Zaplaceno', color: 'text-emerald-400 bg-emerald-500/10' },
+  failed: { label: 'Platba selhala', color: 'text-red-400 bg-red-500/10' },
+  refunded: { label: 'Vráceno', color: 'text-gray-400 bg-gray-500/10' },
 };
 
 export default function AdminDashboard() {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'chat'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'products'>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -72,14 +57,14 @@ export default function AdminDashboard() {
       setOrders(data);
 
       const totalRevenue = data
-        .filter((o) => o.payment_status === PAYMENT_STATUS.PAID)
+        .filter((o) => o.payment_status === 'paid')
         .reduce((sum, o) => sum + Number(o.total_amount), 0);
 
       setStats({
         totalOrders: data.length,
         totalRevenue,
-        pendingOrders: data.filter((o) => o.status === ORDER_STATUS.PENDING || o.status === ORDER_STATUS.CONFIRMED).length,
-        deliveredOrders: data.filter((o) => o.status === ORDER_STATUS.DELIVERED).length,
+        pendingOrders: data.filter((o) => o.status === 'pending').length,
+        deliveredOrders: data.filter((o) => o.status === 'delivered').length,
       });
     }
 
@@ -87,16 +72,13 @@ export default function AdminDashboard() {
   };
 
   const updateOrderStatus = async (orderId: string, status: Order['status']) => {
-    const order = orders.find((o) => o.id === orderId);
-    if (!order) return;
-
     const updates: any = { status };
 
-    if (status === 'shipped' && !order.shipped_at) {
+    if (status === 'shipped' && !orders.find((o) => o.id === orderId)?.shipped_at) {
       updates.shipped_at = new Date().toISOString();
     }
 
-    if (status === 'delivered' && !order.delivered_at) {
+    if (status === 'delivered' && !orders.find((o) => o.id === orderId)?.delivered_at) {
       updates.delivered_at = new Date().toISOString();
     }
 
@@ -106,26 +88,14 @@ export default function AdminDashboard() {
       .eq('id', orderId);
 
     if (!error) {
-      if (order.customer_email) {
-        sendOrderStatusUpdateEmail({
-          to: order.customer_email,
-          orderNumber: order.order_number || order.payment_reference || orderId,
-          customerName: `${order.customer_first_name || ''} ${order.customer_last_name || ''}`.trim() || 'Zákazník',
-          oldStatus: order.status,
-          newStatus: status,
-        }).catch(err => console.error('Failed to send status update email:', err));
-      }
       loadOrders();
     }
   };
 
   const updatePaymentStatus = async (orderId: string, paymentStatus: Order['payment_status']) => {
-    const order = orders.find((o) => o.id === orderId);
-    if (!order) return;
-
     const updates: any = { payment_status: paymentStatus };
 
-    if (paymentStatus === 'paid' && !order.paid_at) {
+    if (paymentStatus === 'paid' && !orders.find((o) => o.id === orderId)?.paid_at) {
       updates.paid_at = new Date().toISOString();
     }
 
@@ -135,15 +105,6 @@ export default function AdminDashboard() {
       .eq('id', orderId);
 
     if (!error) {
-      if (paymentStatus === 'paid' && order.customer_email) {
-        sendOrderStatusUpdateEmail({
-          to: order.customer_email,
-          orderNumber: order.order_number || order.payment_reference || orderId,
-          customerName: `${order.customer_first_name || ''} ${order.customer_last_name || ''}`.trim() || 'Zákazník',
-          oldStatus: order.payment_status,
-          newStatus: 'paid',
-        }).catch(err => console.error('Failed to send payment confirmation email:', err));
-      }
       loadOrders();
     }
   };
@@ -197,17 +158,6 @@ export default function AdminDashboard() {
             >
               <ShoppingBag className="w-5 h-5" />
               Produkty
-            </button>
-            <button
-              onClick={() => setActiveTab('chat')}
-              className={`flex items-center gap-2 px-4 py-3 font-semibold transition-colors border-b-2 ${
-                activeTab === 'chat'
-                  ? 'text-emerald-400 border-emerald-400'
-                  : 'text-gray-400 border-transparent hover:text-white'
-              }`}
-            >
-              <MessageCircle className="w-5 h-5" />
-              Živý Chat
             </button>
           </div>
 
@@ -284,11 +234,11 @@ export default function AdminDashboard() {
                           onChange={(e) => updateOrderStatus(order.id, e.target.value as Order['status'])}
                           className={`px-3 py-1 rounded-lg text-sm font-medium bg-black/50 border border-emerald-500/20 ${statusLabels[order.status].color}`}
                         >
-                          {ORDER_STATUS_LIST.map((status) => (
-                            <option key={status} value={status}>
-                              {ORDER_STATUS_LABELS[status]}
-                            </option>
-                          ))}
+                          <option value="pending">Čeká na zpracování</option>
+                          <option value="processing">Zpracovává se</option>
+                          <option value="shipped">Odesláno</option>
+                          <option value="delivered">Doručeno</option>
+                          <option value="cancelled">Zrušeno</option>
                         </select>
                       </td>
                       <td className="py-4 px-4">
@@ -297,11 +247,10 @@ export default function AdminDashboard() {
                           onChange={(e) => updatePaymentStatus(order.id, e.target.value as Order['payment_status'])}
                           className={`px-3 py-1 rounded-lg text-sm font-medium bg-black/50 border border-emerald-500/20 ${paymentStatusLabels[order.payment_status].color}`}
                         >
-                          {PAYMENT_STATUS_LIST.map((status) => (
-                            <option key={status} value={status}>
-                              {PAYMENT_STATUS_LABELS[status]}
-                            </option>
-                          ))}
+                          <option value="pending">Čeká na platbu</option>
+                          <option value="paid">Zaplaceno</option>
+                          <option value="failed">Platba selhala</option>
+                          <option value="refunded">Vráceno</option>
                         </select>
                       </td>
                     </tr>
@@ -314,8 +263,6 @@ export default function AdminDashboard() {
           )}
 
           {activeTab === 'products' && <ProductManagement />}
-
-          {activeTab === 'chat' && <ChatManagement />}
         </div>
       </div>
     </div>

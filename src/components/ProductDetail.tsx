@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Leaf, Info, AlertTriangle, Check, Users, TrendingUp, Star } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Zap, Leaf, Info, AlertTriangle, Check, Users, TrendingUp, Star } from 'lucide-react';
 import { supabase, Product } from '../lib/supabase';
 import { useCart } from '../contexts/CartContext';
-import { useMetaTracking } from '../hooks/useMetaTracking';
+import { trackEvent } from '../hooks/useTracking';
 import CustomCursor from './CustomCursor';
 import ParticleBackground from './ParticleBackground';
 import Footer from './Footer';
@@ -12,7 +12,6 @@ export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { trackViewContent, trackAddToCart } = useMetaTracking();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedGramage, setSelectedGramage] = useState<number>(1);
@@ -33,16 +32,10 @@ export default function ProductDetail() {
       } else {
         setProduct(data);
 
-        const contentId = data.meta_catalog_id || data.id;
-        if (import.meta.env.DEV && !data.meta_catalog_id) {
-          console.warn(`[Meta] Produkt ${data.slug} nemá meta_catalog_id. Používám interní ID: ${data.id}. Pro lepší výsledky kampaní toto ID přidejte do Meta katalogu.`);
-        }
-
-        trackViewContent({
-          contentId: contentId.toString(),
-          contentName: data.name,
-          contentCategory: data.category || 'Botanické vzorky',
-          contentType: 'product',
+        trackEvent('ViewContent', {
+          content_name: data.name,
+          content_ids: [data.id],
+          content_type: 'product',
           value: data.price,
           currency: 'CZK',
         });
@@ -61,7 +54,7 @@ export default function ProductDetail() {
     };
 
     fetchProduct();
-  }, [slug]);
+  }, [slug, navigate]);
 
   const incrementQuantity = () => {
     if (product && quantity < (product.stock || 0)) {
@@ -89,22 +82,18 @@ export default function ProductDetail() {
     return getGramagePrice(selectedGramage) * quantity;
   };
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = () => {
     if (product && (product.stock || 0) > 0 && quantity <= (product.stock || 0)) {
       const gramAmount = `${selectedGramage}g`;
-      await addToCart(product, gramAmount, quantity);
+      addToCart(product, gramAmount, quantity);
 
-      const contentId = product.meta_catalog_id || product.id;
-      if (import.meta.env.DEV && !product.meta_catalog_id) {
-        console.warn(`[Meta] Produkt ${product.slug} nemá meta_catalog_id. Používám interní ID: ${product.id}. Pro lepší výsledky kampaní toto ID přidejte do Meta katalogu.`);
-      }
-
-      trackAddToCart({
-        contentId: contentId.toString(),
-        contentName: product.name,
+      trackEvent('AddToCart', {
+        content_name: product.name,
+        content_ids: [product.id],
+        content_type: 'product',
         value: calculatePrice(),
-        quantity: quantity,
         currency: 'CZK',
+        contents: [{ id: product.id, quantity }],
       });
 
       setAdded(true);
@@ -183,9 +172,35 @@ export default function ProductDetail() {
                 </div>
               </div>
 
-              {
-                
-              }
+              <div className="p-6 bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl">
+                <h3 className="text-sm font-bold text-gray-400 mb-4 tracking-wider">CANNABINOID PROFIL</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {product.thcx_content !== null && (
+                    <div className="group p-5 bg-gradient-to-br from-yellow-500/25 to-yellow-600/15 border border-yellow-400/40 rounded-xl hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-300 cursor-pointer">
+                      <div className="text-yellow-400 text-xs font-bold mb-2 tracking-wider">THC-X</div>
+                      <div className="text-white font-black text-3xl group-hover:text-yellow-100 transition-colors">{product.thcx_content}%</div>
+                    </div>
+                  )}
+                  {product.thc_percentage !== null && (
+                    <div className="group p-5 bg-gradient-to-br from-green-500/25 to-green-600/15 border border-green-400/40 rounded-xl hover:scale-105 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300 cursor-pointer">
+                      <div className="text-green-400 text-xs font-bold mb-2 tracking-wider">THC</div>
+                      <div className="text-white font-black text-3xl group-hover:text-green-100 transition-colors">{product.thc_percentage}%</div>
+                    </div>
+                  )}
+                  {product.cbd_percentage !== null && (
+                    <div className="group p-5 bg-gradient-to-br from-cyan-500/25 to-cyan-600/15 border border-cyan-400/40 rounded-xl hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/30 transition-all duration-300 cursor-pointer">
+                      <div className="text-cyan-400 text-xs font-bold mb-2 tracking-wider">CBD</div>
+                      <div className="text-white font-black text-3xl group-hover:text-cyan-100 transition-colors">{product.cbd_percentage}%</div>
+                    </div>
+                  )}
+                  {product.cbg_percentage !== null && (
+                    <div className="group p-5 bg-gradient-to-br from-orange-500/25 to-amber-600/15 border border-orange-400/40 rounded-xl hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 cursor-pointer">
+                      <div className="text-orange-400 text-xs font-bold mb-2 tracking-wider">CBG</div>
+                      <div className="text-white font-black text-3xl group-hover:text-orange-100 transition-colors">{product.cbg_percentage}%</div>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               {product.flavor_profile && (
                 <div className="p-6 bg-gradient-to-r from-white/5 to-transparent border border-white/10 rounded-2xl">
@@ -197,8 +212,10 @@ export default function ProductDetail() {
               {product.effects && (
                 <div className="p-6 bg-gradient-to-r from-white/5 to-transparent border border-white/10 rounded-2xl">
                   <div className="flex items-start gap-3">
-                    <Leaf className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1" />
+                    <Zap className="w-6 h-6 text-yellow-400 flex-shrink-0 mt-1" />
                     <div>
+                      <div className="text-gray-400 text-sm mb-2">Botanický Profil</div>
+                      <div className="text-white font-bold text-lg">{product.effects}</div>
                     </div>
                   </div>
                 </div>
@@ -346,15 +363,15 @@ export default function ProductDetail() {
                 ⚡
               </div>
               <h3 className="text-lg font-bold mb-2 text-white">Unikátní Složení</h3>
-              <p className="text-gray-400 text-sm">Jedinečný profil přírodních silic a aromatických látek. Vzácná bylinkový vzorek pro sběratele.</p>
+              <p className="text-gray-400 text-sm">Jedinečný profil kanabinoidů a terpénů. Vzácná kombinace pro sběratele.</p>
             </div>
 
             <div className="p-8 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all duration-300">
               <div className="text-4xl font-black mb-4" style={{ color: product.color_accent }}>
                 ⚙️
               </div>
-              <h3 className="text-lg font-bold mb-2 text-white">Vynikající Aroma</h3>
-              <p className="text-gray-400 text-sm">Precizně vyvážený aromatický profil a konzistence. Sběratelský botanický vzorek vysoké kvality.</p>
+              <h3 className="text-lg font-bold mb-2 text-white">Vynikající Profil</h3>
+              <p className="text-gray-400 text-sm">Precizně vyvážené aróma, chuť a konzistence. Sběratelský kousek vysoké kvality.</p>
             </div>
           </div>
 
@@ -462,9 +479,9 @@ export default function ProductDetail() {
                   <Info className="w-6 h-6 text-yellow-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black text-white mb-3">Co jsou přírodní silice?</h3>
+                  <h3 className="text-2xl font-black text-white mb-3">Co je to THC-X?</h3>
                   <p className="text-gray-300 text-lg leading-relaxed">
-                    Přírodní silice jsou těkavé aromatické sloučeniny získávané z bylinných rostlin. Tvoří základ charakteristického aroma a jsou předmětem botanického výzkumu i sběratelského zájmu.
+                    Vzácný syntetický kanabinoid s unikátními vlastnostmi. Horká novinka v konopné sféře a cenný přírůstek do každé sběratelské kolekce.
                   </p>
                 </div>
               </div>
@@ -479,18 +496,18 @@ export default function ProductDetail() {
                   <h3 className="text-2xl font-black text-white">UPOZORNĚNÍ</h3>
                   <div className="space-y-3 text-gray-300 leading-relaxed">
                     <p>
-                      Tento botanický materiál je určen výhradně ke sběratelským, studijním a aromaterapeutickým účelům.
-                      Není určen ke konzumaci, spalování ani ke kouření. Jedná se o sušené bylinné květy pro průmyslové,
-                      technické a zahradnické využití. Produkt podléhá přirozenému úbytku hmotnosti.
-                      Uchovávejte mimo dosah dětí a mladistvých.
+                      Produkt v souladu se zákonem č. 167/1998 Sb. Balení obsahuje konopný květ s obsahem THC méně než 1 %.
+                      Tento výrobek není určen ke konzumaci samostatně ani ve směsi s jinými látkami. Také neslouží ke spalování
+                      či kouření. Jedná se o sběratelský předmět, který slouží k účelům průmyslovým, technickým a zahradnickým.
+                      Produkt podléhá přirozenému úbytku hmotnosti. Uchovávejte mimo dosah dětí a mladistvých.
                     </p>
                     <p>
-                      Výrobek splňuje všechny legislativní podmínky prodeje platné v ČR. Každá šarže je pravidelně
-                      testována v certifikovaných botanických laboratořích s přiloženým certifikátem analýzy.
+                      Výrobek splňuje všechny legislativní podmínky prodeje. Jeho hodnoty se drží v požadovaném rozmezí norem
+                      a je pravidelně testován v certifikovaných laboratořích.
                     </p>
                     <p className="font-semibold text-white">
-                      Produkt je prodáván výhradně ke sběratelským, technickým a zahradnickým účelům.
-                      Koupí produktu zákazník toto potvrzuje.
+                      Nikoho nenabádáme ke konzumaci či užívání produktu! Produkt je prodáván pouze ke sběratelským,
+                      technickým či zahradnickým účelům. Koupí produktu toto zákazník stvrzuje.
                     </p>
                     <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                       <span className="px-4 py-2 bg-red-500/20 border border-red-400/30 rounded-full text-sm font-bold text-red-300">
@@ -519,7 +536,7 @@ export default function ProductDetail() {
               <h3 className="text-5xl md:text-6xl font-black mb-6 text-white">
                 Objevte Více{' '}
                 <span className="bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
-                  Bylinných Vzorků
+                  Prémiových Květů
                 </span>
               </h3>
               <p className="text-xl text-gray-400 max-w-3xl mx-auto">
