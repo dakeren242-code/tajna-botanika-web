@@ -6,6 +6,52 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
+function isValidEventData(eventName: string, customData: any): { valid: boolean; reason?: string } {
+  if (!customData) return { valid: true };
+
+  if (customData.content_ids && Array.isArray(customData.content_ids)) {
+    const invalidIds = ['test', 'dummy', 'undefined', 'null', ''];
+    for (const id of customData.content_ids) {
+      if (!id || invalidIds.includes(String(id).toLowerCase())) {
+        return { valid: false, reason: `Invalid content_id: ${id}` };
+      }
+      if (String(id).toLowerCase().includes('test') || String(id).toLowerCase().includes('dummy')) {
+        return { valid: false, reason: `Test/dummy content_id detected: ${id}` };
+      }
+    }
+  }
+
+  if (customData.content_name) {
+    const invalidNames = ['test', 'dummy', 'undefined', 'null'];
+    if (invalidNames.includes(String(customData.content_name).toLowerCase())) {
+      return { valid: false, reason: `Invalid content_name: ${customData.content_name}` };
+    }
+  }
+
+  if (customData.value !== undefined && customData.value !== null) {
+    if (customData.value <= 0 || !isFinite(customData.value)) {
+      return { valid: false, reason: `Invalid value: ${customData.value}` };
+    }
+  }
+
+  if (customData.contents && Array.isArray(customData.contents)) {
+    for (const item of customData.contents) {
+      if (!item.id || item.id === 'undefined' || item.id === 'null') {
+        return { valid: false, reason: `Invalid content item id: ${item.id}` };
+      }
+      if (item.quantity <= 0 || !isFinite(item.quantity)) {
+        return { valid: false, reason: `Invalid quantity: ${item.quantity}` };
+      }
+    }
+  }
+
+  if (eventName === 'Purchase' && !customData.value) {
+    return { valid: false, reason: 'Purchase event requires a value' };
+  }
+
+  return { valid: true };
+}
+
 interface FacebookEvent {
   event_name: string;
   event_time: number;
@@ -65,6 +111,24 @@ Deno.serve(async (req: Request) => {
 
     const { event_name, custom_data, user_data, event_source_url } = await req.json();
 
+    const validation = isValidEventData(event_name, custom_data);
+    if (!validation.valid) {
+      console.warn(`🚫 Blocked invalid event: ${event_name} - ${validation.reason}`);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: `Invalid event data: ${validation.reason}`
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
     const eventTime = Math.floor(Date.now() / 1000);
 
     const fbEvent: FacebookEvent = {
@@ -108,6 +172,8 @@ Deno.serve(async (req: Request) => {
         }
       );
     }
+
+    console.log(`✅ Successfully sent ${event_name} event to Facebook CAPI`);
 
     return new Response(
       JSON.stringify({ success: true, result }),

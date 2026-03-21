@@ -21,7 +21,95 @@ declare global {
       track: (event: string, data?: any) => void;
       page: () => void;
     };
+    _trackingEventCache?: Set<string>;
   }
+}
+
+const EVENT_DEDUP_WINDOW = 5000;
+const eventTimestamps = new Map<string, number>();
+
+function generateEventKey(eventName: string, data?: TrackingEvent): string {
+  const key = JSON.stringify({
+    event: eventName,
+    id: data?.transaction_id || data?.content_ids?.[0] || '',
+    value: data?.value,
+    timestamp: Math.floor(Date.now() / EVENT_DEDUP_WINDOW)
+  });
+  return key;
+}
+
+function isDuplicate(eventName: string, data?: TrackingEvent): boolean {
+  const key = generateEventKey(eventName, data);
+  const now = Date.now();
+  const lastSent = eventTimestamps.get(key);
+
+  if (lastSent && (now - lastSent) < EVENT_DEDUP_WINDOW) {
+    console.warn(`🚫 Blocked duplicate event: ${eventName}`, data);
+    return true;
+  }
+
+  eventTimestamps.set(key, now);
+
+  setTimeout(() => {
+    eventTimestamps.delete(key);
+  }, EVENT_DEDUP_WINDOW * 2);
+
+  return false;
+}
+
+function isValidEventData(eventName: string, data?: TrackingEvent): boolean {
+  if (!data) return true;
+
+  if (data.content_ids) {
+    const invalidIds = ['test', 'dummy', 'undefined', 'null', ''];
+    for (const id of data.content_ids) {
+      if (!id || invalidIds.includes(id.toLowerCase())) {
+        console.warn(`🚫 Blocked event with invalid content_id: ${id}`, eventName);
+        return false;
+      }
+      if (id.includes('test') || id.includes('dummy')) {
+        console.warn(`🚫 Blocked event with test/dummy content_id: ${id}`, eventName);
+        return false;
+      }
+    }
+  }
+
+  if (data.content_name) {
+    const invalidNames = ['test', 'dummy', 'undefined', 'null'];
+    if (invalidNames.includes(data.content_name.toLowerCase())) {
+      console.warn(`🚫 Blocked event with invalid content_name: ${data.content_name}`, eventName);
+      return false;
+    }
+  }
+
+  if (data.value !== undefined) {
+    if (data.value <= 0 || !isFinite(data.value)) {
+      console.warn(`🚫 Blocked event with invalid value: ${data.value}`, eventName);
+      return false;
+    }
+  }
+
+  if (data.transaction_id) {
+    if (!data.transaction_id || data.transaction_id === 'undefined' || data.transaction_id === 'null') {
+      console.warn(`🚫 Blocked event with invalid transaction_id: ${data.transaction_id}`, eventName);
+      return false;
+    }
+  }
+
+  if (data.contents && Array.isArray(data.contents)) {
+    for (const item of data.contents) {
+      if (!item.id || item.id === 'undefined' || item.id === 'null') {
+        console.warn(`🚫 Blocked event with invalid content item id: ${item.id}`, eventName);
+        return false;
+      }
+      if (item.quantity <= 0 || !isFinite(item.quantity)) {
+        console.warn(`🚫 Blocked event with invalid quantity: ${item.quantity}`, eventName);
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 export function initializeTracking() {
@@ -161,6 +249,14 @@ function getCookie(name: string): string | undefined {
 }
 
 export function trackEvent(eventName: string, data?: TrackingEvent) {
+  if (isDuplicate(eventName, data)) {
+    return;
+  }
+
+  if (!isValidEventData(eventName, data)) {
+    return;
+  }
+
   if (window.fbq) {
     window.fbq('track', eventName, data);
   }
@@ -178,7 +274,7 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
   }
 
   if (import.meta.env.DEV) {
-    console.log('📊 Tracking Event:', eventName, data);
+    console.log('✅ Tracking Event:', eventName, data);
   }
 }
 
