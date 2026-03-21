@@ -1,13 +1,15 @@
 import { useEffect } from 'react';
 
 interface TrackingEvent {
-  event: string;
   value?: number;
   currency?: string;
   content_name?: string;
   content_ids?: string[];
   content_type?: string;
   contents?: Array<{ id: string; quantity: number }>;
+  num_items?: number;
+  transaction_id?: string;
+  search_string?: string;
   [key: string]: any;
 }
 

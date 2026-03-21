@@ -40,15 +40,21 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const FB_PIXEL_ID = Deno.env.get("FACEBOOK_PIXEL_ID") || "4296612473987786";
+    const FB_PIXEL_ID = Deno.env.get("FACEBOOK_PIXEL_ID");
     const FB_ACCESS_TOKEN = Deno.env.get("FACEBOOK_ACCESS_TOKEN");
 
-    if (!FB_ACCESS_TOKEN) {
-      console.warn("Facebook Pixel tracking disabled - FACEBOOK_ACCESS_TOKEN not configured");
+    if (!FB_PIXEL_ID || !FB_ACCESS_TOKEN) {
+      console.error("Facebook tracking not configured:", {
+        hasPixelId: !!FB_PIXEL_ID,
+        hasAccessToken: !!FB_ACCESS_TOKEN
+      });
       return new Response(
-        JSON.stringify({ success: false, message: "Facebook tracking not configured" }),
+        JSON.stringify({
+          success: false,
+          error: "Facebook tracking not configured. Please set FACEBOOK_PIXEL_ID and FACEBOOK_ACCESS_TOKEN in Supabase edge function secrets."
+        }),
         {
-          status: 200,
+          status: 400,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",

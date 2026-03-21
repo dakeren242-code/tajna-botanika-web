@@ -17,6 +17,8 @@ Comprehensive pixel tracking has been implemented for your website to track user
 2. Create a new Pixel or select an existing one
 3. Copy your Pixel ID (it's a number like `123456789012345`)
 
+**Note**: You have already configured the Facebook Pixel ID and Access Token in Supabase edge function secrets. The Facebook Conversions API (CAPI) is ready to use!
+
 #### Google Analytics 4
 1. Go to [Google Analytics](https://analytics.google.com/)
 2. Create a new GA4 property or select an existing one
@@ -47,7 +49,37 @@ VITE_GA_MEASUREMENT_ID=G-ABC123XYZ
 VITE_TIKTOK_PIXEL_ID=CDEFGH12345
 ```
 
-### 3. Restart Your Development Server
+**Important**: Replace `your_pixel_id_here` in the `.env` file with your actual Facebook Pixel ID to enable client-side tracking. The server-side tracking (CAPI) is already configured in Supabase.
+
+### 3. Facebook Conversions API (CAPI)
+
+Your Facebook tracking uses both client-side (Pixel) and server-side (CAPI) tracking for maximum accuracy:
+
+**What's Already Configured:**
+- CAPI edge function is deployed and running
+- FACEBOOK_PIXEL_ID and FACEBOOK_ACCESS_TOKEN are configured in Supabase secrets
+- Events are automatically sent to both Pixel and CAPI
+- Facebook automatically deduplicates events from both sources
+
+**How It Works:**
+1. When a user performs an action (add to cart, purchase, etc.), the event is sent to:
+   - Facebook Pixel (client-side in browser)
+   - Facebook CAPI (server-side via Supabase edge function)
+2. Facebook receives both events and deduplicates them using:
+   - Event name and timestamp
+   - Facebook cookies (fbp, fbc)
+   - User data (hashed email if available)
+3. This ensures accurate tracking even when browsers block the pixel
+
+**Tracked Events via CAPI:**
+- PageView
+- ViewContent
+- AddToCart
+- InitiateCheckout
+- Purchase
+- Lead
+
+### 4. Restart Your Development Server
 
 After adding the pixel IDs, restart your development server to load the new environment variables.
 
