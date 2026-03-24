@@ -26,6 +26,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
   const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'card' | 'cash_on_delivery'>('bank_transfer');
   const [shippingMethod, setShippingMethod] = useState<'zasilkovna' | 'personal_pickup' | 'personal_invoice' | undefined>(undefined);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -48,6 +49,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
   const finalTotal = totalPrice + shippingCost + codFee;
 
   const handleSubmit = () => {
+    setSubmitted(true);
     if (!shippingMethod || !termsAccepted || !firstName || !lastName || !email || !phone) {
       return;
     }
@@ -95,9 +97,10 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-black/30 border border-emerald-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !firstName ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                 placeholder="Vaše jméno"
               />
+              {submitted && !firstName && <p className="mt-1 text-xs text-red-400">Vyplnte jmeno</p>}
             </div>
 
             <div>
@@ -109,9 +112,10 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-black/30 border border-emerald-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !lastName ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                 placeholder="Vaše příjmení"
               />
+              {submitted && !lastName && <p className="mt-1 text-xs text-red-400">Vyplnte prijmeni</p>}
             </div>
 
             <div>
@@ -125,10 +129,11 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-11 pr-4 py-3 bg-black/30 border border-emerald-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                  className={`w-full pl-11 pr-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !email ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                   placeholder="vas@email.cz"
                 />
               </div>
+              {submitted && !email && <p className="mt-1 text-xs text-red-400">Vyplnte emailovou adresu</p>}
             </div>
 
             <div>
@@ -142,10 +147,11 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required
-                  className="w-full pl-11 pr-4 py-3 bg-black/30 border border-emerald-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                  className={`w-full pl-11 pr-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !phone ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                   placeholder="+420 123 456 789"
                 />
               </div>
+              {submitted && !phone && <p className="mt-1 text-xs text-red-400">Vyplnte telefonni cislo</p>}
             </div>
           </div>
 
@@ -162,9 +168,10 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     required
-                    className="w-full px-4 py-3 bg-black/30 border border-emerald-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                    className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !address ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                     placeholder="např. Hlavní 123"
                   />
+                  {submitted && !address && <p className="mt-1 text-xs text-red-400">Vyplnte ulici a cislo</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -177,9 +184,10 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       required
-                      className="w-full px-4 py-3 bg-black/30 border border-emerald-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                      className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !city ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                       placeholder="Praha"
                     />
+                    {submitted && !city && <p className="mt-1 text-xs text-red-400">Vyplnte mesto</p>}
                   </div>
 
                   <div>
@@ -191,9 +199,10 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                       value={zip}
                       onChange={(e) => setZip(e.target.value)}
                       required
-                      className="w-full px-4 py-3 bg-black/30 border border-emerald-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+                      className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !zip ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                       placeholder="120 00"
                     />
+                    {submitted && !zip && <p className="mt-1 text-xs text-red-400">Vyplnte PSC</p>}
                   </div>
                 </div>
               </div>
@@ -514,6 +523,12 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               </div>
             </div>
           )}
+
+          {submitted && !shippingMethod && (
+            <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <p className="text-sm text-red-400 text-center">Vyberte zpusob dopravy pro pokracovani</p>
+            </div>
+          )}
         </div>
 
         <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-xl p-6 border border-emerald-500/30">
@@ -565,7 +580,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
         </div>
 
         <div className="space-y-4">
-          <div className="bg-white/5 rounded-xl p-4 border border-emerald-500/20">
+          <div className={`bg-white/5 rounded-xl p-4 border transition-all ${submitted && !termsAccepted ? 'border-red-500/40 bg-red-500/5' : 'border-emerald-500/20'}`}>
             <label className="flex items-start gap-3 cursor-pointer group">
               <div className="flex-shrink-0 pt-1">
                 <input
@@ -586,13 +601,16 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                     zásadami ochrany osobních údajů
                   </a>
                 </p>
+                {submitted && !termsAccepted && (
+                  <p className="mt-1 text-xs text-red-400">Muste souhlasit s obchodnimi podminkami</p>
+                )}
               </div>
             </label>
           </div>
 
           <button
             onClick={handleSubmit}
-            disabled={loading || !isFormValid}
+            disabled={loading}
             className="group relative w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 overflow-hidden shadow-lg hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
