@@ -58,9 +58,9 @@ export default function Checkout() {
           .from('products')
           .select('stock')
           .eq('id', item.product.id)
-          .single();
+          .maybeSingle();
 
-        if (!product || (product.stock || 0) < item.quantity) {
+        if (product && (product.stock || 0) < item.quantity) {
           throw new Error(`Produkt ${item.product.name} není na skladě v požadovaném množství`);
         }
       }
@@ -119,8 +119,9 @@ export default function Checkout() {
           product_id: item.product.id,
           product_name: item.product.name,
           quantity: item.quantity,
-          product_price: price,
-          variant: item.gramAmount,
+          unit_price: price,
+          total_price: price * item.quantity,
+          variant_name: item.gramAmount,
         };
       });
 
@@ -139,7 +140,7 @@ export default function Checkout() {
           .from('products')
           .select('stock')
           .eq('id', item.product.id)
-          .single();
+          .maybeSingle();
 
         if (product) {
           await supabase
