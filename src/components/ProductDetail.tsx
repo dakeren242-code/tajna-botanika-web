@@ -141,16 +141,10 @@ export default function ProductDetail() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
             <div className="flex items-center justify-center relative min-h-[600px]">
               <div
-                className="absolute inset-0 rounded-full blur-[120px] opacity-50"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-60"
                 style={{
-                  backgroundColor: product.glow_color,
-                  width: '80%',
-                  height: '80%',
-                  margin: 'auto',
-                  top: '0',
-                  bottom: '0',
-                  left: '0',
-                  right: '0'
+                  backgroundColor: product.glow_color || product.color_accent,
+                  filter: 'blur(100px)',
                 }}
               />
               <div className="relative z-10 flex items-center justify-center w-full h-full">
@@ -299,41 +293,43 @@ export default function ProductDetail() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={(product.stock || 0) === 0}
-                    className="relative w-full px-8 py-5 rounded-full font-bold text-lg transition-all duration-300 overflow-hidden hover:scale-105 group/btn disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    style={{
-                      backgroundColor: added ? '#10b981' : (product.color_accent || '#ec4899'),
-                      boxShadow: (product.stock || 0) > 0 ? `0 0 40px ${product.glow_color || '#ec4899'}60` : 'none',
-                    }}
-                  >
-                    <div
-                      className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-all duration-500 shimmer-effect"
+                  <div className="flex justify-center">
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={(product.stock || 0) === 0}
+                      className="relative px-12 py-5 rounded-full font-bold text-lg transition-all duration-300 overflow-hidden hover:scale-105 group/btn disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                       style={{
-                        background: `linear-gradient(90deg, transparent, ${product.glow_color || '#ec4899'}40, transparent)`,
+                        backgroundColor: added ? '#10b981' : (product.glow_color || product.color_accent || '#ec4899'),
+                        boxShadow: (product.stock || 0) > 0 ? `0 0 40px ${product.glow_color || product.color_accent || '#ec4899'}60` : 'none',
                       }}
-                    />
-                    <div
-                      className="absolute -inset-1 rounded-full opacity-0 group-hover/btn:opacity-100 transition-all duration-300 blur-xl"
-                      style={{
-                        backgroundColor: product.glow_color || '#ec4899',
-                      }}
-                    />
-                    <span className="relative z-10 flex items-center justify-center gap-3 text-white font-black uppercase tracking-wider">
-                      {added ? (
-                        <>
-                          <Check className="w-5 h-5" />
-                          PŘIDÁNO DO KOŠÍKU
-                        </>
-                      ) : (
-                        <>
-                          <ShoppingCart className="w-5 h-5" />
-                          PŘIDAT DO KOŠÍKU
-                        </>
-                      )}
-                    </span>
-                  </button>
+                    >
+                      <div
+                        className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-all duration-500 shimmer-effect"
+                        style={{
+                          background: `linear-gradient(90deg, transparent, ${product.glow_color || product.color_accent || '#ec4899'}40, transparent)`,
+                        }}
+                      />
+                      <div
+                        className="absolute -inset-1 rounded-full opacity-0 group-hover/btn:opacity-100 transition-all duration-300 blur-xl"
+                        style={{
+                          backgroundColor: product.glow_color || product.color_accent || '#ec4899',
+                        }}
+                      />
+                      <span className="relative z-10 flex items-center justify-center gap-3 text-white font-black uppercase tracking-wider">
+                        {added ? (
+                          <>
+                            <Check className="w-5 h-5" />
+                            PŘIDÁNO DO KOŠÍKU
+                          </>
+                        ) : (
+                          <>
+                            <ShoppingCart className="w-5 h-5" />
+                            PŘIDAT DO KOŠÍKU
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  </div>
 
                   <style>{`
                     @keyframes shimmer {
