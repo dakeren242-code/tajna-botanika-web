@@ -99,8 +99,25 @@ export default function ProductManagement() {
     setError('');
 
     try {
+      const effectsArray = formData.effects
+        ? formData.effects.split(',').map(e => e.trim()).filter(e => e.length > 0)
+        : [];
+
       const productData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        stock: formData.stock,
+        category: formData.category,
+        thc_percent: formData.thc_percent,
+        cbd_percent: formData.cbd_percent,
+        cbg_percent: formData.cbg_percent,
+        thc_x_percent: formData.thc_x_percent,
+        flavor_profile: formData.flavor_profile || null,
+        effects: effectsArray,
+        image_url: formData.image_url || null,
+        featured: formData.featured,
+        gram_options: formData.gram_options,
         updated_at: new Date().toISOString(),
       };
 
@@ -301,12 +318,13 @@ export default function ProductManagement() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-300 mb-2">Účinky</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Účinky (oddělené čárkou)</label>
             <input
               type="text"
               value={formData.effects}
               onChange={(e) => setFormData({ ...formData, effects: e.target.value })}
               className="w-full px-4 py-2 bg-black/50 border border-emerald-500/20 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
+              placeholder="relaxace, úleva od bolesti, zlepšení spánku"
             />
           </div>
 
