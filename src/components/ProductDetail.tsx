@@ -406,7 +406,7 @@ export default function ProductDetail() {
                 {relatedProducts.map((relatedProduct, idx) => (
                   <div
                     key={relatedProduct.id}
-                    onClick={() => navigate(`/product/${relatedProduct.slug}`)}
+                    onClick={() => navigate(`/product/${relatedProduct.id}`)}
                     className="group relative p-6 bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-2xl hover:border-emerald-400/50 hover:bg-white/10 transition-all duration-500 cursor-pointer hover:scale-105"
                     style={{ animationDelay: `${idx * 100}ms` }}
                   >
