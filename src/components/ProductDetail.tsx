@@ -469,8 +469,11 @@ export default function ProductDetail() {
                         </div>
                       </div>
                       <div
-                        className="px-6 py-3 rounded-full font-bold text-sm text-black group-hover:scale-110 transition-transform"
-                        style={{ backgroundColor: relatedProduct.color_accent }}
+                        className="px-6 py-3 rounded-full font-bold text-sm text-white group-hover:scale-110 transition-transform shadow-lg"
+                        style={{
+                          backgroundColor: relatedProduct.color_accent,
+                          boxShadow: `0 0 20px ${relatedProduct.glow_color}40`
+                        }}
                       >
                         Zobrazit
                       </div>
