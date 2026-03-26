@@ -6,6 +6,7 @@ import { useCart } from '../contexts/CartContext';
 import { trackEvent } from '../hooks/useTracking';
 import CustomCursor from './CustomCursor';
 import ParticleBackground from './ParticleBackground';
+import DewEffect from './DewEffect';
 import Footer from './Footer';
 
 export default function ProductDetail() {
@@ -117,6 +118,7 @@ export default function ProductDetail() {
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
       <CustomCursor />
       <ParticleBackground />
+      <DewEffect />
 
       <main className="relative z-10 pt-24">
         <div className="container mx-auto px-4 py-8">
@@ -175,28 +177,28 @@ export default function ProductDetail() {
               <div className="p-6 bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl">
                 <h3 className="text-sm font-bold text-gray-400 mb-4 tracking-wider">CANNABINOID PROFIL</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  {product.thcx_content !== null && (
+                  {product.thc_x_percent !== null && product.thc_x_percent !== undefined && (
                     <div className="group p-5 bg-gradient-to-br from-yellow-500/25 to-yellow-600/15 border border-yellow-400/40 rounded-xl hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/30 transition-all duration-300 cursor-pointer">
                       <div className="text-yellow-400 text-xs font-bold mb-2 tracking-wider">THC-X</div>
-                      <div className="text-white font-black text-3xl group-hover:text-yellow-100 transition-colors">{product.thcx_content}%</div>
+                      <div className="text-white font-black text-3xl group-hover:text-yellow-100 transition-colors">{product.thc_x_percent}%</div>
                     </div>
                   )}
-                  {product.thc_percentage !== null && (
+                  {product.thc_percent !== null && product.thc_percent !== undefined && (
                     <div className="group p-5 bg-gradient-to-br from-green-500/25 to-green-600/15 border border-green-400/40 rounded-xl hover:scale-105 hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300 cursor-pointer">
                       <div className="text-green-400 text-xs font-bold mb-2 tracking-wider">THC</div>
-                      <div className="text-white font-black text-3xl group-hover:text-green-100 transition-colors">{product.thc_percentage}%</div>
+                      <div className="text-white font-black text-3xl group-hover:text-green-100 transition-colors">{product.thc_percent}%</div>
                     </div>
                   )}
-                  {product.cbd_percentage !== null && (
+                  {product.cbd_percent !== null && product.cbd_percent !== undefined && (
                     <div className="group p-5 bg-gradient-to-br from-cyan-500/25 to-cyan-600/15 border border-cyan-400/40 rounded-xl hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/30 transition-all duration-300 cursor-pointer">
                       <div className="text-cyan-400 text-xs font-bold mb-2 tracking-wider">CBD</div>
-                      <div className="text-white font-black text-3xl group-hover:text-cyan-100 transition-colors">{product.cbd_percentage}%</div>
+                      <div className="text-white font-black text-3xl group-hover:text-cyan-100 transition-colors">{product.cbd_percent}%</div>
                     </div>
                   )}
-                  {product.cbg_percentage !== null && (
+                  {product.cbg_percent !== null && product.cbg_percent !== undefined && (
                     <div className="group p-5 bg-gradient-to-br from-orange-500/25 to-amber-600/15 border border-orange-400/40 rounded-xl hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 cursor-pointer">
                       <div className="text-orange-400 text-xs font-bold mb-2 tracking-wider">CBG</div>
-                      <div className="text-white font-black text-3xl group-hover:text-orange-100 transition-colors">{product.cbg_percentage}%</div>
+                      <div className="text-white font-black text-3xl group-hover:text-orange-100 transition-colors">{product.cbg_percent}%</div>
                     </div>
                   )}
                 </div>
@@ -209,13 +211,15 @@ export default function ProductDetail() {
                 </div>
               )}
 
-              {product.effects && (
+              {product.effects && product.effects.length > 0 && (
                 <div className="p-6 bg-gradient-to-r from-white/5 to-transparent border border-white/10 rounded-2xl">
                   <div className="flex items-start gap-3">
                     <Zap className="w-6 h-6 text-yellow-400 flex-shrink-0 mt-1" />
                     <div>
                       <div className="text-gray-400 text-sm mb-2">Botanický Profil</div>
-                      <div className="text-white font-bold text-lg">{product.effects}</div>
+                      <div className="text-white font-bold text-lg">
+                        {Array.isArray(product.effects) ? product.effects.join(', ') : product.effects}
+                      </div>
                     </div>
                   </div>
                 </div>
