@@ -115,7 +115,7 @@ Deno.serve(async (req: Request) => {
       description: product.description || product.name,
       availability: product.stock_quantity > 0 ? "in stock" : "out of stock",
       condition: "new",
-      price: `${product.price} CZK`,
+      price: `${Number(product.price).toFixed(2)} CZK`,
       link: `${SITE_URL}/products/${product.id}`,
       image_link: product.image_url || `${SITE_URL}/placeholder.jpg`,
       brand: "Botanika",
@@ -135,30 +135,28 @@ Deno.serve(async (req: Request) => {
         try {
           const apiUrl = `https://graph.facebook.com/v18.0/${FACEBOOK_CATALOG_ID}/products`;
 
-          const response = await fetch(apiUrl, {
+          const product = products.find((p: Product) => p.id === item.id || p.meta_catalog_id === item.id);
+          const priceInCents = Math.round(Number(product?.price || 0) * 100);
+
+          const catalogData = {
+            retailer_id: item.id,
+            name: item.title,
+            description: item.description,
+            availability: item.availability,
+            condition: item.condition,
+            price: priceInCents,
+            currency: "CZK",
+            url: item.link,
+            image_url: item.image_link,
+            brand: item.brand,
+          };
+
+          const response = await fetch(`${apiUrl}?access_token=${FACEBOOK_ACCESS_TOKEN}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              access_token: FACEBOOK_ACCESS_TOKEN,
-              requests: [
-                {
-                  method: "UPDATE",
-                  retailer_id: item.id,
-                  data: {
-                    title: item.title,
-                    description: item.description,
-                    availability: item.availability,
-                    condition: item.condition,
-                    price: item.price,
-                    link: item.link,
-                    image_link: item.image_link,
-                    brand: item.brand,
-                  },
-                },
-              ],
-            }),
+            body: JSON.stringify(catalogData),
           });
 
           const result = await response.json();
