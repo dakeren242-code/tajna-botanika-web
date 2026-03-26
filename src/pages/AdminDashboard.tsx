@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase, Order } from '../lib/supabase';
-import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag } from 'lucide-react';
+import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag, Facebook } from 'lucide-react';
 import ProductManagement from '../components/admin/ProductManagement';
+import FacebookCatalogManager from '../components/admin/FacebookCatalogManager';
 
 const statusLabels = {
   pending: { label: 'Čeká na zpracování', color: 'text-yellow-400 bg-yellow-500/10' },
@@ -23,7 +24,7 @@ const paymentStatusLabels = {
 export default function AdminDashboard() {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'orders' | 'products'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'catalog'>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -159,6 +160,17 @@ export default function AdminDashboard() {
               <ShoppingBag className="w-5 h-5" />
               Produkty
             </button>
+            <button
+              onClick={() => setActiveTab('catalog')}
+              className={`flex items-center gap-2 px-4 py-3 font-semibold transition-colors border-b-2 ${
+                activeTab === 'catalog'
+                  ? 'text-emerald-400 border-emerald-400'
+                  : 'text-gray-400 border-transparent hover:text-white'
+              }`}
+            >
+              <Facebook className="w-5 h-5" />
+              Facebook Catalog
+            </button>
           </div>
 
           {activeTab === 'orders' && (
@@ -263,6 +275,8 @@ export default function AdminDashboard() {
           )}
 
           {activeTab === 'products' && <ProductManagement />}
+
+          {activeTab === 'catalog' && <FacebookCatalogManager />}
         </div>
       </div>
     </div>
