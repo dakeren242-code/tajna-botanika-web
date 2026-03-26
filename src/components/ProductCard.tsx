@@ -31,7 +31,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
   };
 
   const handleProductClick = () => {
-    navigate(`/product/${product.slug}`);
+    navigate(`/product/${product.id}`);
   };
 
   const handleAddToCart = (e: React.MouseEvent) => {

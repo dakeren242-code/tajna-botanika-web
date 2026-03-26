@@ -24,7 +24,7 @@ export default function ProductDetail() {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('slug', slug)
+        .eq('id', slug)
         .maybeSingle();
 
       if (error || !data) {
@@ -43,7 +43,7 @@ export default function ProductDetail() {
         const { data: related } = await supabase
           .from('products')
           .select('*')
-          .neq('slug', slug)
+          .neq('id', slug)
           .limit(3);
 
         if (related) {

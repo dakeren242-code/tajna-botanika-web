@@ -18,20 +18,22 @@ export type Database = {
         Row: {
           id: string
           name: string
-          slug: string
-          description: string
+          description: string | null
           price: number
-          thc_content: string | null
-          cbd_content: string | null
-          flavor_profile: string | null
-          effects: string | null
-          color_accent: string | null
-          glow_color: string | null
           image_url: string | null
+          category: string | null
+          stock_quantity: number | null
+          thc_content: number | null
+          cbd_content: number | null
+          effects: string[] | null
           featured: boolean | null
-          stock: number | null
+          meta_catalog_id: string | null
           created_at: string | null
           updated_at: string | null
+          flavor_profile: string | null
+          color_accent: string | null
+          glow_color: string | null
+          stock: number | null
           thc_x_percent: number | null
           thc_percent: number | null
           cbd_percent: number | null
@@ -41,7 +43,6 @@ export type Database = {
           thc_percentage: number | null
           cbd_percentage: number | null
           cbg_percentage: number | null
-          category: string | null
           original_price: number | null
           is_popular: boolean | null
           is_subscription: boolean | null
@@ -51,20 +52,22 @@ export type Database = {
         Insert: {
           id?: string
           name: string
-          slug: string
-          description: string
-          price?: number
-          thc_content?: string | null
-          cbd_content?: string | null
-          flavor_profile?: string | null
-          effects?: string | null
-          color_accent?: string | null
-          glow_color?: string | null
+          description?: string | null
+          price: number
           image_url?: string | null
+          category?: string | null
+          stock_quantity?: number | null
+          thc_content?: number | null
+          cbd_content?: number | null
+          effects?: string[] | null
           featured?: boolean | null
-          stock?: number | null
+          meta_catalog_id?: string | null
           created_at?: string | null
           updated_at?: string | null
+          flavor_profile?: string | null
+          color_accent?: string | null
+          glow_color?: string | null
+          stock?: number | null
           thc_x_percent?: number | null
           thc_percent?: number | null
           cbd_percent?: number | null
@@ -74,7 +77,6 @@ export type Database = {
           thc_percentage?: number | null
           cbd_percentage?: number | null
           cbg_percentage?: number | null
-          category?: string | null
           original_price?: number | null
           is_popular?: boolean | null
           is_subscription?: boolean | null
@@ -84,20 +86,22 @@ export type Database = {
         Update: {
           id?: string
           name?: string
-          slug?: string
-          description?: string
+          description?: string | null
           price?: number
-          thc_content?: string | null
-          cbd_content?: string | null
-          flavor_profile?: string | null
-          effects?: string | null
-          color_accent?: string | null
-          glow_color?: string | null
           image_url?: string | null
+          category?: string | null
+          stock_quantity?: number | null
+          thc_content?: number | null
+          cbd_content?: number | null
+          effects?: string[] | null
           featured?: boolean | null
-          stock?: number | null
+          meta_catalog_id?: string | null
           created_at?: string | null
           updated_at?: string | null
+          flavor_profile?: string | null
+          color_accent?: string | null
+          glow_color?: string | null
+          stock?: number | null
           thc_x_percent?: number | null
           thc_percent?: number | null
           cbd_percent?: number | null
@@ -107,7 +111,6 @@ export type Database = {
           thc_percentage?: number | null
           cbd_percentage?: number | null
           cbg_percentage?: number | null
-          category?: string | null
           original_price?: number | null
           is_popular?: boolean | null
           is_subscription?: boolean | null

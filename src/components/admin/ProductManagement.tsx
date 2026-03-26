@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase, Product } from '../../lib/supabase';
-import { Plus, Edit2, Trash2, Save, X, Package } from 'lucide-react';
+import { Plus, CreditCard as Edit2, Trash2, Save, X, Package } from 'lucide-react';
 
 interface ProductFormData {
   name: string;
-  slug: string;
   description: string;
   price: number;
   stock: number;
@@ -22,7 +21,6 @@ interface ProductFormData {
 
 const defaultFormData: ProductFormData = {
   name: '',
-  slug: '',
   description: '',
   price: 190,
   stock: 0,
@@ -66,8 +64,7 @@ export default function ProductManagement() {
     setEditingId(product.id);
     setFormData({
       name: product.name,
-      slug: product.slug,
-      description: product.description,
+      description: product.description || '',
       price: Number(product.price),
       stock: product.stock || 0,
       category: product.category || 'flower',
@@ -76,7 +73,7 @@ export default function ProductManagement() {
       cbg_percent: Number(product.cbg_percent) || 0,
       thc_x_percent: Number(product.thc_x_percent) || 0,
       flavor_profile: product.flavor_profile || '',
-      effects: product.effects || '',
+      effects: Array.isArray(product.effects) ? product.effects.join(', ') : (product.effects || ''),
       image_url: product.image_url || '',
       featured: product.featured || false,
       gram_options: (product.gram_options as number[]) || [1, 3, 5, 10],
@@ -186,17 +183,6 @@ export default function ProductManagement() {
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 bg-black/50 border border-emerald-500/20 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Slug (URL)</label>
-              <input
-                type="text"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                 className="w-full px-4 py-2 bg-black/50 border border-emerald-500/20 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
                 required
               />
@@ -381,7 +367,7 @@ export default function ProductManagement() {
                     )}
                     <div>
                       <p className="text-white font-semibold">{product.name}</p>
-                      <p className="text-sm text-gray-400">{product.slug}</p>
+                      <p className="text-sm text-gray-400">{product.category || 'N/A'}</p>
                     </div>
                   </div>
                 </td>
