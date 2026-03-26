@@ -18,19 +18,6 @@ interface Product {
   meta_catalog_id?: string;
 }
 
-interface CatalogItem {
-  id: string;
-  title: string;
-  description: string;
-  availability: "in stock" | "out of stock";
-  condition: "new";
-  price: string;
-  link: string;
-  image_link: string;
-  brand: string;
-  google_product_category?: string;
-}
-
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -80,7 +67,30 @@ Deno.serve(async (req: Request) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    const { action } = await req.json();
+    const body = await req.json();
+    const { action } = body;
+
+    // First, verify the catalog exists and we have access
+    const verifyUrl = `https://graph.facebook.com/v18.0/${FACEBOOK_CATALOG_ID}?access_token=${FACEBOOK_ACCESS_TOKEN}`;
+    const verifyResponse = await fetch(verifyUrl);
+    const verifyResult = await verifyResponse.json();
+
+    if (!verifyResponse.ok) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: `Cannot access catalog ${FACEBOOK_CATALOG_ID}. Please verify: 1) Catalog ID is correct, 2) Access token has catalog_management permission, 3) You have access to this catalog.`,
+          details: verifyResult,
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
 
     // Fetch all products from database
     const { data: products, error: dbError } = await supabase
@@ -109,7 +119,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Convert products to Facebook catalog format
-    const catalogItems: CatalogItem[] = products.map((product: Product) => ({
+    const catalogItems = products.map((product: Product) => ({
       id: product.meta_catalog_id || product.id,
       title: product.name,
       description: product.description || product.name,
@@ -119,7 +129,6 @@ Deno.serve(async (req: Request) => {
       link: `${SITE_URL}/products/${product.id}`,
       image_link: product.image_url || `${SITE_URL}/placeholder.jpg`,
       brand: "Botanika",
-      google_product_category: "Health & Beauty > Personal Care > Cosmetics",
     }));
 
     const results = {
@@ -130,16 +139,15 @@ Deno.serve(async (req: Request) => {
     };
 
     if (action === "sync" || action === "create") {
-      // Sync/Create products in Facebook catalog
-      for (const item of catalogItems) {
-        try {
-          const apiUrl = `https://graph.facebook.com/v18.0/${FACEBOOK_CATALOG_ID}/products`;
+      // Use batch API to sync products
+      const batch_requests = catalogItems.map((item) => {
+        const product = products.find((p: Product) => p.id === item.id || p.meta_catalog_id === item.id);
+        const priceInCents = Math.round(Number(product?.price || 0) * 100);
 
-          const product = products.find((p: Product) => p.id === item.id || p.meta_catalog_id === item.id);
-          const priceInCents = Math.round(Number(product?.price || 0) * 100);
-
-          const catalogData = {
-            retailer_id: item.id,
+        return {
+          method: "UPDATE",
+          retailer_id: item.id,
+          data: {
             name: item.title,
             description: item.description,
             availability: item.availability,
@@ -149,90 +157,127 @@ Deno.serve(async (req: Request) => {
             url: item.link,
             image_url: item.image_link,
             brand: item.brand,
-          };
+          },
+        };
+      });
 
-          const response = await fetch(`${apiUrl}?access_token=${FACEBOOK_ACCESS_TOKEN}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(catalogData),
-          });
+      // Process in batches of 50 (Facebook limit)
+      const batchSize = 50;
+      for (let i = 0; i < batch_requests.length; i += batchSize) {
+        const batch = batch_requests.slice(i, i + batchSize);
 
-          const result = await response.json();
-
-          if (response.ok && result.handles) {
-            results.success++;
-            results.synced_products.push({
-              id: item.id,
-              catalog_id: result.handles[0],
-            });
-
-            // Update meta_catalog_id in database if it was created
-            const product = products.find((p: Product) =>
-              p.meta_catalog_id === item.id || p.id === item.id
-            );
-
-            if (product && !product.meta_catalog_id) {
-              await supabase
-                .from("products")
-                .update({ meta_catalog_id: item.id })
-                .eq("id", product.id);
-            }
-          } else {
-            results.failed++;
-            results.errors.push({
-              id: item.id,
-              error: JSON.stringify(result),
-            });
-          }
-        } catch (error) {
-          results.failed++;
-          results.errors.push({
-            id: item.id,
-            error: error instanceof Error ? error.message : "Unknown error",
-          });
-        }
-      }
-    } else if (action === "delete") {
-      // Delete all products from catalog
-      for (const item of catalogItems) {
         try {
-          const apiUrl = `https://graph.facebook.com/v18.0/${FACEBOOK_CATALOG_ID}/products`;
-
-          const response = await fetch(apiUrl, {
+          const batchUrl = `https://graph.facebook.com/v18.0/${FACEBOOK_CATALOG_ID}/batch`;
+          const response = await fetch(batchUrl, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
               access_token: FACEBOOK_ACCESS_TOKEN,
-              requests: [
-                {
-                  method: "DELETE",
-                  retailer_id: item.id,
-                },
-              ],
+              requests: batch,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.handles) {
+            const handles = result.handles;
+            for (let j = 0; j < batch.length; j++) {
+              const retailer_id = batch[j].retailer_id;
+              const handle = handles[j];
+
+              if (handle) {
+                results.success++;
+                results.synced_products.push({
+                  id: retailer_id,
+                  catalog_id: handle,
+                });
+
+                // Update meta_catalog_id in database
+                const product = products.find((p: Product) =>
+                  p.id === retailer_id || p.meta_catalog_id === retailer_id
+                );
+
+                if (product && !product.meta_catalog_id) {
+                  await supabase
+                    .from("products")
+                    .update({ meta_catalog_id: retailer_id })
+                    .eq("id", product.id);
+                }
+              } else {
+                results.failed++;
+                results.errors.push({
+                  id: retailer_id,
+                  error: "No handle returned from Facebook",
+                });
+              }
+            }
+          } else {
+            // Batch failed
+            for (const req of batch) {
+              results.failed++;
+              results.errors.push({
+                id: req.retailer_id,
+                error: JSON.stringify(result),
+              });
+            }
+          }
+        } catch (error) {
+          for (const req of batch) {
+            results.failed++;
+            results.errors.push({
+              id: req.retailer_id,
+              error: error instanceof Error ? error.message : "Unknown error",
+            });
+          }
+        }
+      }
+    } else if (action === "delete") {
+      // Delete products using batch API
+      const batch_requests = catalogItems.map((item) => ({
+        method: "DELETE",
+        retailer_id: item.id,
+      }));
+
+      const batchSize = 50;
+      for (let i = 0; i < batch_requests.length; i += batchSize) {
+        const batch = batch_requests.slice(i, i + batchSize);
+
+        try {
+          const batchUrl = `https://graph.facebook.com/v18.0/${FACEBOOK_CATALOG_ID}/batch`;
+          const response = await fetch(batchUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              access_token: FACEBOOK_ACCESS_TOKEN,
+              requests: batch,
             }),
           });
 
           const result = await response.json();
 
           if (response.ok) {
-            results.success++;
+            results.success += batch.length;
           } else {
-            results.failed++;
-            results.errors.push({
-              id: item.id,
-              error: JSON.stringify(result),
-            });
+            for (const req of batch) {
+              results.failed++;
+              results.errors.push({
+                id: req.retailer_id,
+                error: JSON.stringify(result),
+              });
+            }
           }
         } catch (error) {
-          results.failed++;
-          results.errors.push({
-            id: item.id,
-            error: error instanceof Error ? error.message : "Unknown error",
-          });
+          for (const req of batch) {
+            results.failed++;
+            results.errors.push({
+              id: req.retailer_id,
+              error: error instanceof Error ? error.message : "Unknown error",
+            });
+          }
         }
       }
     } else if (action === "fetch") {
