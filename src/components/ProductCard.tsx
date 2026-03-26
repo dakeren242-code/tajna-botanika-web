@@ -261,7 +261,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                     backgroundColor: product.glow_color,
                   }}
                 />
-                <span className="relative z-10 flex items-center gap-2 text-black">
+                <span className="relative z-10 flex items-center gap-2 text-white font-black">
                   {added ? (
                     <>
                       <Check className="w-4 h-4" />
