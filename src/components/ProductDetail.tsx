@@ -139,17 +139,26 @@ export default function ProductDetail() {
           </button>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-            <div className="flex items-center justify-center relative">
+            <div className="flex items-center justify-center relative min-h-[600px]">
               <div
-                className="absolute inset-0 rounded-3xl blur-3xl opacity-40"
-                style={{ backgroundColor: product.glow_color }}
+                className="absolute inset-0 rounded-full blur-[120px] opacity-50"
+                style={{
+                  backgroundColor: product.glow_color,
+                  width: '80%',
+                  height: '80%',
+                  margin: 'auto',
+                  top: '0',
+                  bottom: '0',
+                  left: '0',
+                  right: '0'
+                }}
               />
-              <div className="relative overflow-hidden rounded-3xl w-full h-full max-h-[600px]">
+              <div className="relative z-10 flex items-center justify-center w-full h-full">
                 {product.image_url && (
                   <img
                     src={product.image_url}
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    className="w-full max-w-md h-auto object-contain drop-shadow-2xl"
                   />
                 )}
               </div>
@@ -271,7 +280,7 @@ export default function ProductDetail() {
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center pt-4 space-y-6">
+                <div className="flex flex-col items-stretch pt-4 space-y-6">
                   <div className="text-center">
                     <div className="text-gray-400 text-sm mb-2">Celková cena</div>
                     <div className="text-5xl font-black text-white">
@@ -293,25 +302,25 @@ export default function ProductDetail() {
                   <button
                     onClick={handleAddToCart}
                     disabled={(product.stock || 0) === 0}
-                    className="relative px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 overflow-hidden hover:scale-105 group/btn disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="relative w-full px-8 py-5 rounded-full font-bold text-lg transition-all duration-300 overflow-hidden hover:scale-105 group/btn disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     style={{
-                      backgroundColor: added ? '#10b981' : product.color_accent,
-                      boxShadow: (product.stock || 0) > 0 ? `0 0 40px ${product.glow_color}60` : 'none',
+                      backgroundColor: added ? '#10b981' : (product.color_accent || '#ec4899'),
+                      boxShadow: (product.stock || 0) > 0 ? `0 0 40px ${product.glow_color || '#ec4899'}60` : 'none',
                     }}
                   >
                     <div
                       className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-all duration-500 shimmer-effect"
                       style={{
-                        background: `linear-gradient(90deg, transparent, ${product.glow_color}40, transparent)`,
+                        background: `linear-gradient(90deg, transparent, ${product.glow_color || '#ec4899'}40, transparent)`,
                       }}
                     />
                     <div
                       className="absolute -inset-1 rounded-full opacity-0 group-hover/btn:opacity-100 transition-all duration-300 blur-xl"
                       style={{
-                        backgroundColor: product.glow_color,
+                        backgroundColor: product.glow_color || '#ec4899',
                       }}
                     />
-                    <span className="relative z-10 flex items-center gap-3 text-black">
+                    <span className="relative z-10 flex items-center justify-center gap-3 text-white font-black uppercase tracking-wider">
                       {added ? (
                         <>
                           <Check className="w-5 h-5" />
