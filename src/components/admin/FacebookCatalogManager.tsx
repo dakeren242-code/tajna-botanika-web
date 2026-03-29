@@ -4,8 +4,8 @@ import { Facebook, RefreshCw, Upload, Trash2, Download, CheckCircle, AlertCircle
 interface SyncResult {
   success: number;
   failed: number;
-  errors: Array<{ id: string; error: string }>;
-  synced_products: Array<{ id: string; catalog_id: string }>;
+  errors: Array<{ id: string; product_name: string; error: string; rejection_reason?: string }>;
+  synced_products: Array<{ id: string; product_name: string; catalog_id: string }>;
 }
 
 export default function FacebookCatalogManager() {
@@ -38,10 +38,13 @@ export default function FacebookCatalogManager() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to sync catalog');
+        const errorMsg = data.error || 'Failed to sync catalog';
+        const details = data.details ? `\n\nDetails: ${JSON.stringify(data.details, null, 2)}` : '';
+        const troubleshooting = data.troubleshooting ? `\n\nTroubleshooting:\n${data.troubleshooting.join('\n')}` : '';
+        throw new Error(errorMsg + details + troubleshooting);
       }
 
-      if (data.success) {
+      if (data.success !== false) {
         setSyncResult(data.results);
         setLastSync(new Date());
       } else {
@@ -123,14 +126,17 @@ export default function FacebookCatalogManager() {
 
             {syncResult.synced_products.length > 0 && (
               <div className="mt-3">
-                <p className="text-gray-400 text-sm mb-2">Synced Products:</p>
-                <div className="space-y-1 max-h-40 overflow-y-auto">
+                <p className="text-gray-400 text-sm mb-2">Successfully Synced Products:</p>
+                <div className="space-y-1 max-h-60 overflow-y-auto">
                   {syncResult.synced_products.map((product) => (
                     <div
                       key={product.id}
-                      className="text-xs text-gray-500 bg-black/30 px-2 py-1 rounded"
+                      className="text-xs text-gray-300 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded"
                     >
-                      ID: {product.id} → Catalog ID: {product.catalog_id}
+                      <div className="font-semibold text-emerald-400">{product.product_name}</div>
+                      <div className="text-gray-500 mt-1">
+                        Product ID: {product.id} → Catalog ID: {product.catalog_id}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -139,14 +145,23 @@ export default function FacebookCatalogManager() {
 
             {syncResult.errors.length > 0 && (
               <div className="mt-3">
-                <p className="text-red-400 text-sm mb-2">Errors:</p>
-                <div className="space-y-1 max-h-40 overflow-y-auto">
+                <p className="text-red-400 text-sm mb-2 font-semibold">Failed Products ({syncResult.errors.length}):</p>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
                   {syncResult.errors.map((err, idx) => (
                     <div
                       key={idx}
-                      className="text-xs text-red-400 bg-red-500/10 px-2 py-1 rounded"
+                      className="text-xs bg-red-500/10 border border-red-500/20 px-3 py-2 rounded"
                     >
-                      {err.id}: {err.error}
+                      <div className="font-semibold text-red-400">{err.product_name}</div>
+                      <div className="text-gray-500 mt-1">Product ID: {err.id}</div>
+                      {err.rejection_reason && (
+                        <div className="text-red-300 mt-2 font-semibold">
+                          Rejection Reason: {err.rejection_reason}
+                        </div>
+                      )}
+                      <div className="text-red-400 mt-1 text-[11px] font-mono opacity-75">
+                        {err.error}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -158,9 +173,9 @@ export default function FacebookCatalogManager() {
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-            <div>
+            <div className="flex-1">
               <p className="text-red-400 font-semibold">Error</p>
-              <p className="text-red-300 text-sm mt-1">{error}</p>
+              <pre className="text-red-300 text-xs mt-2 whitespace-pre-wrap font-mono">{error}</pre>
             </div>
           </div>
         )}
