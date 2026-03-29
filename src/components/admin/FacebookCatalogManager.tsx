@@ -37,18 +37,28 @@ export default function FacebookCatalogManager() {
 
       const data = await response.json();
 
+      console.log('Sync response:', data);
+
       if (!response.ok) {
         const errorMsg = data.error || 'Failed to sync catalog';
         const details = data.details ? `\n\nDetails: ${JSON.stringify(data.details, null, 2)}` : '';
         const troubleshooting = data.troubleshooting ? `\n\nTroubleshooting:\n${data.troubleshooting.join('\n')}` : '';
-        throw new Error(errorMsg + details + troubleshooting);
+        const stack = data.stack ? `\n\nStack trace:\n${data.stack}` : '';
+        throw new Error(errorMsg + details + troubleshooting + stack);
       }
 
-      if (data.success !== false) {
+      // Check if we have results
+      if (data.results) {
         setSyncResult(data.results);
         setLastSync(new Date());
+
+        // Show success message even if some products failed
+        if (data.results.success > 0) {
+          console.log(`Successfully synced ${data.results.success} products`);
+        }
       } else {
-        throw new Error(data.error || 'Sync failed');
+        // No results object means something went wrong
+        throw new Error(data.error || data.message || `Sync failed. Response: ${JSON.stringify(data)}`);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error occurred');

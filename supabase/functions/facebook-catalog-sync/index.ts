@@ -407,14 +407,20 @@ Deno.serve(async (req: Request) => {
 
     console.log(`✅ Sync completed: ${results.success} success, ${results.failed} failed`);
 
+    const responseData = {
+      success: results.failed === 0,
+      results,
+      total_products: products.length,
+      summary: `Successfully synced ${results.success}/${products.length} products. ${results.failed} failed.`,
+    };
+
+    // Log the full response for debugging
+    console.log('📤 Sending response:', JSON.stringify(responseData, null, 2));
+
     return new Response(
-      JSON.stringify({
-        success: results.failed === 0,
-        results,
-        total_products: products.length,
-        summary: `Successfully synced ${results.success}/${products.length} products. ${results.failed} failed.`,
-      }),
+      JSON.stringify(responseData),
       {
+        status: 200,
         headers: {
           ...corsHeaders,
           "Content-Type": "application/json",
