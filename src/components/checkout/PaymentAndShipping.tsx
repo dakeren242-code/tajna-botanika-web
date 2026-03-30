@@ -77,7 +77,11 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
     <div className="animate-fadeSlideIn">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Způsob platby a doručení</h1>
-        <p className="text-gray-400">Vyplňte kontaktní údaje a vyberte způsob platby a dopravy</p>
+        <p className="text-gray-400 mb-3">Vyplňte kontaktní údaje a vyberte způsob platby a dopravy</p>
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+          <Check className="w-4 h-4 text-emerald-400" />
+          <p className="text-sm text-emerald-300 font-medium">Registrace není nutná - můžete objednat jako host</p>
+        </div>
       </div>
 
       <div className="space-y-6">

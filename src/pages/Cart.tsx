@@ -17,10 +17,6 @@ export default function Cart() {
   const freeShippingProgress = Math.min((totalPrice / FREE_SHIPPING_THRESHOLD) * 100, 100);
 
   const handleCheckout = () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
     navigate('/checkout');
   };
 
@@ -188,8 +184,8 @@ export default function Cart() {
               </button>
 
               {!user && (
-                <p className="text-sm text-gray-400 text-center mt-4">
-                  Pro dokončení objednávky se musíte přihlásit
+                <p className="text-sm text-emerald-300 text-center mt-4">
+                  Můžete nakupovat bez registrace
                 </p>
               )}
             </div>
