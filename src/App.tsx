@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { PerformanceProvider } from './contexts/PerformanceContext';
+import { ConsentProvider } from './contexts/ConsentContext';
 import { useTracking, trackPageView } from './hooks/useTracking';
 import CustomCursor from './components/CustomCursor';
 import ParticleBackground from './components/ParticleBackground';
@@ -38,6 +39,7 @@ const OrderHistory = lazy(() => import('./pages/OrderHistory'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const CookieBanner = lazy(() => import('./components/CookieBanner'));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen bg-black">
@@ -174,37 +176,42 @@ function TrackingWrapper({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <PerformanceProvider>
-      <AuthProvider>
-        <CartProvider>
-          <Router>
-            <TrackingWrapper>
-              <Header />
-              <Suspense fallback={null}>
-                <LiveNotifications />
-              </Suspense>
-              <Suspense fallback={<LoadingSpinner />}>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/product/:slug" element={<ProductDetail />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/success" element={<Success />} />
-                  <Route path="/paymentok" element={<PaymentOk />} />
-                  <Route path="/paymenterr" element={<PaymentErr />} />
-                  <Route path="/orders" element={<OrderHistory />} />
-                  <Route path="/orders/:orderId" element={<OrderDetail />} />
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                </Routes>
-              </Suspense>
-            </TrackingWrapper>
-          </Router>
-        </CartProvider>
-      </AuthProvider>
+      <ConsentProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Router>
+              <TrackingWrapper>
+                <Header />
+                <Suspense fallback={null}>
+                  <LiveNotifications />
+                </Suspense>
+                <Suspense fallback={<LoadingSpinner />}>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/product/:slug" element={<ProductDetail />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/success" element={<Success />} />
+                    <Route path="/paymentok" element={<PaymentOk />} />
+                    <Route path="/paymenterr" element={<PaymentErr />} />
+                    <Route path="/orders" element={<OrderHistory />} />
+                    <Route path="/orders/:orderId" element={<OrderDetail />} />
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                  </Routes>
+                </Suspense>
+                <Suspense fallback={null}>
+                  <CookieBanner />
+                </Suspense>
+              </TrackingWrapper>
+            </Router>
+          </CartProvider>
+        </AuthProvider>
+      </ConsentProvider>
     </PerformanceProvider>
   );
 }

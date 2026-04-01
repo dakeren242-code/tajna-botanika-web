@@ -1,7 +1,9 @@
 import { Sparkles, Instagram, Twitter, Mail } from 'lucide-react';
+import { useConsent } from '../contexts/ConsentContext';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const { resetConsent } = useConsent();
 
   return (
     <footer className="relative py-16 px-6 overflow-hidden">
@@ -97,6 +99,13 @@ export default function Footer() {
               >
                 Obchodní podmínky
               </a>
+              <button
+                onClick={resetConsent}
+                data-cursor-hover
+                className="text-gray-500 hover:text-yellow-400 text-sm transition-colors duration-300"
+              >
+                Nastavení cookies
+              </button>
             </div>
           </div>
         </div>

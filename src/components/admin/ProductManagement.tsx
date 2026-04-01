@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase, Product } from '../../lib/supabase';
-import { Plus, CreditCard as Edit2, Trash2, Save, X, Package } from 'lucide-react';
+import { Plus, CreditCard as Edit2, Trash2, Save, X, Package, Upload, Image as ImageIcon } from 'lucide-react';
 
 interface ProductFormData {
   name: string;
@@ -43,6 +43,38 @@ export default function ProductManagement() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState<ProductFormData>(defaultFormData);
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setError('');
+
+    try {
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      const fileName = `${Date.now()}-${formData.name.toLowerCase().replace(/\s+/g, '-')}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
+
+      setFormData({ ...formData, image_url: publicUrl });
+    } catch (err: any) {
+      setError(err.message || 'Chyba při nahrávání obrázku');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   useEffect(() => {
     loadProducts();
@@ -242,13 +274,52 @@ export default function ProductManagement() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">URL obrázku</label>
-              <input
-                type="text"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                className="w-full px-4 py-2 bg-black/50 border border-emerald-500/20 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
-              />
+              <label className="block text-sm font-medium text-gray-300 mb-2">Obrázek produktu</label>
+              <div className="space-y-3">
+                {formData.image_url && (
+                  <div className="relative w-24 h-24">
+                    <img
+                      src={formData.image_url}
+                      alt="Náhled"
+                      className="w-24 h-24 rounded-lg object-cover border border-emerald-500/20"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, image_url: '' })}
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-3 px-4 py-3 bg-black/50 border border-dashed border-emerald-500/30 rounded-lg cursor-pointer hover:border-emerald-500/60 transition-colors"
+                >
+                  {uploading ? (
+                    <div className="animate-spin w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full" />
+                  ) : (
+                    <Upload className="w-5 h-5 text-emerald-400" />
+                  )}
+                  <span className="text-gray-400 text-sm">
+                    {uploading ? 'Nahrávání...' : 'Klikněte pro nahrání obrázku'}
+                  </span>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <input
+                  type="text"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  placeholder="nebo vložte URL obrázku"
+                  className="w-full px-4 py-2 bg-black/50 border border-emerald-500/20 rounded-lg text-white text-sm focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
             </div>
 
             <div>

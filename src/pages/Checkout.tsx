@@ -159,6 +159,14 @@ export default function Checkout() {
           id: item.product.id,
           quantity: item.quantity,
         })),
+        user_email: customerData.email,
+        user_phone: customerData.phone,
+        user_first_name: customerData.firstName,
+        user_last_name: customerData.lastName,
+        user_city: customerData.city,
+        user_zip: customerData.zip,
+        user_country: 'cz',
+        user_id: user?.id,
       });
 
       clearCart();

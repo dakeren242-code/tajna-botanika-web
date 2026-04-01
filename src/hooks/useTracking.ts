@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { getConsentState, type ConsentState } from '../contexts/ConsentContext';
 
 interface TrackingEvent {
   value?: number;
@@ -10,12 +11,20 @@ interface TrackingEvent {
   num_items?: number;
   transaction_id?: string;
   search_string?: string;
+  user_email?: string;
+  user_phone?: string;
+  user_first_name?: string;
+  user_last_name?: string;
+  user_city?: string;
+  user_zip?: string;
+  user_country?: string;
+  user_id?: string;
   [key: string]: any;
 }
 
 declare global {
   interface Window {
-    fbq?: (action: string, event: string, data?: any) => void;
+    fbq?: (action: string, event: string, data?: any, options?: any) => void;
     gtag?: (...args: any[]) => void;
     ttq?: {
       track: (event: string, data?: any) => void;
@@ -112,12 +121,13 @@ function isValidEventData(eventName: string, data?: TrackingEvent): boolean {
   return true;
 }
 
-export function initializeTracking() {
+export function initializeTracking(consent?: ConsentState) {
+  const effectiveConsent = consent || getConsentState();
   const fbPixelId = import.meta.env.VITE_FB_PIXEL_ID;
   const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
   const tiktokPixelId = import.meta.env.VITE_TIKTOK_PIXEL_ID;
 
-  if (fbPixelId && !window.fbq) {
+  if (effectiveConsent.marketing && fbPixelId && !window.fbq) {
     (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
       if (f.fbq) return;
       n = f.fbq = function() {
@@ -139,7 +149,7 @@ export function initializeTracking() {
     window.fbq!('track', 'PageView');
   }
 
-  if (gaId && !window.gtag) {
+  if (effectiveConsent.analytics && gaId && !window.gtag) {
     const script = document.createElement('script');
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
@@ -153,7 +163,7 @@ export function initializeTracking() {
     window.gtag('config', gaId);
   }
 
-  if (tiktokPixelId && !window.ttq) {
+  if (effectiveConsent.marketing && tiktokPixelId && !window.ttq) {
     (function(w: any, d: any, t: any) {
       w.TiktokAnalyticsObject = t;
       const ttq = (w[t] = w[t] || []);
@@ -206,12 +216,17 @@ export function initializeTracking() {
   }
 }
 
-async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent) {
+function generateEventId(eventName: string): string {
+  return `${eventName}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, eventId?: string) {
   try {
     const capiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/facebook-capi`;
 
     const payload = {
       event_name: eventName,
+      event_id: eventId,
       event_source_url: window.location.href,
       custom_data: {
         currency: data?.currency || 'CZK',
@@ -225,6 +240,14 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent) {
       user_data: {
         fbp: getCookie('_fbp'),
         fbc: getCookie('_fbc'),
+        em: data?.user_email,
+        ph: data?.user_phone,
+        fn: data?.user_first_name,
+        ln: data?.user_last_name,
+        ct: data?.user_city,
+        zp: data?.user_zip,
+        country: data?.user_country,
+        external_id: data?.user_id,
       },
     };
 
@@ -249,6 +272,8 @@ function getCookie(name: string): string | undefined {
 }
 
 export function trackEvent(eventName: string, data?: TrackingEvent) {
+  const consent = getConsentState();
+
   if (isDuplicate(eventName, data)) {
     return;
   }
@@ -257,20 +282,22 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
     return;
   }
 
-  if (window.fbq) {
-    window.fbq('track', eventName, data);
+  const eventId = generateEventId(eventName);
+
+  if (consent.marketing && window.fbq) {
+    window.fbq('track', eventName, data, { eventID: eventId });
   }
 
-  if (window.gtag) {
+  if (consent.analytics && window.gtag) {
     window.gtag('event', eventName, data);
   }
 
-  if (window.ttq) {
+  if (consent.marketing && window.ttq) {
     window.ttq.track(eventName, data);
   }
 
-  if (import.meta.env.VITE_FB_PIXEL_ID) {
-    sendToFacebookCAPI(eventName, data);
+  if (consent.marketing && import.meta.env.VITE_FB_PIXEL_ID) {
+    sendToFacebookCAPI(eventName, data, eventId);
   }
 
   if (import.meta.env.DEV) {
@@ -279,17 +306,19 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
 }
 
 export function trackPageView(pagePath?: string) {
-  if (window.fbq) {
+  const consent = getConsentState();
+
+  if (consent.marketing && window.fbq) {
     window.fbq('track', 'PageView');
   }
 
-  if (window.gtag && pagePath) {
+  if (consent.analytics && window.gtag && pagePath) {
     window.gtag('config', import.meta.env.VITE_GA_MEASUREMENT_ID, {
       page_path: pagePath,
     });
   }
 
-  if (window.ttq) {
+  if (consent.marketing && window.ttq) {
     window.ttq.page();
   }
 
@@ -300,7 +329,8 @@ export function trackPageView(pagePath?: string) {
 
 export function useTracking() {
   useEffect(() => {
-    initializeTracking();
+    const consent = getConsentState();
+    initializeTracking(consent);
   }, []);
 
   return {
