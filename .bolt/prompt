@@ -3,3 +3,28 @@ For all designs I ask you to make, have them be beautiful, not cookie cutter. Ma
 By default, this template supports JSX syntax with Tailwind CSS classes, React hooks, and Lucide React for icons. Do not install other packages for UI themes, icons, etc unless absolutely necessary or I request them.
 
 Use icons from lucide-react for logos.
+
+## Tracking & GDPR Consent
+
+This project has a GDPR cookie consent system. All tracking pixels (Facebook, Google Analytics, TikTok) are gated behind user consent via ConsentContext.
+
+CRITICAL RULES:
+- NEVER load or fire tracking pixels without checking consent state first
+- NEVER call window.fbq, window.gtag, or window.ttq directly — always use trackEvent() from src/hooks/useTracking.ts
+- The useTracking hook checks ConsentContext before firing any event
+- Facebook Conversion API (CAPI) is sent server-side via Supabase edge function (supabase/functions/facebook-capi/) — do not bypass this
+
+## Cookie Consent Components
+- src/contexts/ConsentContext.tsx — manages consent state (necessary/analytics/marketing)
+- src/components/CookieBanner.tsx — GDPR banner UI
+- Consent is persisted in localStorage key 'cookie_consent'
+- Footer contains a button to re-open cookie preferences via resetConsent()
+
+## Supabase Edge Functions
+
+Three edge functions exist in supabase/functions/:
+- facebook-capi — server-side Facebook event tracking with SHA-256 hashed PII
+- facebook-catalog-sync — syncs products to Facebook Commerce catalog
+- pays-webhook — payment gateway webhook with HMAC-MD5 verification
+
+Do not modify edge functions unless explicitly asked.

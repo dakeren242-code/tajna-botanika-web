@@ -10,6 +10,7 @@ const corsHeaders = {
 interface Product {
   id: string;
   name: string;
+  slug: string;
   description: string;
   price: number;
   image_url: string;
@@ -171,7 +172,7 @@ Deno.serve(async (req: Request) => {
             condition: "new",
             price: priceInCents,
             currency: "CZK",
-            url: `${SITE_URL}/products/${product.id}`,
+            url: `${SITE_URL}/product/${product.slug || product.id}`,
             image_url: product.image_url || `${SITE_URL}/placeholder.jpg`,
             brand: "Botanika",
           },

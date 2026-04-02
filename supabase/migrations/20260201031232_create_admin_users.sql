@@ -15,6 +15,9 @@
   The passwords are hashed automatically by Supabase's auth system.
 */
 
+-- Enable pgcrypto for gen_salt/crypt
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
+
 -- Create admin user: nikiasek
 DO $$
 DECLARE
@@ -47,7 +50,7 @@ BEGIN
       'authenticated',
       'authenticated',
       'nikiasek@botanika.cz',
-      crypt('Nekopara#123', gen_salt('bf')),
+      extensions.crypt('Nekopara#123', extensions.gen_salt('bf')),
       now(),
       '{"provider":"email","providers":["email"]}',
       '{"full_name":"Nikiasek Admin"}',
@@ -103,7 +106,7 @@ BEGIN
       'authenticated',
       'authenticated',
       'administrator@botanika.cz',
-      crypt('Admin2026!Botanika', gen_salt('bf')),
+      extensions.crypt('Admin2026!Botanika', extensions.gen_salt('bf')),
       now(),
       '{"provider":"email","providers":["email"]}',
       '{"full_name":"Administrator","note":"Generated password: Admin2026!Botanika"}',

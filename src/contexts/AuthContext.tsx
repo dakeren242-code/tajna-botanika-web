@@ -47,8 +47,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const checkAdminStatus = useCallback(async (userId: string) => {
     const { data } = await supabase
       .from('admin_users')
-      .select('id')
-      .eq('id', userId)
+      .select('user_id')
+      .eq('user_id', userId)
       .maybeSingle();
 
     setIsAdmin(!!data);

@@ -15,8 +15,15 @@
 DROP POLICY IF EXISTS "Admins can view admin users" ON admin_users;
 
 -- Create a new policy that allows users to check their own admin status
-CREATE POLICY "Users can check their own admin status"
-  ON admin_users
-  FOR SELECT
-  TO authenticated
-  USING (auth.uid() = id);
+-- Handle both schemas: 'id' (setup_complete_schema_v2) or 'user_id' (earlier migration)
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'admin_users' AND column_name = 'user_id') THEN
+    CREATE POLICY "Users can check their own admin status"
+      ON admin_users FOR SELECT TO authenticated
+      USING (auth.uid() = user_id);
+  ELSE
+    CREATE POLICY "Users can check their own admin status"
+      ON admin_users FOR SELECT TO authenticated
+      USING (auth.uid() = id);
+  END IF;
+END $$;

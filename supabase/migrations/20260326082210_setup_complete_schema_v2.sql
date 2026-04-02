@@ -68,6 +68,9 @@ CREATE TABLE IF NOT EXISTS product_variants (
   created_at timestamptz DEFAULT now()
 );
 
+-- Add sku column if it doesn't exist (table may have been created by earlier migration without it)
+ALTER TABLE product_variants ADD COLUMN IF NOT EXISTS sku text UNIQUE;
+
 CREATE INDEX IF NOT EXISTS idx_product_variants_product_id ON product_variants(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_variants_sku ON product_variants(sku);
 
@@ -85,6 +88,12 @@ CREATE TABLE IF NOT EXISTS payment_methods (
   created_at timestamptz DEFAULT now()
 );
 
+-- Ensure columns exist (table may have been created by earlier migration with different schema)
+ALTER TABLE payment_methods ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE payment_methods ADD COLUMN IF NOT EXISTS code text UNIQUE;
+ALTER TABLE payment_methods ADD COLUMN IF NOT EXISTS description text;
+ALTER TABLE payment_methods ADD COLUMN IF NOT EXISTS enabled boolean DEFAULT true;
+
 ALTER TABLE payment_methods ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Anyone can view payment methods" ON payment_methods;
@@ -99,6 +108,13 @@ CREATE TABLE IF NOT EXISTS shipping_methods (
   enabled boolean DEFAULT true,
   created_at timestamptz DEFAULT now()
 );
+
+-- Ensure columns exist (table may have been created by earlier migration with different schema)
+ALTER TABLE shipping_methods ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE shipping_methods ADD COLUMN IF NOT EXISTS code text UNIQUE;
+ALTER TABLE shipping_methods ADD COLUMN IF NOT EXISTS description text;
+ALTER TABLE shipping_methods ADD COLUMN IF NOT EXISTS price decimal(10,2) DEFAULT 0;
+ALTER TABLE shipping_methods ADD COLUMN IF NOT EXISTS enabled boolean DEFAULT true;
 
 ALTER TABLE shipping_methods ENABLE ROW LEVEL SECURITY;
 
@@ -193,13 +209,27 @@ CREATE TABLE IF NOT EXISTS cart_items (
   updated_at timestamptz DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_cart_items_user_id ON cart_items(user_id);
-CREATE INDEX IF NOT EXISTS idx_cart_items_session_id ON cart_items(session_id);
+-- Ensure columns exist (table may have been created by earlier migration with different schema)
+ALTER TABLE cart_items ADD COLUMN IF NOT EXISTS user_id uuid;
+ALTER TABLE cart_items ADD COLUMN IF NOT EXISTS session_id text;
+ALTER TABLE cart_items ADD COLUMN IF NOT EXISTS product_variant_id uuid;
+
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_cart_items_user_id ON cart_items(user_id);
+EXCEPTION WHEN undefined_column THEN NULL;
+END $$;
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_cart_items_session_id ON cart_items(session_id);
+EXCEPTION WHEN undefined_column THEN NULL;
+END $$;
 
 ALTER TABLE cart_items ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can manage own cart" ON cart_items;
-CREATE POLICY "Users can manage own cart" ON cart_items FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DO $$ BEGIN
+  CREATE POLICY "Users can manage own cart" ON cart_items FOR ALL TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+EXCEPTION WHEN undefined_column THEN NULL;
+END $$;
 
 CREATE TABLE IF NOT EXISTS payment_transactions (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -214,19 +244,35 @@ CREATE TABLE IF NOT EXISTS payment_transactions (
   completed_at timestamptz
 );
 
-CREATE INDEX IF NOT EXISTS idx_payment_transactions_order_id ON payment_transactions(order_id);
-CREATE INDEX IF NOT EXISTS idx_payment_transactions_transaction_id ON payment_transactions(transaction_id);
+ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS transaction_id text;
+ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS payment_method_code text;
+ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS amount decimal(10,2);
+ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS currency text DEFAULT 'CZK';
+ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS metadata jsonb;
+ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS completed_at timestamptz;
+
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_payment_transactions_order_id ON payment_transactions(order_id);
+EXCEPTION WHEN undefined_column THEN NULL;
+END $$;
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_payment_transactions_transaction_id ON payment_transactions(transaction_id);
+EXCEPTION WHEN undefined_column THEN NULL;
+END $$;
 
 ALTER TABLE payment_transactions ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can view own payment transactions" ON payment_transactions;
-CREATE POLICY "Users can view own payment transactions" ON payment_transactions FOR SELECT TO authenticated USING (
-  EXISTS (
-    SELECT 1 FROM orders
-    WHERE orders.id = payment_transactions.order_id
-    AND orders.user_id = auth.uid()
-  )
-);
+DO $$ BEGIN
+  CREATE POLICY "Users can view own payment transactions" ON payment_transactions FOR SELECT TO authenticated USING (
+    EXISTS (
+      SELECT 1 FROM orders
+      WHERE orders.id = payment_transactions.order_id
+      AND orders.user_id = auth.uid()
+    )
+  );
+EXCEPTION WHEN undefined_column THEN NULL;
+END $$;
 
 CREATE TABLE IF NOT EXISTS email_subscribers (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -253,97 +299,41 @@ CREATE INDEX IF NOT EXISTS idx_admin_users_role ON admin_users(role);
 ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Admins can view admin users" ON admin_users;
-CREATE POLICY "Admins can view admin users" ON admin_users FOR SELECT TO authenticated USING (
-  EXISTS (
-    SELECT 1 FROM admin_users WHERE admin_users.id = auth.uid()
-  )
-);
+-- Use COALESCE to handle both schemas: id (this migration) or user_id (earlier migration)
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'admin_users' AND column_name = 'user_id') THEN
+    CREATE POLICY "Admins can view admin users" ON admin_users FOR SELECT TO authenticated USING (
+      EXISTS (SELECT 1 FROM admin_users au WHERE au.user_id = auth.uid())
+    );
+  ELSE
+    CREATE POLICY "Admins can view admin users" ON admin_users FOR SELECT TO authenticated USING (
+      EXISTS (SELECT 1 FROM admin_users au WHERE au.id = auth.uid())
+    );
+  END IF;
+END $$;
 
-INSERT INTO payment_methods (name, code, description, enabled)
-VALUES
-  ('Online card payment', 'card', 'Pay securely with your credit or debit card', true),
-  ('Bank transfer', 'bank_transfer', 'Direct bank transfer', true)
-ON CONFLICT (code) DO NOTHING;
+-- Skip seed inserts if tables already have data from earlier migrations
+DO $$ BEGIN
+  INSERT INTO payment_methods (name, code, description, enabled)
+  VALUES
+    ('Online card payment', 'card', 'Pay securely with your credit or debit card', true),
+    ('Bank transfer', 'bank_transfer', 'Direct bank transfer', true)
+  ON CONFLICT (code) DO NOTHING;
+EXCEPTION WHEN not_null_violation OR undefined_column THEN NULL;
+END $$;
 
-INSERT INTO shipping_methods (name, code, description, price, enabled)
-VALUES
-  ('PPL', 'ppl', 'PPL courier delivery', 99, true),
-  ('Zásilkovna', 'packeta', 'Pick up at Zásilkovna point', 49, true),
-  ('Czech Post', 'czech_post', 'Standard postal delivery', 79, true)
-ON CONFLICT (code) DO NOTHING;
+DO $$ BEGIN
+  INSERT INTO shipping_methods (name, code, description, price, enabled)
+  VALUES
+    ('PPL', 'ppl', 'PPL courier delivery', 99, true),
+    ('Zásilkovna', 'packeta', 'Pick up at Zásilkovna point', 49, true),
+    ('Czech Post', 'czech_post', 'Standard postal delivery', 79, true)
+  ON CONFLICT (code) DO NOTHING;
+EXCEPTION WHEN not_null_violation OR undefined_column THEN NULL;
+END $$;
 
-INSERT INTO products (name, description, price, image_url, category, stock_quantity, thc_content, cbd_content, effects, featured)
-VALUES
-  (
-    'CBD Oil 10%',
-    'Premium quality CBD oil with 10% concentration. Perfect for daily wellness and relaxation.',
-    1990,
-    'https://images.pexels.com/photos/6667767/pexels-photo-6667767.jpeg',
-    'CBD Oils',
-    50,
-    0.2,
-    10.0,
-    ARRAY['relaxation', 'wellness', 'sleep'],
-    true
-  ),
-  (
-    'CBD Gummies 25mg',
-    'Delicious CBD-infused gummies. Each gummy contains 25mg of premium CBD.',
-    599,
-    'https://images.pexels.com/photos/6667772/pexels-photo-6667772.jpeg',
-    'Edibles',
-    100,
-    0,
-    25.0,
-    ARRAY['relaxation', 'stress relief'],
-    true
-  ),
-  (
-    'Hemp Flower Premium',
-    'High-quality hemp flower with natural terpenes and cannabinoids.',
-    899,
-    'https://images.pexels.com/photos/7257401/pexels-photo-7257401.jpeg',
-    'Flowers',
-    30,
-    0.3,
-    15.0,
-    ARRAY['relaxation', 'focus'],
-    true
-  ),
-  (
-    'CBD Cream 500mg',
-    'Topical CBD cream for targeted relief. Contains 500mg of CBD per jar.',
-    799,
-    'https://images.pexels.com/photos/6663583/pexels-photo-6663583.jpeg',
-    'Topicals',
-    75,
-    0,
-    500.0,
-    ARRAY['pain relief', 'skin care'],
-    false
-  ),
-  (
-    'CBD Oil 20%',
-    'Extra strength CBD oil with 20% concentration for advanced users.',
-    3490,
-    'https://images.pexels.com/photos/7261419/pexels-photo-7261419.jpeg',
-    'CBD Oils',
-    25,
-    0.2,
-    20.0,
-    ARRAY['relaxation', 'wellness', 'deep sleep'],
-    true
-  ),
-  (
-    'Hemp Tea Relax',
-    'Organic hemp tea blend designed for relaxation and better sleep.',
-    299,
-    'https://images.pexels.com/photos/7257435/pexels-photo-7257435.jpeg',
-    'Beverages',
-    150,
-    0,
-    5.0,
-    ARRAY['relaxation', 'sleep', 'calm'],
-    false
-  )
-ON CONFLICT DO NOTHING;
+-- Add stock_quantity if missing (earlier migration may use 'stock' instead)
+ALTER TABLE products ADD COLUMN IF NOT EXISTS stock_quantity integer DEFAULT 0;
+
+-- Product seed data skipped here — products will be inserted via a separate seed migration
+-- to match the actual Tajna Botanika product catalog

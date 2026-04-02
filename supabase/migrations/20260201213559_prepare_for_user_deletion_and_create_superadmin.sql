@@ -123,7 +123,7 @@ BEGIN
     'authenticated',
     'authenticated',
     'nikiasek50@gmail.com',
-    crypt('Heslo123!', gen_salt('bf')),
+    extensions.crypt('Heslo123!', extensions.gen_salt('bf')),
     now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     '{}'::jsonb,

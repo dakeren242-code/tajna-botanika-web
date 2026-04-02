@@ -52,14 +52,35 @@ function isValidEventData(eventName: string, customData: any): { valid: boolean;
   return { valid: true };
 }
 
+async function hashValue(value: string): Promise<string> {
+  const normalized = value.trim().toLowerCase();
+  const encoder = new TextEncoder();
+  const data = encoder.encode(normalized);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function hashIfPresent(value?: string): Promise<string[] | undefined> {
+  if (!value) return undefined;
+  return [await hashValue(value)];
+}
+
 interface FacebookEvent {
   event_name: string;
   event_time: number;
+  event_id?: string;
   event_source_url: string;
   action_source: string;
   user_data: {
     em?: string[];
     ph?: string[];
+    fn?: string[];
+    ln?: string[];
+    ct?: string[];
+    zp?: string[];
+    country?: string[];
+    external_id?: string[];
     client_ip_address?: string;
     client_user_agent?: string;
     fbc?: string;
@@ -109,7 +130,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { event_name, custom_data, user_data, event_source_url } = await req.json();
+    const { event_name, custom_data, user_data, event_source_url, event_id } = await req.json();
 
     const validation = isValidEventData(event_name, custom_data);
     if (!validation.valid) {
@@ -134,12 +155,22 @@ Deno.serve(async (req: Request) => {
     const fbEvent: FacebookEvent = {
       event_name,
       event_time: eventTime,
+      event_id: event_id || undefined,
       event_source_url: event_source_url || "https://botanika.com",
       action_source: "website",
       user_data: {
         client_ip_address: req.headers.get("x-forwarded-for") || undefined,
         client_user_agent: req.headers.get("user-agent") || undefined,
-        ...user_data,
+        fbp: user_data?.fbp,
+        fbc: user_data?.fbc,
+        em: await hashIfPresent(user_data?.em),
+        ph: await hashIfPresent(user_data?.ph),
+        fn: await hashIfPresent(user_data?.fn),
+        ln: await hashIfPresent(user_data?.ln),
+        ct: await hashIfPresent(user_data?.ct),
+        zp: await hashIfPresent(user_data?.zp),
+        country: await hashIfPresent(user_data?.country),
+        external_id: await hashIfPresent(user_data?.external_id),
       },
       custom_data: custom_data || {},
     };
