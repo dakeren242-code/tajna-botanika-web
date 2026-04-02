@@ -22,7 +22,7 @@ const paymentStatusLabels = {
 };
 
 export default function AdminDashboard() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'catalog'>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
@@ -35,6 +35,8 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
+    if (authLoading) return;
+
     if (!user) {
       navigate('/login');
       return;
@@ -46,7 +48,7 @@ export default function AdminDashboard() {
     }
 
     loadOrders();
-  }, [user, isAdmin, navigate]);
+  }, [user, isAdmin, authLoading, navigate]);
 
   const loadOrders = async () => {
     const { data, error } = await supabase
