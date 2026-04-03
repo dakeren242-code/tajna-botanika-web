@@ -43,7 +43,7 @@ Deno.serve(async (req: Request) => {
     const FACEBOOK_ACCESS_TOKEN = Deno.env.get("FACEBOOK_ACCESS_TOKEN");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const SITE_URL = Deno.env.get("SITE_URL") || "https://lifixfqilzqfkbrzycsg.supabase.co";
+    const SITE_URL = Deno.env.get("SITE_URL") || "https://tajnabotanika.cz";
 
     console.log(`🔍 Config check - Catalog ID: ${FACEBOOK_CATALOG_ID ? 'SET' : 'MISSING'}, Token: ${FACEBOOK_ACCESS_TOKEN ? 'SET' : 'MISSING'}`);
 
@@ -88,7 +88,7 @@ Deno.serve(async (req: Request) => {
 
     // First, verify the catalog exists and we have access
     console.log(`🔍 Verifying catalog access...`);
-    const verifyUrl = `https://graph.facebook.com/v18.0/${FACEBOOK_CATALOG_ID}?fields=id,name,product_count&access_token=${FACEBOOK_ACCESS_TOKEN}`;
+    const verifyUrl = `https://graph.facebook.com/v21.0/${FACEBOOK_CATALOG_ID}?fields=id,name,product_count&access_token=${FACEBOOK_ACCESS_TOKEN}`;
     const verifyResponse = await fetch(verifyUrl);
     const verifyResult = await verifyResponse.json();
 
@@ -186,7 +186,7 @@ Deno.serve(async (req: Request) => {
         console.log(`📤 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(batch_requests.length / batchSize)} (${batch.length} products)`);
 
         try {
-          const batchUrl = `https://graph.facebook.com/v18.0/${FACEBOOK_CATALOG_ID}/batch`;
+          const batchUrl = `https://graph.facebook.com/v21.0/${FACEBOOK_CATALOG_ID}/batch`;
           const response = await fetch(batchUrl, {
             method: "POST",
             headers: {
@@ -306,7 +306,7 @@ Deno.serve(async (req: Request) => {
         const batch = batch_requests.slice(i, i + batchSize);
 
         try {
-          const batchUrl = `https://graph.facebook.com/v18.0/${FACEBOOK_CATALOG_ID}/batch`;
+          const batchUrl = `https://graph.facebook.com/v21.0/${FACEBOOK_CATALOG_ID}/batch`;
           const response = await fetch(batchUrl, {
             method: "POST",
             headers: {
@@ -355,7 +355,7 @@ Deno.serve(async (req: Request) => {
 
       // Fetch products from catalog and update database
       try {
-        const apiUrl = `https://graph.facebook.com/v18.0/${FACEBOOK_CATALOG_ID}/products?fields=id,retailer_id,name,price,availability&access_token=${FACEBOOK_ACCESS_TOKEN}&limit=1000`;
+        const apiUrl = `https://graph.facebook.com/v21.0/${FACEBOOK_CATALOG_ID}/products?fields=id,retailer_id,name,price,availability&access_token=${FACEBOOK_ACCESS_TOKEN}&limit=1000`;
 
         const response = await fetch(apiUrl);
         const result = await response.json();

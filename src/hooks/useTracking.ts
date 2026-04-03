@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { getConsentState, type ConsentState } from '../contexts/ConsentContext';
+import { getConsentState, useConsent, type ConsentState } from '../contexts/ConsentContext';
+import { supabase } from '../lib/supabase';
 
 interface TrackingEvent {
   value?: number;
@@ -33,6 +34,13 @@ declare global {
     _trackingEventCache?: Set<string>;
   }
 }
+
+let cachedUserId: string | undefined;
+
+// Keep user ID cached for EMQ enrichment
+supabase.auth.onAuthStateChange((_event, session) => {
+  cachedUserId = session?.user?.id;
+});
 
 const EVENT_DEDUP_WINDOW = 5000;
 const eventTimestamps = new Map<string, number>();
@@ -222,8 +230,6 @@ function generateEventId(eventName: string): string {
 
 async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, eventId?: string) {
   try {
-    const capiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/facebook-capi`;
-
     const payload = {
       event_name: eventName,
       event_id: eventId,
@@ -251,6 +257,7 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
       },
     };
 
+    const capiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/facebook-capi`;
     await fetch(capiUrl, {
       method: 'POST',
       headers: {
@@ -282,6 +289,12 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
     return;
   }
 
+  // Auto-enrich with logged-in user ID for better EMQ
+  const enrichedData = { ...data };
+  if (!enrichedData.user_id && cachedUserId) {
+    enrichedData.user_id = cachedUserId;
+  }
+
   const eventId = generateEventId(eventName);
 
   if (consent.marketing && window.fbq) {
@@ -297,7 +310,7 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
   }
 
   if (consent.marketing && import.meta.env.VITE_FB_PIXEL_ID) {
-    sendToFacebookCAPI(eventName, data, eventId);
+    sendToFacebookCAPI(eventName, enrichedData, eventId);
   }
 
   if (import.meta.env.DEV) {
@@ -328,10 +341,11 @@ export function trackPageView(pagePath?: string) {
 }
 
 export function useTracking() {
+  const { consent } = useConsent();
+
   useEffect(() => {
-    const consent = getConsentState();
     initializeTracking(consent);
-  }, []);
+  }, [consent]);
 
   return {
     trackEvent,
@@ -379,6 +393,7 @@ export function useTracking() {
     trackLead: (email?: string) => {
       trackEvent('Lead', {
         content_name: 'Newsletter Signup',
+        user_email: email,
       });
     },
   };

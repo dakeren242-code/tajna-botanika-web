@@ -45,8 +45,10 @@ export default function Checkout() {
         id: item.product.id,
         quantity: item.quantity,
       })),
+      user_id: user?.id,
     });
-  }, [items, navigate, totalPrice]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleCompleteOrder = async (paymentMethod: string, shippingMethod: string, customerData: CustomerData) => {
     setError('');

@@ -156,7 +156,7 @@ Deno.serve(async (req: Request) => {
       event_name,
       event_time: eventTime,
       event_id: event_id || undefined,
-      event_source_url: event_source_url || "https://botanika.com",
+      event_source_url: event_source_url || "https://tajnabotanika.cz",
       action_source: "website",
       user_data: {
         client_ip_address: req.headers.get("x-forwarded-for") || undefined,
@@ -175,7 +175,7 @@ Deno.serve(async (req: Request) => {
       custom_data: custom_data || {},
     };
 
-    const apiUrl = `https://graph.facebook.com/v18.0/${FB_PIXEL_ID}/events`;
+    const apiUrl = `https://graph.facebook.com/v21.0/${FB_PIXEL_ID}/events`;
 
     const response = await fetch(apiUrl, {
       method: "POST",
