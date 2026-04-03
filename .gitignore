@@ -21,3 +21,12 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Playwright CLI
+.playwright-cli/
+
+# Screenshots
+*.png
+
+# Supabase temp
+supabase/.temp/
