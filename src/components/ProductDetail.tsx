@@ -33,11 +33,15 @@ export default function ProductDetail() {
       } else {
         setProduct(data);
 
+        const defaultPrice = (() => {
+          const prices: { [key: number]: number } = { 1: 190, 3: 490, 5: 690, 10: 1290 };
+          return prices[1];
+        })();
         trackEvent('ViewContent', {
           content_name: data.name,
           content_ids: [data.id],
           content_type: 'product',
-          value: data.price,
+          value: defaultPrice,
           currency: 'CZK',
         });
 

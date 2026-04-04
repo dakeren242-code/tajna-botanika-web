@@ -102,7 +102,7 @@ function isValidEventData(eventName: string, data?: TrackingEvent): boolean {
   }
 
   if (data.value !== undefined) {
-    if (data.value <= 0 || !isFinite(data.value)) {
+    if (data.value < 0 || !isFinite(data.value)) {
       console.warn(`🚫 Blocked event with invalid value: ${data.value}`, eventName);
       return false;
     }

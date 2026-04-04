@@ -43,7 +43,7 @@ Deno.serve(async (req: Request) => {
     const FACEBOOK_ACCESS_TOKEN = Deno.env.get("FACEBOOK_ACCESS_TOKEN");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const SITE_URL = Deno.env.get("SITE_URL") || "https://tajnabotanika.cz";
+    const SITE_URL = Deno.env.get("SITE_URL") || "https://tajnabotanika.online";
 
     console.log(`🔍 Config check - Catalog ID: ${FACEBOOK_CATALOG_ID ? 'SET' : 'MISSING'}, Token: ${FACEBOOK_ACCESS_TOKEN ? 'SET' : 'MISSING'}`);
 
