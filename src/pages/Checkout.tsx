@@ -46,6 +46,7 @@ export default function Checkout() {
         quantity: item.quantity,
       })),
       user_id: user?.id,
+      user_email: user?.email,
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

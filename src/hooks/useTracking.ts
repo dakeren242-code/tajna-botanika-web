@@ -36,10 +36,12 @@ declare global {
 }
 
 let cachedUserId: string | undefined;
+let cachedUserEmail: string | undefined;
 
-// Keep user ID cached for EMQ enrichment
+// Keep user ID and email cached for EMQ enrichment
 supabase.auth.onAuthStateChange((_event, session) => {
   cachedUserId = session?.user?.id;
+  cachedUserEmail = session?.user?.email;
 });
 
 const EVENT_DEDUP_WINDOW = 5000;
@@ -289,10 +291,13 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
     return;
   }
 
-  // Auto-enrich with logged-in user ID for better EMQ
+  // Auto-enrich with logged-in user ID and email for better EMQ
   const enrichedData = { ...data };
   if (!enrichedData.user_id && cachedUserId) {
     enrichedData.user_id = cachedUserId;
+  }
+  if (!enrichedData.user_email && cachedUserEmail) {
+    enrichedData.user_email = cachedUserEmail;
   }
 
   const eventId = generateEventId(eventName);
