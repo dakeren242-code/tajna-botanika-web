@@ -37,11 +37,47 @@ declare global {
 
 let cachedUserId: string | undefined;
 let cachedUserEmail: string | undefined;
+let cachedUserPhone: string | undefined;
+let cachedUserFirstName: string | undefined;
+let cachedUserLastName: string | undefined;
 
-// Keep user ID and email cached for EMQ enrichment
-supabase.auth.onAuthStateChange((_event, session) => {
+async function cacheUserProfile(userId: string) {
+  const { data } = await supabase
+    .from('user_profiles')
+    .select('full_name, phone')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (data) {
+    const nameParts = (data.full_name || '').trim().split(/\s+/);
+    cachedUserFirstName = nameParts[0] || undefined;
+    cachedUserLastName = nameParts.slice(1).join(' ') || undefined;
+    cachedUserPhone = data.phone || undefined;
+  }
+}
+
+// Eagerly load current session on module init to avoid race conditions
+// where the user adds to cart before onAuthStateChange profile fetch completes
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session?.user) {
+    cachedUserId = session.user.id;
+    cachedUserEmail = session.user.email;
+    cacheUserProfile(session.user.id);
+  }
+});
+
+// Keep user data cached for EMQ enrichment
+supabase.auth.onAuthStateChange(async (_event, session) => {
   cachedUserId = session?.user?.id;
   cachedUserEmail = session?.user?.email;
+
+  if (session?.user?.id) {
+    cacheUserProfile(session.user.id);
+  } else {
+    cachedUserPhone = undefined;
+    cachedUserFirstName = undefined;
+    cachedUserLastName = undefined;
+  }
 });
 
 const EVENT_DEDUP_WINDOW = 5000;
@@ -247,7 +283,7 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
       },
       user_data: {
         fbp: getCookie('_fbp'),
-        fbc: getCookie('_fbc'),
+        fbc: getFbc(),
         em: data?.user_email,
         ph: data?.user_phone,
         fn: data?.user_first_name,
@@ -280,6 +316,30 @@ function getCookie(name: string): string | undefined {
   return undefined;
 }
 
+// Capture fbclid from URL and persist it for the session so CAPI always receives fbc
+// even before the Meta Pixel has a chance to set the _fbc cookie.
+let cachedFbc: string | undefined;
+
+(function captureFbclid() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const fbclid = params.get('fbclid');
+    if (fbclid) {
+      // fbc format: fb.1.{timestamp_ms}.{fbclid}
+      cachedFbc = `fb.1.${Date.now()}.${fbclid}`;
+      // Also write the cookie so the pixel and future calls stay in sync
+      const expires = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `_fbc=${cachedFbc}; expires=${expires}; path=/; SameSite=Lax`;
+    }
+  } catch {
+    // Non-browser environment, ignore
+  }
+})();
+
+function getFbc(): string | undefined {
+  return cachedFbc || getCookie('_fbc');
+}
+
 export function trackEvent(eventName: string, data?: TrackingEvent) {
   const consent = getConsentState();
 
@@ -291,14 +351,13 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
     return;
   }
 
-  // Auto-enrich with logged-in user ID and email for better EMQ
+  // Auto-enrich with logged-in user data for better EMQ
   const enrichedData = { ...data };
-  if (!enrichedData.user_id && cachedUserId) {
-    enrichedData.user_id = cachedUserId;
-  }
-  if (!enrichedData.user_email && cachedUserEmail) {
-    enrichedData.user_email = cachedUserEmail;
-  }
+  if (!enrichedData.user_id && cachedUserId) enrichedData.user_id = cachedUserId;
+  if (!enrichedData.user_email && cachedUserEmail) enrichedData.user_email = cachedUserEmail;
+  if (!enrichedData.user_phone && cachedUserPhone) enrichedData.user_phone = cachedUserPhone;
+  if (!enrichedData.user_first_name && cachedUserFirstName) enrichedData.user_first_name = cachedUserFirstName;
+  if (!enrichedData.user_last_name && cachedUserLastName) enrichedData.user_last_name = cachedUserLastName;
 
   const eventId = generateEventId(eventName);
 
@@ -326,8 +385,14 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
 export function trackPageView(pagePath?: string) {
   const consent = getConsentState();
 
-  if (consent.marketing && window.fbq) {
-    window.fbq('track', 'PageView');
+  if (consent.marketing) {
+    const eventId = generateEventId('PageView');
+    if (window.fbq) {
+      window.fbq('track', 'PageView', {}, { eventID: eventId });
+    }
+    if (import.meta.env.VITE_FB_PIXEL_ID) {
+      sendToFacebookCAPI('PageView', {}, eventId);
+    }
   }
 
   if (consent.analytics && window.gtag && pagePath) {
