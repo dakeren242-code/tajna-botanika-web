@@ -152,26 +152,38 @@ Deno.serve(async (req: Request) => {
 
     const eventTime = Math.floor(Date.now() / 1000);
 
+    // Parse first IP from x-forwarded-for (may contain comma-separated list)
+    const rawIp = req.headers.get("x-forwarded-for") ||
+                  req.headers.get("x-real-ip") ||
+                  req.headers.get("cf-connecting-ip");
+    const clientIp = rawIp ? rawIp.split(",")[0].trim() : undefined;
+
+    // Build user_data, stripping undefined/null values so Facebook doesn't reject
+    const rawUserData: Record<string, any> = {
+      client_ip_address: clientIp,
+      client_user_agent: req.headers.get("user-agent") || undefined,
+      fbp: user_data?.fbp || undefined,
+      fbc: user_data?.fbc || undefined,
+      em: await hashIfPresent(user_data?.em),
+      ph: await hashIfPresent(user_data?.ph),
+      fn: await hashIfPresent(user_data?.fn),
+      ln: await hashIfPresent(user_data?.ln),
+      ct: await hashIfPresent(user_data?.ct),
+      zp: await hashIfPresent(user_data?.zp),
+      country: await hashIfPresent(user_data?.country),
+      external_id: await hashIfPresent(user_data?.external_id),
+    };
+    const cleanUserData = Object.fromEntries(
+      Object.entries(rawUserData).filter(([_, v]) => v !== undefined && v !== null)
+    );
+
     const fbEvent: FacebookEvent = {
       event_name,
       event_time: eventTime,
       event_id: event_id || undefined,
       event_source_url: event_source_url || "https://tajnabotanika.cz",
       action_source: "website",
-      user_data: {
-        client_ip_address: req.headers.get("x-forwarded-for") || undefined,
-        client_user_agent: req.headers.get("user-agent") || undefined,
-        fbp: user_data?.fbp,
-        fbc: user_data?.fbc,
-        em: await hashIfPresent(user_data?.em),
-        ph: await hashIfPresent(user_data?.ph),
-        fn: await hashIfPresent(user_data?.fn),
-        ln: await hashIfPresent(user_data?.ln),
-        ct: await hashIfPresent(user_data?.ct),
-        zp: await hashIfPresent(user_data?.zp),
-        country: await hashIfPresent(user_data?.country),
-        external_id: await hashIfPresent(user_data?.external_id),
-      },
+      user_data: cleanUserData as FacebookEvent["user_data"],
       custom_data: custom_data || {},
     };
 
