@@ -29,7 +29,7 @@ function isValidEventData(eventName: string, customData: any): { valid: boolean;
   }
 
   if (customData.value !== undefined && customData.value !== null) {
-    if (customData.value <= 0 || !isFinite(customData.value)) {
+    if (customData.value < 0 || !isFinite(customData.value)) {
       return { valid: false, reason: `Invalid value: ${customData.value}` };
     }
   }
@@ -181,7 +181,7 @@ Deno.serve(async (req: Request) => {
       event_name,
       event_time: eventTime,
       event_id: event_id || undefined,
-      event_source_url: event_source_url || "https://tajnabotanika.cz",
+      event_source_url: event_source_url || "https://tajnabotanika.online",
       action_source: "website",
       user_data: cleanUserData as FacebookEvent["user_data"],
       custom_data: custom_data || {},
