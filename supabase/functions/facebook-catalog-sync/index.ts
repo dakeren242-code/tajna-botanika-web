@@ -160,7 +160,7 @@ Deno.serve(async (req: Request) => {
       // Use batch API to sync products
       const batch_requests: BatchRequest[] = products.map((product: Product) => {
         const priceInCents = Math.round(Number(product.price) * 100);
-        const retailer_id = product.meta_catalog_id || product.id;
+        const retailer_id = product.id; // Always use UUID — this is what's stored in the catalog as retailer_id
 
         return {
           method: "UPDATE",
@@ -202,62 +202,34 @@ Deno.serve(async (req: Request) => {
           console.log(`📥 Batch response:`, JSON.stringify(result).substring(0, 500));
 
           if (response.ok) {
-            // Check if we have handles (successful uploads)
-            if (result.handles && result.handles.length > 0) {
-              for (let j = 0; j < batch.length; j++) {
-                const retailer_id = batch[j].retailer_id;
-                const handle = result.handles[j];
-                const product = products.find((p: Product) =>
-                  p.id === retailer_id || p.meta_catalog_id === retailer_id
-                );
+            // Facebook only returns handles for products whose data actually changed.
+            // Products already up-to-date are silently accepted (no handle, no error).
+            // Treat: has error entry → failed. No error entry → success.
+            const errorMap = new Map((result.errors || []).map(e => [e.retailer_id, e]));
 
-                if (handle && handle !== "") {
-                  results.success++;
-                  results.synced_products.push({
-                    id: retailer_id,
-                    product_name: product?.name || "Unknown",
-                    catalog_id: handle,
-                  });
+            for (let j = 0; j < batch.length; j++) {
+              const retailer_id = batch[j].retailer_id;
+              const handle = result.handles?.[j];
+              const product = products.find((p: Product) => p.id === retailer_id);
+              const errorInfo = errorMap.get(retailer_id);
 
-                  // Update meta_catalog_id in database if needed
-                  if (product && !product.meta_catalog_id) {
-                    await supabase
-                      .from("products")
-                      .update({ meta_catalog_id: retailer_id })
-                      .eq("id", product.id);
-                  }
-                  console.log(`✅ Product synced: ${product?.name} (${retailer_id})`);
-                } else {
-                  results.failed++;
-                  const errorInfo = result.errors?.find(e => e.retailer_id === retailer_id);
-                  results.errors.push({
-                    id: retailer_id,
-                    product_name: product?.name || "Unknown",
-                    error: errorInfo?.error?.message || "No handle returned from Facebook",
-                    rejection_reason: errorInfo?.error?.message,
-                  });
-                  console.log(`❌ Product failed: ${product?.name} (${retailer_id})`);
-                }
-              }
-            }
-
-            // Check for specific errors in response
-            if (result.errors && result.errors.length > 0) {
-              for (const error of result.errors) {
-                const product = products.find((p: Product) =>
-                  p.id === error.retailer_id || p.meta_catalog_id === error.retailer_id
-                );
-
-                if (!results.errors.find(e => e.id === error.retailer_id)) {
-                  results.failed++;
-                  results.errors.push({
-                    id: error.retailer_id,
-                    product_name: product?.name || "Unknown",
-                    error: error.error.message,
-                    rejection_reason: `Code ${error.error.code}: ${error.error.message}`,
-                  });
-                  console.log(`❌ Product error: ${product?.name} - ${error.error.message}`);
-                }
+              if (errorInfo) {
+                results.failed++;
+                results.errors.push({
+                  id: retailer_id,
+                  product_name: product?.name || "Unknown",
+                  error: errorInfo.error?.message || "Facebook rejected this product",
+                  rejection_reason: errorInfo.error?.message,
+                });
+                console.log(`❌ Product failed: ${product?.name} (${retailer_id})`);
+              } else {
+                results.success++;
+                results.synced_products.push({
+                  id: retailer_id,
+                  product_name: product?.name || "Unknown",
+                  catalog_id: handle || "unchanged",
+                });
+                console.log(`✅ Product synced: ${product?.name} (${retailer_id})`);
               }
             }
           } else {
