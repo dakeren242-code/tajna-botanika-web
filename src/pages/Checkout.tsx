@@ -153,6 +153,7 @@ export default function Checkout() {
         }
       }
 
+      const priceMap: Record<string, number> = { '1g': 190, '3g': 490, '5g': 690, '10g': 1290 };
       trackEvent('Purchase', {
         transaction_id: order.id,
         value: finalTotal,
@@ -161,6 +162,7 @@ export default function Checkout() {
         contents: items.map(item => ({
           id: item.product.id,
           quantity: item.quantity,
+          item_price: priceMap[item.gramAmount] || 190,
         })),
         user_email: customerData.email,
         user_phone: customerData.phone,

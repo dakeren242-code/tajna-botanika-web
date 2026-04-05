@@ -40,6 +40,9 @@ let cachedUserEmail: string | undefined;
 let cachedUserPhone: string | undefined;
 let cachedUserFirstName: string | undefined;
 let cachedUserLastName: string | undefined;
+let cachedUserCity: string | undefined;
+let cachedUserZip: string | undefined;
+let cachedUserCountry: string | undefined;
 
 async function cacheUserProfile(userId: string) {
   const { data } = await supabase
@@ -53,6 +56,21 @@ async function cacheUserProfile(userId: string) {
     cachedUserFirstName = nameParts[0] || undefined;
     cachedUserLastName = nameParts.slice(1).join(' ') || undefined;
     cachedUserPhone = data.phone || undefined;
+  }
+
+  // Cache most recent shipping address for better EMQ on non-purchase events
+  const { data: address } = await supabase
+    .from('addresses')
+    .select('city, postal_code, country')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (address) {
+    cachedUserCity = address.city || undefined;
+    cachedUserZip = address.postal_code || undefined;
+    cachedUserCountry = address.country || undefined;
   }
 }
 
@@ -77,6 +95,9 @@ supabase.auth.onAuthStateChange(async (_event, session) => {
     cachedUserPhone = undefined;
     cachedUserFirstName = undefined;
     cachedUserLastName = undefined;
+    cachedUserCity = undefined;
+    cachedUserZip = undefined;
+    cachedUserCountry = undefined;
   }
 });
 
@@ -280,6 +301,7 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
         content_type: data?.content_type,
         contents: data?.contents,
         num_items: data?.num_items,
+        order_id: data?.transaction_id,
       },
       user_data: {
         fbp: getCookie('_fbp'),
@@ -358,6 +380,9 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
   if (!enrichedData.user_phone && cachedUserPhone) enrichedData.user_phone = cachedUserPhone;
   if (!enrichedData.user_first_name && cachedUserFirstName) enrichedData.user_first_name = cachedUserFirstName;
   if (!enrichedData.user_last_name && cachedUserLastName) enrichedData.user_last_name = cachedUserLastName;
+  if (!enrichedData.user_city && cachedUserCity) enrichedData.user_city = cachedUserCity;
+  if (!enrichedData.user_zip && cachedUserZip) enrichedData.user_zip = cachedUserZip;
+  if (!enrichedData.user_country && cachedUserCountry) enrichedData.user_country = cachedUserCountry;
 
   const eventId = generateEventId(eventName);
 
