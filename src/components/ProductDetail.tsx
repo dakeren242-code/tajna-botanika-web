@@ -22,11 +22,16 @@ export default function ProductDetail() {
 
   useEffect(() => {
     const fetchProduct = async () => {
+      // Try slug first, fall back to id (for UUID-based links)
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('id', slug)
-        .maybeSingle();
+        .eq('slug', slug)
+        .maybeSingle()
+        .then(async (res) => {
+          if (res.data) return res;
+          return supabase.from('products').select('*').eq('id', slug).maybeSingle();
+        });
 
       if (error || !data) {
         navigate('/');
