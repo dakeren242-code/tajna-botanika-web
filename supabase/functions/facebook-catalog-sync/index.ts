@@ -15,7 +15,8 @@ interface Product {
   price: number;
   image_url: string;
   category: string;
-  stock_quantity: number;
+  stock_quantity?: number;
+  stock?: number;
   meta_catalog_id?: string;
 }
 
@@ -168,7 +169,7 @@ Deno.serve(async (req: Request) => {
           data: {
             name: product.name,
             description: product.description || product.name,
-            availability: product.stock_quantity > 0 ? "in stock" : "out of stock",
+            availability: ((product.stock ?? product.stock_quantity) ?? 0) > 0 ? "in stock" : "out of stock",
             condition: "new",
             price: priceInCents,
             currency: "CZK",
