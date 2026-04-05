@@ -158,6 +158,8 @@ export default function Checkout() {
         transaction_id: order.id,
         value: finalTotal,
         currency: 'CZK',
+        content_ids: items.map(item => item.product.id),
+        content_type: 'product',
         num_items: items.reduce((sum, item) => sum + item.quantity, 0),
         contents: items.map(item => ({
           id: item.product.id,

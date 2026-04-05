@@ -468,6 +468,8 @@ export function useTracking() {
       trackEvent('InitiateCheckout', {
         value,
         currency: 'CZK',
+        content_ids: contents.map(c => c.id),
+        content_type: 'product',
         num_items: numItems,
         contents,
       });
@@ -477,6 +479,8 @@ export function useTracking() {
         value,
         currency: 'CZK',
         transaction_id: orderId,
+        content_ids: contents.map(c => c.id),
+        content_type: 'product',
         contents,
       });
     },
