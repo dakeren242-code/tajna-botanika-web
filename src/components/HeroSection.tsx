@@ -106,7 +106,7 @@ export default function HeroSection() {
 
       <button
         onClick={scrollToProducts}
-        className="absolute bottom-[-3px] md:bottom-2 left-1/2 -translate-x-1/2 animate-bounce-slow cursor-pointer group z-20"
+        className="absolute bottom-[4px] md:bottom-2 left-1/2 -translate-x-1/2 animate-bounce-slow cursor-pointer group z-20"
         data-cursor-hover
       >
         <div className="flex flex-col items-center gap-2">
