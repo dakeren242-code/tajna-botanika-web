@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase, Order } from '../lib/supabase';
-import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag, Facebook } from 'lucide-react';
+import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag, Facebook, Radio } from 'lucide-react';
 import ProductManagement from '../components/admin/ProductManagement';
 import FacebookCatalogManager from '../components/admin/FacebookCatalogManager';
 
@@ -33,6 +33,7 @@ export default function AdminDashboard() {
     pendingOrders: 0,
     deliveredOrders: 0,
   });
+  const [liveVisitors, setLiveVisitors] = useState(0);
 
   useEffect(() => {
     if (authLoading) return;
@@ -49,6 +50,16 @@ export default function AdminDashboard() {
 
     loadOrders();
   }, [user, isAdmin, authLoading, navigate]);
+
+  useEffect(() => {
+    const ch = supabase.channel('visitors')
+      .on('presence', { event: 'sync' }, () => {
+        const state = ch.presenceState();
+        setLiveVisitors(Object.keys(state).length);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
 
   const loadOrders = async () => {
     const { data, error } = await supabase
@@ -177,6 +188,19 @@ export default function AdminDashboard() {
 
           {activeTab === 'orders' && (
             <>
+              <div className="mb-6 flex items-center gap-4 px-6 py-4 bg-gradient-to-r from-green-500/15 to-emerald-500/10 border border-green-500/30 rounded-xl">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
+                  <Radio className="w-4 h-4 text-green-400" />
+                  <span className="text-green-400 text-xs font-bold uppercase tracking-wider">Live</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-black text-white">{liveVisitors}</span>
+                  <span className="text-gray-400 text-sm">lidí právě na webu</span>
+                </div>
+                <div className="ml-auto text-gray-500 text-xs">Aktualizuje se v reálném čase</div>
+              </div>
+
               <div className="grid md:grid-cols-4 gap-6 mb-8">
             <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl p-6">
               <div className="flex items-center justify-between mb-3">

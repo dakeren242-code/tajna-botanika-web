@@ -11,6 +11,7 @@ import PersistentDecorations from './components/PersistentDecorations';
 import HeroSection from './components/HeroSection';
 import Header from './components/Header';
 import { Loader2 } from 'lucide-react';
+import { supabase } from './lib/supabase';
 
 const TrustBadgesSection = lazy(() => import('./components/TrustBadgesSection'));
 const ProductsSection = lazy(() => import('./components/ProductsSection'));
@@ -183,6 +184,24 @@ function TrackingWrapper({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function VisitorPresenceTracker() {
+  useEffect(() => {
+    let sid = sessionStorage.getItem('vsid');
+    if (!sid) {
+      sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      sessionStorage.setItem('vsid', sid);
+    }
+    const ch = supabase.channel('visitors', { config: { presence: { key: sid } } });
+    ch.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await ch.track({ t: Date.now() });
+      }
+    });
+    return () => { supabase.removeChannel(ch); };
+  }, []);
+  return null;
+}
+
 function App() {
   return (
     <PerformanceProvider>
@@ -193,6 +212,7 @@ function App() {
               <TrackingWrapper>
                 <ScrollToTop />
                 <PageViewTracker />
+                <VisitorPresenceTracker />
                 <GlobalBackground />
                 <PersistentDecorations />
                 <FlyingUFOs />

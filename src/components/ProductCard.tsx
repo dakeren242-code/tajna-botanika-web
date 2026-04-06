@@ -181,7 +181,12 @@ export default function ProductCard({ product, index }: ProductCardProps) {
             {product.effects && (
               <div className="flex items-start gap-2 text-sm">
                 <Zap className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-                <p className="text-gray-400 text-xs"><strong>Profil:</strong> {product.effects}</p>
+                <p className="text-gray-400 text-xs">
+                  <strong>Profil:</strong>{' '}
+                  {Array.isArray(product.effects)
+                    ? product.effects.map(e => String(e).replace(/[{}\[\]"]/g, '').trim()).filter(Boolean).join(', ')
+                    : String(product.effects).replace(/[{}\[\]"]/g, '').trim()}
+                </p>
               </div>
             )}
 
