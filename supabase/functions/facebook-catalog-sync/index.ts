@@ -158,58 +158,13 @@ Deno.serve(async (req: Request) => {
     if (action === "sync" || action === "create") {
       console.log(`🔄 Starting product sync...`);
 
-      // Fetch all items currently in the catalog to find stale ones
-      console.log(`🔍 Fetching existing catalog items to detect stale entries...`);
-      const currentDbIds = new Set(products.map((p: Product) => p.id));
-      const staleRetailerIds: string[] = [];
-      let catalogCursor: string | null = null;
-
-      do {
-        const catalogUrl = `https://graph.facebook.com/v21.0/${FACEBOOK_CATALOG_ID}/products?fields=retailer_id&limit=200&access_token=${FACEBOOK_ACCESS_TOKEN}${catalogCursor ? `&after=${catalogCursor}` : ''}`;
-        const catalogResponse = await fetch(catalogUrl);
-        const catalogResult = await catalogResponse.json();
-
-        if (catalogResponse.ok && catalogResult.data) {
-          for (const item of catalogResult.data) {
-            if (!currentDbIds.has(item.retailer_id)) {
-              staleRetailerIds.push(item.retailer_id);
-            }
-          }
-          catalogCursor = catalogResult.paging?.cursors?.after && catalogResult.paging?.next ? catalogResult.paging.cursors.after : null;
-        } else {
-          console.warn(`⚠️ Could not fetch catalog items for stale check:`, catalogResult);
-          catalogCursor = null;
-        }
-      } while (catalogCursor);
-
-      console.log(`🗑️ Found ${staleRetailerIds.length} stale catalog items to remove`);
-
-      // Delete stale items in batches
-      if (staleRetailerIds.length > 0) {
-        const batchSize = 50;
-        for (let i = 0; i < staleRetailerIds.length; i += batchSize) {
-          const staleBatch: BatchRequest[] = staleRetailerIds.slice(i, i + batchSize).map(rid => ({
-            method: "DELETE",
-            retailer_id: rid,
-          }));
-          const deleteUrl = `https://graph.facebook.com/v21.0/${FACEBOOK_CATALOG_ID}/batch`;
-          const deleteResponse = await fetch(deleteUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ access_token: FACEBOOK_ACCESS_TOKEN, requests: staleBatch }),
-          });
-          const deleteResult = await deleteResponse.json();
-          console.log(`🗑️ Deleted stale batch ${Math.floor(i / batchSize) + 1}: ${JSON.stringify(deleteResult).substring(0, 200)}`);
-        }
-      }
-
-      // Use batch API to sync products — CREATE if not yet in catalog, UPDATE if already there
+      // Use batch API to sync products
       const batch_requests: BatchRequest[] = products.map((product: Product) => {
         const priceInCents = Math.round(Number(product.price) * 100);
-        const retailer_id = product.id;
+        const retailer_id = product.id; // Always use UUID — this is what's stored in the catalog as retailer_id
 
         return {
-          method: "CREATE",
+          method: "UPDATE",
           retailer_id: retailer_id,
           data: {
             name: product.name,
@@ -248,8 +203,10 @@ Deno.serve(async (req: Request) => {
           console.log(`📥 Batch response:`, JSON.stringify(result).substring(0, 500));
 
           if (response.ok) {
+            // Facebook only returns handles for products whose data actually changed.
+            // Products already up-to-date are silently accepted (no handle, no error).
+            // Treat: has error entry → failed. No error entry → success.
             const errorMap = new Map((result.errors || []).map(e => [e.retailer_id, e]));
-            const alreadyExistsIds: string[] = [];
 
             for (let j = 0; j < batch.length; j++) {
               const retailer_id = batch[j].retailer_id;
@@ -258,71 +215,22 @@ Deno.serve(async (req: Request) => {
               const errorInfo = errorMap.get(retailer_id);
 
               if (errorInfo) {
-                // If CREATE failed because item already exists, retry with UPDATE
-                if (errorInfo.error?.message?.toLowerCase().includes('already exists') ||
-                    errorInfo.error?.code === 2200019) {
-                  alreadyExistsIds.push(retailer_id);
-                } else {
-                  results.failed++;
-                  results.errors.push({
-                    id: retailer_id,
-                    product_name: product?.name || "Unknown",
-                    error: errorInfo.error?.message || "Facebook rejected this product",
-                    rejection_reason: errorInfo.error?.message,
-                  });
-                  console.log(`❌ Product failed: ${product?.name} (${retailer_id})`);
-                }
+                results.failed++;
+                results.errors.push({
+                  id: retailer_id,
+                  product_name: product?.name || "Unknown",
+                  error: errorInfo.error?.message || "Facebook rejected this product",
+                  rejection_reason: errorInfo.error?.message,
+                });
+                console.log(`❌ Product failed: ${product?.name} (${retailer_id})`);
               } else {
                 results.success++;
                 results.synced_products.push({
                   id: retailer_id,
                   product_name: product?.name || "Unknown",
-                  catalog_id: handle || "created",
+                  catalog_id: handle || "unchanged",
                 });
                 console.log(`✅ Product synced: ${product?.name} (${retailer_id})`);
-              }
-            }
-
-            // Retry already-existing items with UPDATE
-            if (alreadyExistsIds.length > 0) {
-              console.log(`🔄 Retrying ${alreadyExistsIds.length} existing items with UPDATE...`);
-              const updateBatch: BatchRequest[] = alreadyExistsIds.map(retailer_id => {
-                const product = products.find((p: Product) => p.id === retailer_id)!;
-                const priceInCents = Math.round(Number(product.price) * 100);
-                return {
-                  method: "UPDATE",
-                  retailer_id,
-                  data: {
-                    name: product.name,
-                    description: product.description || product.name,
-                    availability: ((product.stock ?? product.stock_quantity) ?? 0) > 0 ? "in stock" : "out of stock",
-                    condition: "new",
-                    price: priceInCents,
-                    currency: "CZK",
-                    url: `${SITE_URL}/product/${product.slug || product.id}`,
-                    image_url: product.image_url || `${SITE_URL}/placeholder.jpg`,
-                    brand: "Botanika",
-                  },
-                };
-              });
-              const updateResponse = await fetch(`https://graph.facebook.com/v21.0/${FACEBOOK_CATALOG_ID}/batch`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ access_token: FACEBOOK_ACCESS_TOKEN, requests: updateBatch }),
-              });
-              const updateResult: BatchResponse = await updateResponse.json();
-              const updateErrorMap = new Map((updateResult.errors || []).map(e => [e.retailer_id, e]));
-              for (const retailer_id of alreadyExistsIds) {
-                const product = products.find((p: Product) => p.id === retailer_id);
-                const errInfo = updateErrorMap.get(retailer_id);
-                if (errInfo) {
-                  results.failed++;
-                  results.errors.push({ id: retailer_id, product_name: product?.name || "Unknown", error: errInfo.error?.message || "Update failed", rejection_reason: errInfo.error?.message });
-                } else {
-                  results.success++;
-                  results.synced_products.push({ id: retailer_id, product_name: product?.name || "Unknown", catalog_id: "updated" });
-                  console.log(`✅ Product updated: ${product?.name} (${retailer_id})`);
-                }
               }
             }
           } else {

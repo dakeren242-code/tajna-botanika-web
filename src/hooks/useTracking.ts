@@ -74,20 +74,6 @@ async function cacheUserProfile(userId: string) {
   }
 }
 
-// Capture fbclid from URL on first landing so getFbc() can use it even after
-// the user navigates away from the landing page (e.g. on the /paymentok page).
-(function captureFbclid() {
-  try {
-    const fbclid = new URLSearchParams(window.location.search).get('fbclid');
-    if (fbclid && !sessionStorage.getItem('_fbclid')) {
-      sessionStorage.setItem('_fbclid', fbclid);
-      sessionStorage.setItem('_fbclid_ts', String(Date.now()));
-    }
-  } catch {
-    // Non-browser or storage unavailable
-  }
-})();
-
 // Eagerly load current session on module init to avoid race conditions
 // where the user adds to cart before onAuthStateChange profile fetch completes
 supabase.auth.getSession().then(({ data: { session } }) => {
@@ -230,9 +216,7 @@ export function initializeTracking(consent?: ConsentState) {
     })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
     window.fbq!('init', fbPixelId);
-    // Do NOT fire PageView here — App.tsx calls trackPageView() on every route change
-    // (including initial load), which fires both pixel + CAPI with a shared eventID.
-    // Firing it here too would produce a pixel-only PageView with no CAPI counterpart.
+    window.fbq!('track', 'PageView');
   }
 
   if (effectiveConsent.analytics && gaId && !window.gtag && isProduction) {
@@ -371,28 +355,28 @@ function getCookie(name: string): string | undefined {
   return undefined;
 }
 
-function getFbc(): string | undefined {
-  // Always prefer the _fbc cookie — this is set by the Meta Pixel and matches exactly
-  // what the pixel sends with its events, preventing the "modified fbclid" CAPI warning.
-  const cookieFbc = getCookie('_fbc');
-  if (cookieFbc) return cookieFbc;
+// Capture fbclid from URL and persist it for the session so CAPI always receives fbc
+// even before the Meta Pixel has a chance to set the _fbc cookie.
+let cachedFbc: string | undefined;
 
-  // Fallback: build fbc from the fbclid we captured at landing time (sessionStorage).
-  // This covers the common case where the user arrives via a Facebook ad, browses,
-  // accepts cookies partway through, and purchases on a page that no longer has fbclid
-  // in the URL. Using the original landing timestamp keeps the value stable across the session.
+(function captureFbclid() {
   try {
-    const storedFbclid = sessionStorage.getItem('_fbclid');
-    const storedTs = sessionStorage.getItem('_fbclid_ts');
-    if (storedFbclid && storedTs) return `fb.1.${storedTs}.${storedFbclid}`;
-
-    // Last resort: fbclid is still in the current URL (e.g. user landed directly on checkout)
-    const fbclid = new URLSearchParams(window.location.search).get('fbclid');
-    if (fbclid) return `fb.1.${Date.now()}.${fbclid}`;
+    const params = new URLSearchParams(window.location.search);
+    const fbclid = params.get('fbclid');
+    if (fbclid) {
+      // fbc format: fb.1.{timestamp_ms}.{fbclid}
+      cachedFbc = `fb.1.${Date.now()}.${fbclid}`;
+      // Also write the cookie so the pixel and future calls stay in sync
+      const expires = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `_fbc=${cachedFbc}; expires=${expires}; path=/; SameSite=Lax`;
+    }
   } catch {
-    // Non-browser or storage unavailable
+    // Non-browser environment, ignore
   }
-  return undefined;
+})();
+
+function getFbc(): string | undefined {
+  return cachedFbc || getCookie('_fbc');
 }
 
 export function trackEvent(eventName: string, data?: TrackingEvent) {
