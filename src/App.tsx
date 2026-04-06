@@ -6,6 +6,7 @@ import { PerformanceProvider } from './contexts/PerformanceContext';
 import { ConsentProvider } from './contexts/ConsentContext';
 import { useTracking, trackPageView } from './hooks/useTracking';
 import ParticleBackground from './components/ParticleBackground';
+import GlobalBackground from './components/GlobalBackground';
 import HeroSection from './components/HeroSection';
 import Header from './components/Header';
 import { Loader2 } from 'lucide-react';
@@ -89,7 +90,7 @@ function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
+    <div className="min-h-screen text-white overflow-x-hidden">
       <Suspense fallback={null}>
         <FloatingActionButton />
       </Suspense>
@@ -186,6 +187,7 @@ function App() {
             <Router>
               <TrackingWrapper>
                 <ScrollToTop />
+                <GlobalBackground />
                 <ParticleBackground />
                 <Header />
                 <Suspense fallback={null}>
