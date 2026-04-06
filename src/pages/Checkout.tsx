@@ -34,9 +34,16 @@ export default function Checkout() {
   useEffect(() => {
     if (items.length === 0) {
       navigate('/cart');
-      return;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  const handleCompleteOrder = async (paymentMethod: string, shippingMethod: string, customerData: CustomerData) => {
+    setError('');
+    setLoading(true);
+
+    // Fire InitiateCheckout here (not on mount) so we have full customerData
+    // for all users — guests and logged-in — improving CAPI match quality.
     trackEvent('InitiateCheckout', {
       value: totalPrice,
       currency: 'CZK',
@@ -46,14 +53,14 @@ export default function Checkout() {
         quantity: item.quantity,
       })),
       user_id: user?.id,
-      user_email: user?.email,
+      user_email: customerData.email,
+      user_phone: customerData.phone,
+      user_first_name: customerData.firstName,
+      user_last_name: customerData.lastName,
+      user_city: customerData.city,
+      user_zip: customerData.zip,
+      user_country: 'cz',
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleCompleteOrder = async (paymentMethod: string, shippingMethod: string, customerData: CustomerData) => {
-    setError('');
-    setLoading(true);
 
     try {
       for (const item of items) {
