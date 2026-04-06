@@ -69,7 +69,7 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <h1 className="text-[2.6rem] md:text-7xl lg:text-8xl font-black mb-8 tracking-tight">
+        <h1 className="text-[2.35rem] md:text-7xl lg:text-8xl font-black mb-8 tracking-tight">
           <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent animate-gradient drop-shadow-2xl whitespace-nowrap" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
             ČISTOTA V
           </span>
@@ -86,7 +86,7 @@ export default function HeroSection() {
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>
 
-        <div className="relative inline-flex items-center gap-2 md:gap-3 px-3 md:px-8 py-2.5 md:py-4 mb-14 rounded-xl md:rounded-2xl animate-fade-in backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 max-w-[280px] md:max-w-none" style={{ animationDelay: '0.3s' }}>
+        <div className="relative inline-flex items-center gap-2 md:gap-3 px-3 md:px-8 py-2.5 md:py-4 mb-14 mt-[-6px] md:mt-0 rounded-xl md:rounded-2xl animate-fade-in backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 max-w-[280px] md:max-w-none" style={{ animationDelay: '0.3s' }}>
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-yellow-500/20 rounded-xl md:rounded-2xl animate-gradient border-2 border-yellow-400/40" />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent animate-shimmer-slow" />
 
