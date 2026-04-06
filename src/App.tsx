@@ -50,10 +50,6 @@ function Home() {
   const location = useLocation();
 
   useEffect(() => {
-    trackPageView(location.pathname);
-  }, [location.pathname]);
-
-  useEffect(() => {
     if (location.state?.scrollToProducts) {
       setTimeout(() => {
         const productsSection = document.getElementById('products');
@@ -174,6 +170,14 @@ function ScrollToTop() {
   return null;
 }
 
+function PageViewTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
+  return null;
+}
+
 function TrackingWrapper({ children }: { children: React.ReactNode }) {
   useTracking();
   return <>{children}</>;
@@ -188,6 +192,7 @@ function App() {
             <Router>
               <TrackingWrapper>
                 <ScrollToTop />
+                <PageViewTracker />
                 <GlobalBackground />
                 <PersistentDecorations />
                 <FlyingUFOs />

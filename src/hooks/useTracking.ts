@@ -74,6 +74,20 @@ async function cacheUserProfile(userId: string) {
   }
 }
 
+// Capture fbclid from URL on first landing so getFbc() can use it even after
+// the user navigates away from the landing page (e.g. on the /paymentok page).
+(function captureFbclid() {
+  try {
+    const fbclid = new URLSearchParams(window.location.search).get('fbclid');
+    if (fbclid && !sessionStorage.getItem('_fbclid')) {
+      sessionStorage.setItem('_fbclid', fbclid);
+      sessionStorage.setItem('_fbclid_ts', String(Date.now()));
+    }
+  } catch {
+    // Non-browser or storage unavailable
+  }
+})();
+
 // Eagerly load current session on module init to avoid race conditions
 // where the user adds to cart before onAuthStateChange profile fetch completes
 supabase.auth.getSession().then(({ data: { session } }) => {
@@ -363,13 +377,20 @@ function getFbc(): string | undefined {
   const cookieFbc = getCookie('_fbc');
   if (cookieFbc) return cookieFbc;
 
-  // Fallback: pixel hasn't loaded yet (no consent). Build from URL fbclid if present
-  // so CAPI still gets an fbc for LDU events.
+  // Fallback: build fbc from the fbclid we captured at landing time (sessionStorage).
+  // This covers the common case where the user arrives via a Facebook ad, browses,
+  // accepts cookies partway through, and purchases on a page that no longer has fbclid
+  // in the URL. Using the original landing timestamp keeps the value stable across the session.
   try {
+    const storedFbclid = sessionStorage.getItem('_fbclid');
+    const storedTs = sessionStorage.getItem('_fbclid_ts');
+    if (storedFbclid && storedTs) return `fb.1.${storedTs}.${storedFbclid}`;
+
+    // Last resort: fbclid is still in the current URL (e.g. user landed directly on checkout)
     const fbclid = new URLSearchParams(window.location.search).get('fbclid');
     if (fbclid) return `fb.1.${Date.now()}.${fbclid}`;
   } catch {
-    // Non-browser environment
+    // Non-browser or storage unavailable
   }
   return undefined;
 }
