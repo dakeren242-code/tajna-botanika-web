@@ -25,8 +25,9 @@ dist-ssr
 # Playwright CLI
 .playwright-cli/
 
-# Screenshots
+# Screenshots (but allow public assets)
 *.png
+!public/*.png
 
 # Supabase temp
 supabase/.temp/
