@@ -48,13 +48,53 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
   const codFee = paymentMethod === 'cash_on_delivery' && !isPersonalPickup && !isPersonalInvoice && shippingMethod ? COD_FEE : 0;
   const finalTotal = totalPrice + shippingCost + codFee;
 
+  const scrollToField = (fieldId: string) => {
+    const element = document.getElementById(fieldId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => element.focus(), 300);
+    }
+  };
+
   const handleSubmit = () => {
     setSubmitted(true);
-    if (!shippingMethod || !termsAccepted || !firstName || !lastName || !email || !phone) {
+
+    if (!firstName) {
+      scrollToField('checkout-firstName');
       return;
     }
-
-    if (shippingMethod === 'zasilkovna' && (!address || !city || !zip)) {
+    if (!lastName) {
+      scrollToField('checkout-lastName');
+      return;
+    }
+    if (!email) {
+      scrollToField('checkout-email');
+      return;
+    }
+    if (!phone) {
+      scrollToField('checkout-phone');
+      return;
+    }
+    if (!shippingMethod) {
+      scrollToField('checkout-shipping');
+      return;
+    }
+    if (shippingMethod === 'zasilkovna') {
+      if (!address) {
+        scrollToField('checkout-address');
+        return;
+      }
+      if (!city) {
+        scrollToField('checkout-city');
+        return;
+      }
+      if (!zip) {
+        scrollToField('checkout-zip');
+        return;
+      }
+    }
+    if (!termsAccepted) {
+      scrollToField('checkout-terms');
       return;
     }
 
@@ -97,6 +137,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 Jméno <span className="text-red-400">*</span>
               </label>
               <input
+                id="checkout-firstName"
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
@@ -112,6 +153,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 Příjmení <span className="text-red-400">*</span>
               </label>
               <input
+                id="checkout-lastName"
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
@@ -129,6 +171,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
+                  id="checkout-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -147,6 +190,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               <div className="relative">
                 <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
+                  id="checkout-phone"
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -168,6 +212,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                     Ulice a číslo popisné <span className="text-red-400">*</span>
                   </label>
                   <input
+                    id="checkout-address"
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
@@ -184,6 +229,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                       Město <span className="text-red-400">*</span>
                     </label>
                     <input
+                      id="checkout-city"
                       type="text"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
@@ -199,6 +245,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                       PSČ <span className="text-red-400">*</span>
                     </label>
                     <input
+                      id="checkout-zip"
                       type="text"
                       value={zip}
                       onChange={(e) => setZip(e.target.value)}
@@ -381,7 +428,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
           </div>
         </div>
 
-        <div className="bg-white/5 rounded-xl p-6 border border-emerald-500/20">
+        <div id="checkout-shipping" className="bg-white/5 rounded-xl p-6 border border-emerald-500/20">
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
             <Package className="w-6 h-6 text-emerald-400" />
             Způsob dopravy
@@ -584,7 +631,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
         </div>
 
         <div className="space-y-4">
-          <div className={`bg-white/5 rounded-xl p-4 border transition-all ${submitted && !termsAccepted ? 'border-red-500/40 bg-red-500/5' : 'border-emerald-500/20'}`}>
+          <div id="checkout-terms" className={`bg-white/5 rounded-xl p-4 border transition-all ${submitted && !termsAccepted ? 'border-red-500/40 bg-red-500/5' : 'border-emerald-500/20'}`}>
             <label className="flex items-start gap-3 cursor-pointer group">
               <div className="flex-shrink-0 pt-1">
                 <input

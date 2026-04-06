@@ -213,9 +213,7 @@ export function initializeTracking(consent?: ConsentState) {
     })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
     window.fbq!('init', fbPixelId);
-    // Do NOT fire PageView here — App.tsx calls trackPageView() on every route change
-    // (including initial load), which fires both pixel + CAPI with a shared eventID.
-    // Firing it here too would produce a pixel-only PageView with no CAPI counterpart.
+    window.fbq!('track', 'PageView');
   }
 
   if (effectiveConsent.analytics && gaId && !window.gtag) {
@@ -354,21 +352,28 @@ function getCookie(name: string): string | undefined {
   return undefined;
 }
 
-function getFbc(): string | undefined {
-  // Always prefer the _fbc cookie — this is set by the Meta Pixel and matches exactly
-  // what the pixel sends with its events, preventing the "modified fbclid" CAPI warning.
-  const cookieFbc = getCookie('_fbc');
-  if (cookieFbc) return cookieFbc;
+// Capture fbclid from URL and persist it for the session so CAPI always receives fbc
+// even before the Meta Pixel has a chance to set the _fbc cookie.
+let cachedFbc: string | undefined;
 
-  // Fallback: pixel hasn't loaded yet (no consent). Build from URL fbclid if present
-  // so CAPI still gets an fbc for LDU events.
+(function captureFbclid() {
   try {
-    const fbclid = new URLSearchParams(window.location.search).get('fbclid');
-    if (fbclid) return `fb.1.${Date.now()}.${fbclid}`;
+    const params = new URLSearchParams(window.location.search);
+    const fbclid = params.get('fbclid');
+    if (fbclid) {
+      // fbc format: fb.1.{timestamp_ms}.{fbclid}
+      cachedFbc = `fb.1.${Date.now()}.${fbclid}`;
+      // Also write the cookie so the pixel and future calls stay in sync
+      const expires = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `_fbc=${cachedFbc}; expires=${expires}; path=/; SameSite=Lax`;
+    }
   } catch {
-    // Non-browser environment
+    // Non-browser environment, ignore
   }
-  return undefined;
+})();
+
+function getFbc(): string | undefined {
+  return cachedFbc || getCookie('_fbc');
 }
 
 export function trackEvent(eventName: string, data?: TrackingEvent) {
