@@ -216,7 +216,10 @@ export function initializeTracking(consent?: ConsentState) {
     })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
     window.fbq!('init', fbPixelId);
-    window.fbq!('track', 'PageView');
+    // Do NOT fire PageView here — PageViewTracker in App.tsx fires trackPageView()
+    // on every route change (including initial load), sending both pixel + CAPI
+    // with a shared eventID for deduplication. Firing here produces a pixel-only
+    // PageView with no CAPI counterpart, worsening the coverage ratio.
   }
 
   if (effectiveConsent.analytics && gaId && !window.gtag && isProduction) {
@@ -355,8 +358,11 @@ function getCookie(name: string): string | undefined {
   return undefined;
 }
 
-// Capture fbclid from URL and persist it for the session so CAPI always receives fbc
-// even before the Meta Pixel has a chance to set the _fbc cookie.
+// Capture fbclid from the landing URL as a fallback for when the Meta Pixel
+// hasn't initialized yet (no consent). Stored in memory only — we do NOT write
+// to the _fbc cookie here, because the pixel will set its own _fbc with its own
+// timestamp when it initializes. Overwriting it would cause the "modified fbclid"
+// CAPI diagnostic error (pixel sends its fbc, CAPI sends ours with different timestamp).
 let cachedFbc: string | undefined;
 
 (function captureFbclid() {
@@ -364,11 +370,7 @@ let cachedFbc: string | undefined;
     const params = new URLSearchParams(window.location.search);
     const fbclid = params.get('fbclid');
     if (fbclid) {
-      // fbc format: fb.1.{timestamp_ms}.{fbclid}
       cachedFbc = `fb.1.${Date.now()}.${fbclid}`;
-      // Also write the cookie so the pixel and future calls stay in sync
-      const expires = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toUTCString();
-      document.cookie = `_fbc=${cachedFbc}; expires=${expires}; path=/; SameSite=Lax`;
     }
   } catch {
     // Non-browser environment, ignore
@@ -376,7 +378,10 @@ let cachedFbc: string | undefined;
 })();
 
 function getFbc(): string | undefined {
-  return cachedFbc || getCookie('_fbc');
+  // Always prefer the pixel's _fbc cookie — it's the canonical value the pixel
+  // sends with its own events. Using this prevents the "modified fbclid" CAPI error.
+  // Fall back to cachedFbc only for LDU events where the pixel hasn't loaded.
+  return getCookie('_fbc') || cachedFbc;
 }
 
 export function trackEvent(eventName: string, data?: TrackingEvent) {
