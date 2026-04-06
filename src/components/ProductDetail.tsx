@@ -50,7 +50,7 @@ export default function ProductDetail() {
         const { data: related } = await supabase
           .from('products')
           .select('*')
-          .neq('slug', slug)
+          .neq('id', slug)
           .limit(3);
 
         if (related) {

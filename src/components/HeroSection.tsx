@@ -347,7 +347,9 @@ export default function HeroSection() {
 
         @media (max-width: 767px) {
           .animate-orbit-particle,
-          .animate-orbit-particle-orange,
+          .animate-orbit-particle-orange {
+            display: none !important;
+          }
           .animate-levitate,
           .animate-spin-slow,
           .animate-shimmer-fast,
@@ -356,11 +358,17 @@ export default function HeroSection() {
           .animate-gradient-slow,
           .animate-pulse-glow,
           .animate-glow-white,
-          .animate-bounce-arrow,
-          .animate-rainbow-glow,
+          .animate-bounce-arrow {
+            animation: none !important;
+          }
+          .animate-rainbow-glow {
+            animation: none !important;
+            box-shadow: 0 0 20px rgba(251, 146, 60, 0.5);
+            border-color: rgba(251, 146, 60, 0.6);
+          }
           .animate-bounce-slow {
-            will-change: transform, opacity;
-            contain: layout style paint;
+            animation: none !important;
+            transform: translateX(-50%);
           }
         }
       `}</style>
