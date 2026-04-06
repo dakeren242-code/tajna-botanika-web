@@ -130,7 +130,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { event_name, custom_data, user_data, event_source_url, event_id } = await req.json();
+    const { event_name, custom_data, user_data, event_source_url, event_id, data_processing_options, data_processing_options_country, data_processing_options_state } = await req.json();
 
     const validation = isValidEventData(event_name, custom_data);
     if (!validation.valid) {
@@ -177,7 +177,7 @@ Deno.serve(async (req: Request) => {
       Object.entries(rawUserData).filter(([_, v]) => v !== undefined && v !== null)
     );
 
-    const fbEvent: FacebookEvent = {
+    const fbEvent: FacebookEvent & Record<string, any> = {
       event_name,
       event_time: eventTime,
       event_id: event_id || undefined,
@@ -185,6 +185,11 @@ Deno.serve(async (req: Request) => {
       action_source: "website",
       user_data: cleanUserData as FacebookEvent["user_data"],
       custom_data: custom_data || {},
+      ...(data_processing_options ? {
+        data_processing_options,
+        data_processing_options_country,
+        data_processing_options_state,
+      } : {}),
     };
 
     const apiUrl = `https://graph.facebook.com/v21.0/${FB_PIXEL_ID}/events`;
