@@ -175,6 +175,10 @@ export default function FloatingActionButton() {
           to { opacity: 1; transform: translateX(0); }
         }
         .animate-slide-in-right { animation: slide-in-right 0.5s ease-out; }
+
+        @media (max-width: 767px) {
+          .animate-ping { animation: none !important; display: none; }
+        }
       `}</style>
     </>
   );

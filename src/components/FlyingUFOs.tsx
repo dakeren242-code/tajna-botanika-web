@@ -35,8 +35,12 @@ export default function FlyingUFOs() {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrame = useRef<number>();
 
+  const isMobile = typeof window !== 'undefined' && (
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768
+  );
+
   useEffect(() => {
-    if (!enableAnimations) return;
+    if (!enableAnimations || isMobile) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return;
@@ -125,7 +129,7 @@ export default function FlyingUFOs() {
     };
   }, [enableAnimations]);
 
-  if (!enableAnimations) {
+  if (!enableAnimations || isMobile) {
     return null;
   }
 

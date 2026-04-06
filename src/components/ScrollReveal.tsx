@@ -142,6 +142,19 @@ export default function ScrollReveal({
           opacity: 1;
           transform: translateZ(0);
         }
+
+        @media (max-width: 767px) {
+          .scroll-reveal-up,
+          .scroll-reveal-down,
+          .scroll-reveal-left,
+          .scroll-reveal-right,
+          .scroll-reveal-scale,
+          .scroll-reveal-fade {
+            opacity: 1 !important;
+            transform: none !important;
+            transition: none !important;
+          }
+        }
       `}</style>
     </>
   );
