@@ -33,6 +33,15 @@
     transform: scale(0.98);
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  .logo-link:active {
+    transform: translateX(-50%) !important;
+    transition: none !important;
+  }
+
+  .logo-link * {
+    transition: none !important;
+  }
 }
 
 @layer utilities {

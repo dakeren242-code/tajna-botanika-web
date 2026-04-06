@@ -27,7 +27,11 @@ export default function Header() {
         <div className="flex items-center justify-between relative" style={{ overflow: 'visible' }}>
           <div className="flex-1" />
 
-          <Link to="/" className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-3">
+          <Link
+            to="/"
+            className="logo-link absolute flex items-center gap-3"
+            style={{ left: '50%', transform: 'translateX(-50%)' }}
+          >
             <img
               src="/logo_botanika.png"
               alt="Tajná Botanika"

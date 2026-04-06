@@ -21,10 +21,8 @@ const ContactSection = lazy(() => import('./components/ContactSection'));
 const Footer = lazy(() => import('./components/Footer'));
 const ProductDetail = lazy(() => import('./components/ProductDetail'));
 const MovingCarts = lazy(() => import('./components/MovingCarts'));
-const LiveCounter = lazy(() => import('./components/LiveCounter'));
 const FloatingActionButton = lazy(() => import('./components/FloatingActionButton'));
 const ScrollReveal = lazy(() => import('./components/ScrollReveal'));
-const PerformanceDebug = lazy(() => import('./components/PerformanceDebug'));
 const LiveNotifications = lazy(() => import('./components/LiveNotifications'));
 const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
 const Signup = lazy(() => import('./pages/Signup').then(m => ({ default: m.Signup })));
@@ -93,10 +91,7 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      <CustomCursor />
-      <ParticleBackground />
       <Suspense fallback={null}>
-        <LiveCounter />
         <FloatingActionButton />
       </Suspense>
 
@@ -181,6 +176,8 @@ function App() {
           <CartProvider>
             <Router>
               <TrackingWrapper>
+                <CustomCursor />
+                <ParticleBackground />
                 <Header />
                 <Suspense fallback={null}>
                   <LiveNotifications />
