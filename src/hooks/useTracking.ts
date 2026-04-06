@@ -188,13 +188,16 @@ function isValidEventData(eventName: string, data?: TrackingEvent): boolean {
   return true;
 }
 
+const PRODUCTION_HOST = 'tajnabotanika.online';
+const isProduction = typeof window !== 'undefined' && window.location.hostname === PRODUCTION_HOST;
+
 export function initializeTracking(consent?: ConsentState) {
   const effectiveConsent = consent || getConsentState();
   const fbPixelId = import.meta.env.VITE_FB_PIXEL_ID;
   const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
   const tiktokPixelId = import.meta.env.VITE_TIKTOK_PIXEL_ID;
 
-  if (effectiveConsent.marketing && fbPixelId && !window.fbq) {
+  if (effectiveConsent.marketing && fbPixelId && !window.fbq && isProduction) {
     (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
       if (f.fbq) return;
       n = f.fbq = function() {
@@ -216,7 +219,7 @@ export function initializeTracking(consent?: ConsentState) {
     window.fbq!('track', 'PageView');
   }
 
-  if (effectiveConsent.analytics && gaId && !window.gtag) {
+  if (effectiveConsent.analytics && gaId && !window.gtag && isProduction) {
     const script = document.createElement('script');
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
@@ -230,7 +233,7 @@ export function initializeTracking(consent?: ConsentState) {
     window.gtag('config', gaId);
   }
 
-  if (effectiveConsent.marketing && tiktokPixelId && !window.ttq) {
+  if (effectiveConsent.marketing && tiktokPixelId && !window.ttq && isProduction) {
     (function(w: any, d: any, t: any) {
       w.TiktokAnalyticsObject = t;
       const ttq = (w[t] = w[t] || []);
@@ -412,7 +415,7 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
     window.ttq.track(eventName, data);
   }
 
-  if (import.meta.env.VITE_FB_PIXEL_ID) {
+  if (import.meta.env.VITE_FB_PIXEL_ID && isProduction) {
     sendToFacebookCAPI(eventName, enrichedData, eventId, consent.marketing);
   }
 
@@ -431,7 +434,7 @@ export function trackPageView(pagePath?: string) {
     }
   }
 
-  if (import.meta.env.VITE_FB_PIXEL_ID) {
+  if (import.meta.env.VITE_FB_PIXEL_ID && isProduction) {
     sendToFacebookCAPI('PageView', {}, eventId, consent.marketing);
   }
 
