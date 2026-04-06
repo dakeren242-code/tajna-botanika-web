@@ -7,7 +7,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-28 md:pt-0">
       <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
         <div className="relative inline-flex items-center gap-3 px-8 py-4 mb-10 rounded-2xl animate-levitate">
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/30 via-orange-500/40 via-pink-500/30 via-purple-500/30 to-yellow-500/30 rounded-2xl backdrop-blur-xl border-3 animate-rainbow-glow" style={{ backgroundSize: '300% 100%' }} />
