@@ -3,41 +3,6 @@ import { supabase, Product } from '../lib/supabase';
 import ProductCard from './ProductCard';
 import { Loader2, Sparkles, Zap, Leaf } from 'lucide-react';
 
-const FILTERS = [
-  {
-    id: 'all',
-    label: 'Vše',
-    icon: Sparkles,
-    activeClass: 'bg-gradient-to-r from-yellow-400 to-orange-400 text-black',
-    hoverClass: 'hover:bg-white/10 hover:text-white',
-    glowColor: '',
-  },
-  {
-    id: 'sativa',
-    label: 'Sativa Dominant',
-    icon: Zap,
-    activeClass: 'bg-gradient-to-r from-amber-400 to-yellow-300 text-black',
-    hoverClass: 'hover:bg-amber-400/20 hover:text-amber-300 hover:border-amber-400/40',
-    glowColor: 'shadow-amber-400/30',
-  },
-  {
-    id: 'indica',
-    label: 'Indica Dominant',
-    icon: Leaf,
-    activeClass: 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white',
-    hoverClass: 'hover:bg-blue-500/20 hover:text-blue-300 hover:border-blue-500/40',
-    glowColor: 'shadow-blue-500/30',
-  },
-  {
-    id: 'hybrid',
-    label: 'Hybrid',
-    icon: Leaf,
-    activeClass: 'bg-gradient-to-r from-emerald-500 to-green-400 text-white',
-    hoverClass: 'hover:bg-emerald-500/20 hover:text-emerald-300 hover:border-emerald-500/40',
-    glowColor: 'shadow-emerald-500/30',
-  },
-];
-
 export default function ProductsSection() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -71,11 +36,34 @@ export default function ProductsSection() {
   };
 
   const filterAndSortProducts = () => {
-    let filtered = activeFilter === 'all'
-      ? [...products]
-      : products.filter((p) => p.category === activeFilter);
+    let filtered = [...products];
+
+    const getRelevanceScore = (product: Product) => {
+      if (activeFilter === 'all') return 0;
+
+      if (activeFilter === 'balanced') {
+        return product.category === 'balanced' ? 2 : 0;
+      }
+
+      if (activeFilter === 'relaxing') {
+        return product.category === 'relaxing' ? 2 : 0;
+      }
+
+      if (activeFilter === 'energizing') {
+        return product.category === 'energizing' ? 2 : 0;
+      }
+
+      return 0;
+    };
 
     filtered.sort((a, b) => {
+      const relevanceA = getRelevanceScore(a);
+      const relevanceB = getRelevanceScore(b);
+
+      if (relevanceA !== relevanceB) {
+        return relevanceB - relevanceA;
+      }
+
       switch (sortBy) {
         case 'price-low':
           return (a.price || 0) - (b.price || 0);
@@ -84,7 +72,7 @@ export default function ProductsSection() {
         case 'thc-high':
           return parseFloat(b.thcx_content?.toString() || '0') - parseFloat(a.thcx_content?.toString() || '0');
         default:
-          return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+          return 0;
       }
     });
 
@@ -125,14 +113,19 @@ export default function ProductsSection() {
 
         <div className="mb-12 flex flex-col md:flex-row gap-6 items-center justify-between">
           <div className="flex flex-wrap gap-3 justify-center">
-            {FILTERS.map((filter) => (
+            {[
+              { id: 'all', label: 'Vše', icon: Sparkles },
+              { id: 'relaxing', label: 'Indica Dominant', icon: Leaf },
+              { id: 'energizing', label: 'Sativa Dominant', icon: Zap },
+              { id: 'balanced', label: 'Hybrid', icon: Leaf },
+            ].map((filter) => (
               <button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm border transition-all duration-300 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm transition-all duration-300 ${
                   activeFilter === filter.id
-                    ? `${filter.activeClass} scale-105 border-transparent shadow-lg ${filter.glowColor}`
-                    : `bg-white/5 text-gray-400 border-white/10 ${filter.hoverClass}`
+                    ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-black scale-105'
+                    : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
                 }`}
                 data-cursor-hover
               >
