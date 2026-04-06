@@ -8,6 +8,7 @@ import { useTracking, trackPageView } from './hooks/useTracking';
 import GlobalBackground from './components/GlobalBackground';
 import ParticleBackground from './components/ParticleBackground';
 import FlyingUFOs from './components/FlyingUFOs';
+import PersistentDecorations from './components/PersistentDecorations';
 import HeroSection from './components/HeroSection';
 import Header from './components/Header';
 import { Loader2 } from 'lucide-react';
@@ -190,6 +191,7 @@ function App() {
                 <ScrollToTop />
                 <GlobalBackground />
                 <ParticleBackground />
+                <PersistentDecorations />
                 <FlyingUFOs />
                 <Header />
                 <Suspense fallback={null}>

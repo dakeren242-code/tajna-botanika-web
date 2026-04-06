@@ -1,5 +1,4 @@
-import { Leaf, Sparkles, ArrowDown } from 'lucide-react';
-import DewEffect from './DewEffect';
+import { Sparkles, ArrowDown } from 'lucide-react';
 
 export default function HeroSection() {
   const scrollToProducts = () => {
@@ -9,58 +8,6 @@ export default function HeroSection() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <DewEffect />
-
-      <div className="absolute inset-0 opacity-30">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 8}s`,
-              animationDuration: `${12 + Math.random() * 8}s`,
-            }}
-          >
-            <Leaf
-              className="text-green-400/40"
-              size={20 + Math.random() * 40}
-              style={{
-                transform: `rotate(${Math.random() * 360}deg) translateZ(0)`,
-                filter: 'blur(1px)'
-              }}
-            />
-          </div>
-        ))}
-      </div>
-
-      <div className="absolute inset-0 opacity-50">
-        {[...Array(10)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute animate-float-gentle"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${8 + Math.random() * 6}s`,
-            }}
-          >
-            <div
-              className="rounded-full bg-gradient-to-br from-orange-400/40 to-amber-500/40 animate-pulse-gentle"
-              style={{
-                width: `${15 + Math.random() * 35}px`,
-                height: `${15 + Math.random() * 35}px`,
-                filter: 'blur(2px)',
-                boxShadow: '0 0 30px rgba(251, 146, 60, 0.6), 0 0 60px rgba(251, 146, 60, 0.3)',
-                transform: 'translateZ(0)',
-              }}
-            />
-          </div>
-        ))}
-      </div>
-
       <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
         <div className="relative inline-flex items-center gap-3 px-8 py-4 mb-10 rounded-2xl animate-levitate">
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/30 via-orange-500/40 via-pink-500/30 via-purple-500/30 to-yellow-500/30 rounded-2xl backdrop-blur-xl border-3 animate-rainbow-glow" style={{ backgroundSize: '300% 100%' }} />
@@ -336,60 +283,6 @@ export default function HeroSection() {
         }
         .animate-pulse-fast {
           animation: pulse-fast 1s ease-in-out infinite;
-        }
-        @keyframes float {
-          0%, 100% {
-            transform: translate3d(0, 0, 0) rotate(0deg);
-          }
-          25% {
-            transform: translate3d(15px, -30px, 0) rotate(8deg);
-          }
-          50% {
-            transform: translate3d(-15px, -60px, 0) rotate(-8deg);
-          }
-          75% {
-            transform: translate3d(15px, -30px, 0) rotate(5deg);
-          }
-        }
-        .animate-float {
-          animation: float ease-in-out infinite;
-          transform: translateZ(0);
-        }
-        @keyframes float-gentle {
-          0%, 100% {
-            transform: translate3d(0, 0, 0);
-          }
-          50% {
-            transform: translate3d(0, -15px, 0);
-          }
-        }
-        .animate-float-gentle {
-          animation: float-gentle ease-in-out infinite;
-          transform: translateZ(0);
-        }
-        @keyframes pulse-slow {
-          0%, 100% {
-            opacity: 0.3;
-          }
-          50% {
-            opacity: 0.6;
-          }
-        }
-        .animate-pulse-slow {
-          animation: pulse-slow 4s ease-in-out infinite;
-        }
-        @keyframes pulse-gentle {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 1;
-          }
-          50% {
-            transform: scale(1.1);
-            opacity: 0.8;
-          }
-        }
-        .animate-pulse-gentle {
-          animation: pulse-gentle 3s ease-in-out infinite;
         }
         @keyframes pulse-bright {
           0%, 100% {
