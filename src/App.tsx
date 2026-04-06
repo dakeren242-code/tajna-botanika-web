@@ -5,7 +5,6 @@ import { CartProvider } from './contexts/CartContext';
 import { PerformanceProvider } from './contexts/PerformanceContext';
 import { ConsentProvider } from './contexts/ConsentContext';
 import { useTracking, trackPageView } from './hooks/useTracking';
-import ParticleBackground from './components/ParticleBackground';
 import GlobalBackground from './components/GlobalBackground';
 import HeroSection from './components/HeroSection';
 import Header from './components/Header';
@@ -188,7 +187,6 @@ function App() {
               <TrackingWrapper>
                 <ScrollToTop />
                 <GlobalBackground />
-                <ParticleBackground />
                 <Header />
                 <Suspense fallback={null}>
                   <LiveNotifications />
