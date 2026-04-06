@@ -69,11 +69,11 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 tracking-tight">
-          <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent animate-gradient drop-shadow-2xl" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
+        <h1 className="text-[2.6rem] md:text-7xl lg:text-8xl font-black mb-8 tracking-tight">
+          <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent animate-gradient drop-shadow-2xl whitespace-nowrap" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
             ČISTOTA V
           </span>
-          <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent animate-gradient drop-shadow-2xl" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
+          <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent animate-gradient drop-shadow-2xl whitespace-nowrap" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
             KAŽDÉM DETAILU
           </span>
           <span className="block text-2xl md:text-4xl mt-4 bg-gradient-to-r from-cyan-200 via-blue-200 to-purple-300 bg-clip-text text-transparent font-light tracking-wide animate-gradient-slow">
@@ -81,32 +81,32 @@ export default function HeroSection() {
           </span>
         </h1>
 
-        <p className="text-lg md:text-xl text-gray-200 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
+        <p className="text-[0.95rem] md:text-xl text-gray-200 mb-12 max-w-3xl mx-auto leading-relaxed font-light px-2 md:px-0">
           Exkluzivní kolekce pěstovaná v <span className="text-green-400 font-semibold">kontrolovaném prostředí</span> s péčí o každý detail.
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>
 
-        <div className="relative inline-flex items-center gap-3 px-8 py-4 mb-14 rounded-2xl animate-fade-in backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500" style={{ animationDelay: '0.3s' }}>
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-yellow-500/20 rounded-2xl animate-gradient border-2 border-yellow-400/40" />
+        <div className="relative inline-flex items-center gap-2 md:gap-3 px-4 md:px-8 py-2.5 md:py-4 mb-14 rounded-xl md:rounded-2xl animate-fade-in backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500" style={{ animationDelay: '0.3s' }}>
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-yellow-500/20 rounded-xl md:rounded-2xl animate-gradient border-2 border-yellow-400/40" />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent animate-shimmer-slow" />
 
-          <Sparkles className="w-5 h-5 text-yellow-400 animate-pulse relative z-10" />
+          <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 animate-pulse relative z-10" />
           <div className="relative z-10 text-center">
-            <span className="block text-yellow-300 font-bold text-base md:text-lg">
+            <span className="block text-yellow-300 font-bold text-sm md:text-lg">
               Zaregistrujte se a získejte{' '}
-              <span className="text-yellow-100 text-xl md:text-2xl font-black">15% slevu</span>
+              <span className="text-yellow-100 text-lg md:text-2xl font-black">15% slevu</span>
             </span>
-            <span className="block text-yellow-200/80 text-sm mt-1">
+            <span className="block text-yellow-200/80 text-xs md:text-sm mt-0.5 md:mt-1">
               Slevový kód můžete uplatnit při jakékoliv objednávce
             </span>
           </div>
-          <Sparkles className="w-5 h-5 text-yellow-400 animate-pulse relative z-10" style={{ animationDelay: '0.5s' }} />
+          <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 animate-pulse relative z-10" style={{ animationDelay: '0.5s' }} />
         </div>
       </div>
 
       <button
         onClick={scrollToProducts}
-        className="absolute bottom-2 left-1/2 -translate-x-1/2 animate-bounce-slow cursor-pointer group z-20"
+        className="absolute bottom-[-15px] md:bottom-2 left-1/2 -translate-x-1/2 animate-bounce-slow cursor-pointer group z-20"
         data-cursor-hover
       >
         <div className="flex flex-col items-center gap-2">
