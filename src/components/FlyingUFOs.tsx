@@ -42,7 +42,18 @@ export default function FlyingUFOs() {
   useEffect(() => {
     if (!enableAnimations || ufos.length === 0) return;
 
-    mousePos.current = { x: -999, y: -999 };
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+
+      if (e.clientY < rect.bottom && e.clientY > rect.top) {
+        mousePos.current = { x: e.clientX, y: e.clientY };
+      } else {
+        mousePos.current = { x: -999, y: -999 };
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
 
     const animate = () => {
       setUfos(prevUfos => prevUfos.map(ufo => {
@@ -112,6 +123,7 @@ export default function FlyingUFOs() {
     animationFrame.current = requestAnimationFrame(animate);
 
     return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
       if (animationFrame.current) {
         cancelAnimationFrame(animationFrame.current);
       }
