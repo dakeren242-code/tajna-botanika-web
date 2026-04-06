@@ -287,9 +287,13 @@ function generateEventId(eventName: string): string {
   return `${eventName}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, eventId?: string) {
+async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, eventId?: string, hasConsent?: boolean) {
   try {
-    const payload = {
+    // When no marketing consent: send with Limited Data Use flag and strip PII.
+    // When consent given: send full event with user identifiers for better match quality.
+    const withConsent = hasConsent ?? false;
+
+    const payload: Record<string, any> = {
       event_name: eventName,
       event_id: eventId,
       event_source_url: window.location.href,
@@ -303,7 +307,7 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
         num_items: data?.num_items,
         order_id: data?.transaction_id,
       },
-      user_data: {
+      user_data: withConsent ? {
         fbp: getCookie('_fbp'),
         fbc: getFbc(),
         em: data?.user_email,
@@ -314,8 +318,18 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
         zp: data?.user_zip,
         country: data?.user_country,
         external_id: data?.user_id,
+      } : {
+        // No PII without consent — only anonymous browser signals
+        fbp: getCookie('_fbp'),
+        fbc: getFbc(),
       },
     };
+
+    if (!withConsent) {
+      payload.data_processing_options = ['LDU'];
+      payload.data_processing_options_country = 1; // EU
+      payload.data_processing_options_state = 1000; // EU (all states)
+    }
 
     const capiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/facebook-capi`;
     await fetch(capiUrl, {
@@ -398,8 +412,8 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
     window.ttq.track(eventName, data);
   }
 
-  if (consent.marketing && import.meta.env.VITE_FB_PIXEL_ID) {
-    sendToFacebookCAPI(eventName, enrichedData, eventId);
+  if (import.meta.env.VITE_FB_PIXEL_ID) {
+    sendToFacebookCAPI(eventName, enrichedData, eventId, consent.marketing);
   }
 
   if (import.meta.env.DEV) {
@@ -409,15 +423,16 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
 
 export function trackPageView(pagePath?: string) {
   const consent = getConsentState();
+  const eventId = generateEventId('PageView');
 
   if (consent.marketing) {
-    const eventId = generateEventId('PageView');
     if (window.fbq) {
       window.fbq('track', 'PageView', {}, { eventID: eventId });
     }
-    if (import.meta.env.VITE_FB_PIXEL_ID) {
-      sendToFacebookCAPI('PageView', {}, eventId);
-    }
+  }
+
+  if (import.meta.env.VITE_FB_PIXEL_ID) {
+    sendToFacebookCAPI('PageView', {}, eventId, consent.marketing);
   }
 
   if (consent.analytics && window.gtag && pagePath) {
