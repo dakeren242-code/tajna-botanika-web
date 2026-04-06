@@ -14,33 +14,29 @@ interface UFO {
   scared: boolean;
 }
 
+const initialUfos: UFO[] = Array.from({ length: 3 }, (_, i) => ({
+  id: i,
+  x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
+  y: Math.random() * 150 + 50,
+  baseY: Math.random() * 150 + 50,
+  velocityX: 1.5 + Math.random() * 1.5,
+  velocityY: 0,
+  size: 50 + Math.random() * 35,
+  fleeing: false,
+  fleeTime: 0,
+  scared: false,
+}));
+
 export default function FlyingUFOs() {
   const { enableAnimations } = usePerformance();
-  const [ufos, setUfos] = useState<UFO[]>([]);
+  const ufosRef = useRef<UFO[]>(initialUfos);
+  const [, forceUpdate] = useState(0);
   const mousePos = useRef({ x: -999, y: -999 });
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrame = useRef<number>();
 
   useEffect(() => {
     if (!enableAnimations) return;
-
-    const newUfos: UFO[] = Array.from({ length: 3 }, (_, i) => ({
-      id: i,
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * 150 + 50,
-      baseY: Math.random() * 150 + 50,
-      velocityX: 1.5 + Math.random() * 1.5,
-      velocityY: 0,
-      size: 50 + Math.random() * 35,
-      fleeing: false,
-      fleeTime: 0,
-      scared: false,
-    }));
-    setUfos(newUfos);
-  }, [enableAnimations]);
-
-  useEffect(() => {
-    if (!enableAnimations || ufos.length === 0) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return;
@@ -56,67 +52,66 @@ export default function FlyingUFOs() {
     window.addEventListener('mousemove', handleMouseMove);
 
     const animate = () => {
-      setUfos(prevUfos => prevUfos.map(ufo => {
-        const newUfo = { ...ufo };
-
-        const dx = mousePos.current.x - newUfo.x;
-        const dy = mousePos.current.y - newUfo.y;
+      ufosRef.current = ufosRef.current.map(ufo => {
+        const dx = mousePos.current.x - ufo.x;
+        const dy = mousePos.current.y - ufo.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         const fleeRadius = 150;
         const pushRadius = 100;
 
         if (distance < pushRadius && mousePos.current.x > -500) {
-          newUfo.scared = true;
-          newUfo.fleeing = true;
-          newUfo.fleeTime = Date.now();
+          ufo.scared = true;
+          ufo.fleeing = true;
+          ufo.fleeTime = Date.now();
 
           const pushForce = (pushRadius - distance) / pushRadius;
-          newUfo.velocityX += (-dx / distance) * pushForce * 8;
-          newUfo.velocityY += (-dy / distance) * pushForce * 8;
+          ufo.velocityX += (-dx / distance) * pushForce * 8;
+          ufo.velocityY += (-dy / distance) * pushForce * 8;
         } else if (distance < fleeRadius && mousePos.current.x > -500) {
-          newUfo.fleeing = true;
-          newUfo.fleeTime = Date.now();
+          ufo.fleeing = true;
+          ufo.fleeTime = Date.now();
 
           const fleeForce = (fleeRadius - distance) / fleeRadius;
-          newUfo.velocityX += (-dx / distance) * fleeForce * 3;
-          newUfo.velocityY += (-dy / distance) * fleeForce * 3;
+          ufo.velocityX += (-dx / distance) * fleeForce * 3;
+          ufo.velocityY += (-dy / distance) * fleeForce * 3;
         } else {
-          if (Date.now() - newUfo.fleeTime > 1000) {
-            newUfo.fleeing = false;
+          if (Date.now() - ufo.fleeTime > 1000) {
+            ufo.fleeing = false;
           }
-          if (Date.now() - newUfo.fleeTime > 500) {
-            newUfo.scared = false;
-          }
-        }
-
-        if (!newUfo.fleeing) {
-          const returnForce = (newUfo.baseY - newUfo.y) * 0.01;
-          newUfo.velocityY += returnForce;
-
-          if (Math.abs(newUfo.velocityX) < 1) {
-            newUfo.velocityX += 0.05;
+          if (Date.now() - ufo.fleeTime > 500) {
+            ufo.scared = false;
           }
         }
 
-        newUfo.velocityX *= 0.95;
-        newUfo.velocityY *= 0.95;
+        if (!ufo.fleeing) {
+          const returnForce = (ufo.baseY - ufo.y) * 0.01;
+          ufo.velocityY += returnForce;
 
-        newUfo.x += newUfo.velocityX;
-        newUfo.y += newUfo.velocityY;
-
-        if (newUfo.x > window.innerWidth + 150) {
-          newUfo.x = -150;
-          newUfo.y = Math.random() * 150 + 50;
-          newUfo.baseY = newUfo.y;
-          newUfo.velocityX = 1.5 + Math.random() * 1.5;
-          newUfo.velocityY = 0;
-          newUfo.fleeing = false;
-          newUfo.scared = false;
+          if (Math.abs(ufo.velocityX) < 1) {
+            ufo.velocityX += 0.05;
+          }
         }
 
-        return newUfo;
-      }));
+        ufo.velocityX *= 0.95;
+        ufo.velocityY *= 0.95;
 
+        ufo.x += ufo.velocityX;
+        ufo.y += ufo.velocityY;
+
+        if (ufo.x > window.innerWidth + 150) {
+          ufo.x = -150;
+          ufo.y = Math.random() * 150 + 50;
+          ufo.baseY = ufo.y;
+          ufo.velocityX = 1.5 + Math.random() * 1.5;
+          ufo.velocityY = 0;
+          ufo.fleeing = false;
+          ufo.scared = false;
+        }
+
+        return ufo;
+      });
+
+      forceUpdate(n => n + 1);
       animationFrame.current = requestAnimationFrame(animate);
     };
 
@@ -128,7 +123,7 @@ export default function FlyingUFOs() {
         cancelAnimationFrame(animationFrame.current);
       }
     };
-  }, [enableAnimations, ufos.length]);
+  }, [enableAnimations]);
 
   if (!enableAnimations) {
     return null;
@@ -136,7 +131,7 @@ export default function FlyingUFOs() {
 
   return (
     <div ref={containerRef} className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 5 }}>
-      {ufos.map((ufo) => (
+      {ufosRef.current.map((ufo) => (
         <div
           key={ufo.id}
           className="absolute"

@@ -1,11 +1,12 @@
 import React from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { LoginForm } from '../components/auth/LoginForm'
 import { useAuth } from '../hooks/useAuth'
 import { LogIn } from 'lucide-react'
 
 export function Login() {
   const { user, loading } = useAuth()
+  const navigate = useNavigate()
 
   if (loading) {
     return (
@@ -41,7 +42,7 @@ export function Login() {
             </p>
           </div>
 
-          <LoginForm onSuccess={() => window.location.href = '/'} />
+          <LoginForm onSuccess={() => navigate('/')} />
 
           <div className="mt-6 text-center">
             <Link

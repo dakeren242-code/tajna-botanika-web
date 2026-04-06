@@ -131,7 +131,7 @@ export default function ProductDetail() {
         <div className="container mx-auto px-4 py-8">
           <button
             onClick={() => {
-              window.location.href = '/#products';
+              navigate('/', { state: { scrollToProducts: true } });
             }}
             className="group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-950/40 to-emerald-950/40 border-2 border-green-500/30 rounded-full hover:border-green-400/50 hover:bg-gradient-to-r hover:from-green-900/50 hover:to-emerald-900/50 transition-all duration-500 hover:scale-110 hover:shadow-[0_0_30px_rgba(34,197,94,0.4)] backdrop-blur-xl"
             data-cursor-hover

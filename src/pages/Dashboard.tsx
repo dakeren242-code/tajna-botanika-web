@@ -2,14 +2,15 @@ import React from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { SubscriptionStatus } from '../components/subscription/SubscriptionStatus'
 import { User, Package, LogOut } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 export function Dashboard() {
   const { user, signOut } = useAuth()
+  const navigate = useNavigate()
 
   const handleSignOut = async () => {
     await signOut()
-    window.location.href = '/'
+    navigate('/')
   }
 
   return (
