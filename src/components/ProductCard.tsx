@@ -115,30 +115,25 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         )}
 
         <div className="relative p-8">
-          <div className="mb-6 h-64 flex items-center justify-center relative">
+          <div className="mb-6 h-64 flex items-center justify-center relative overflow-hidden rounded-2xl">
             <div
-              className="absolute inset-0 blur-3xl opacity-30 group-hover:opacity-50 transition-opacity duration-500"
+              className="absolute inset-0 rounded-2xl blur-3xl opacity-30 group-hover:opacity-50 transition-opacity duration-500"
               style={{ backgroundColor: product.glow_color }}
             />
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{
+              background: `linear-gradient(135deg, ${product.color_accent}20, transparent)`
+            }} />
 
             {product.image_url ? (
-              <div
-                className="relative w-52 h-52 rounded-full overflow-hidden transition-transform duration-500 group-hover:scale-110"
-                style={{
-                  boxShadow: `0 0 40px ${product.glow_color}50`,
-                  border: `2px solid ${product.glow_color}40`,
-                }}
-              >
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <img
+                src={product.image_url}
+                alt={product.name}
+                className="relative w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
             ) : (
               <div className="relative">
                 <div
-                  className="w-52 h-52 rounded-full flex items-center justify-center text-6xl font-black transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12"
+                  className="w-32 h-32 rounded-full flex items-center justify-center text-6xl font-black transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12"
                   style={{
                     background: `linear-gradient(135deg, ${product.color_accent}, ${product.glow_color})`,
                     boxShadow: `0 0 40px ${product.glow_color}60`,
