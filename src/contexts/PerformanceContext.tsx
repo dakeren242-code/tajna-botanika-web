@@ -9,7 +9,6 @@ interface PerformanceSettings {
   particleCount: number;
   enableShadows: boolean;
   enableAnimations: boolean;
-  enableCursor: boolean;
   setMode: (mode: 'auto' | 'manual') => void;
   setManualLevel: (level: PerformanceLevel) => void;
 }
@@ -28,7 +27,7 @@ export function PerformanceProvider({ children }: { children: ReactNode }) {
   });
 
   const autoMetrics = usePerformanceMonitor(mode === 'auto');
-  const { fps, level, particleCount, enableShadows, enableAnimations, enableCursor } = autoMetrics;
+  const { fps, level, particleCount, enableShadows, enableAnimations } = autoMetrics;
 
   useEffect(() => {
     localStorage.setItem('performanceMode', mode);
@@ -45,28 +44,24 @@ export function PerformanceProvider({ children }: { children: ReactNode }) {
           particleCount: 30,
           enableShadows: true,
           enableAnimations: true,
-          enableCursor: false,
         };
       case 'medium':
         return {
           particleCount: 20,
           enableShadows: false,
           enableAnimations: true,
-          enableCursor: false,
         };
       case 'low':
         return {
           particleCount: 10,
           enableShadows: false,
           enableAnimations: true,
-          enableCursor: false,
         };
       case 'potato':
         return {
           particleCount: 0,
           enableShadows: false,
           enableAnimations: false,
-          enableCursor: false,
         };
     }
   }, []);
@@ -87,7 +82,6 @@ export function PerformanceProvider({ children }: { children: ReactNode }) {
         particleCount,
         enableShadows,
         enableAnimations,
-        enableCursor,
       };
     }
     return {
@@ -95,7 +89,7 @@ export function PerformanceProvider({ children }: { children: ReactNode }) {
       currentLevel: manualLevel,
       ...getManualSettings(manualLevel),
     };
-  }, [mode, fps, level, particleCount, enableShadows, enableAnimations, enableCursor, manualLevel, getManualSettings]);
+  }, [mode, fps, level, particleCount, enableShadows, enableAnimations, manualLevel, getManualSettings]);
 
   const value = useMemo(() => ({
     mode,

@@ -4,7 +4,6 @@ import { ArrowLeft, ShoppingCart, Zap, Leaf, Info, AlertTriangle, Check, Users, 
 import { supabase, Product } from '../lib/supabase';
 import { useCart } from '../contexts/CartContext';
 import { trackEvent } from '../hooks/useTracking';
-import CustomCursor from './CustomCursor';
 import Footer from './Footer';
 
 export default function ProductDetail() {
@@ -123,8 +122,6 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      <CustomCursor />
-
       <main className="relative z-10 pt-24">
         <div className="container mx-auto px-4 py-8">
           <button

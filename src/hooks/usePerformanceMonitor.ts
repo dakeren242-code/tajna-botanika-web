@@ -8,7 +8,6 @@ interface PerformanceMetrics {
   particleCount: number;
   enableShadows: boolean;
   enableAnimations: boolean;
-  enableCursor: boolean;
 }
 
 export function usePerformanceMonitor(enabled: boolean = true): PerformanceMetrics {
@@ -76,28 +75,24 @@ export function usePerformanceMonitor(enabled: boolean = true): PerformanceMetri
           particleCount: 30,
           enableShadows: true,
           enableAnimations: true,
-          enableCursor: false,
         };
       case 'medium':
         return {
           particleCount: 20,
           enableShadows: false,
           enableAnimations: true,
-          enableCursor: false,
         };
       case 'low':
         return {
           particleCount: 10,
           enableShadows: false,
           enableAnimations: true,
-          enableCursor: false,
         };
       case 'potato':
         return {
           particleCount: 0,
           enableShadows: false,
           enableAnimations: false,
-          enableCursor: false,
         };
     }
   }, [level]);

@@ -3,7 +3,7 @@ import { usePerformance } from '../contexts/PerformanceContext';
 import { X } from 'lucide-react';
 
 export default function PerformanceDebug() {
-  const { mode, fps, currentLevel, particleCount, enableShadows, enableAnimations, enableCursor } = usePerformance();
+  const { mode, fps, currentLevel, particleCount, enableShadows, enableAnimations } = usePerformance();
   const [visible, setVisible] = useState(() => {
     const saved = localStorage.getItem('showPerformanceDebug');
     return saved === 'true';
@@ -116,12 +116,6 @@ export default function PerformanceDebug() {
             </span>
           </div>
 
-          <div className="flex justify-between gap-4">
-            <span className="text-gray-400">Kurzor:</span>
-            <span className={enableCursor ? 'text-green-400' : 'text-red-400'}>
-              {enableCursor ? 'Zapnuto' : 'Vypnuto'}
-            </span>
-          </div>
         </div>
 
         <div className="border-t border-cyan-500/20 mt-2 pt-2">

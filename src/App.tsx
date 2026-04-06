@@ -6,7 +6,6 @@ import { PerformanceProvider } from './contexts/PerformanceContext';
 import { ConsentProvider } from './contexts/ConsentContext';
 import { useTracking, trackPageView } from './hooks/useTracking';
 import GlobalBackground from './components/GlobalBackground';
-import ParticleBackground from './components/ParticleBackground';
 import FlyingUFOs from './components/FlyingUFOs';
 import PersistentDecorations from './components/PersistentDecorations';
 import HeroSection from './components/HeroSection';
@@ -190,7 +189,6 @@ function App() {
               <TrackingWrapper>
                 <ScrollToTop />
                 <GlobalBackground />
-                <ParticleBackground />
                 <PersistentDecorations />
                 <FlyingUFOs />
                 <Header />
