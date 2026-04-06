@@ -13,12 +13,8 @@ export default function MovingCarts() {
   const { enableAnimations } = usePerformance();
   const [carts, setCarts] = useState<Cart[]>([]);
 
-  const isMobile = typeof window !== 'undefined' && (
-    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768
-  );
-
   useEffect(() => {
-    if (!enableAnimations || isMobile) return;
+    if (!enableAnimations) return;
 
     const newCarts: Cart[] = Array.from({ length: 3 }, (_, i) => ({
       id: i,
@@ -30,7 +26,7 @@ export default function MovingCarts() {
     setCarts(newCarts);
   }, [enableAnimations]);
 
-  if (!enableAnimations || isMobile) {
+  if (!enableAnimations) {
     return null;
   }
 

@@ -309,15 +309,6 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         .shimmer-btn {
           animation: shimmer-btn 1.5s ease-in-out infinite;
         }
-
-        @media (max-width: 767px) {
-          @keyframes levitate {
-            0%, 100% { transform: none; }
-          }
-          .shimmer-btn {
-            animation: none;
-          }
-        }
       `}</style>
     </div>
   );
