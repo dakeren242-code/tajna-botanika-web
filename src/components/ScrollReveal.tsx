@@ -19,6 +19,8 @@ export default function ScrollReveal({
     const element = elementRef.current;
     if (!element) return;
 
+    const isMobile = window.innerWidth < 768;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -26,20 +28,33 @@ export default function ScrollReveal({
             setTimeout(() => {
               element.classList.add('revealed');
             }, delay);
+            observer.unobserve(element);
           }
         });
       },
       {
-        threshold: 0.1,
-        rootMargin: '0px 0px -100px 0px',
+        threshold: isMobile ? 0 : 0.1,
+        rootMargin: isMobile ? '100px 0px 100px 0px' : '0px 0px -100px 0px',
       }
     );
 
     observer.observe(element);
 
+    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
+    if (isMobile) {
+      fallbackTimer = setTimeout(() => {
+        if (!element.classList.contains('revealed')) {
+          element.classList.add('revealed');
+        }
+      }, 500 + delay);
+    }
+
     return () => {
       if (element) {
         observer.unobserve(element);
+      }
+      if (fallbackTimer) {
+        clearTimeout(fallbackTimer);
       }
     };
   }, [delay]);
