@@ -310,12 +310,19 @@ export default function ProductCard({ product, index }: ProductCardProps) {
           animation: shimmer-btn 1.5s ease-in-out infinite;
         }
 
+        @keyframes levitate {
+          0%, 100% { transform: translateY(0) translateZ(0); }
+          50% { transform: translateY(-10px) translateZ(0); }
+        }
+        [style*="animation: levitate"],
+        .shimmer-btn {
+          will-change: transform;
+          contain: layout style paint;
+        }
         @media (max-width: 767px) {
           @keyframes levitate {
-            0%, 100% { transform: none; }
-          }
-          .shimmer-btn {
-            animation: none;
+            0%, 100% { transform: translateY(0) translateZ(0); }
+            50% { transform: translateY(-5px) translateZ(0); }
           }
         }
       `}</style>

@@ -143,6 +143,16 @@ export default function ScrollReveal({
           transform: translateZ(0);
         }
 
+        .scroll-reveal-up,
+        .scroll-reveal-down,
+        .scroll-reveal-left,
+        .scroll-reveal-right,
+        .scroll-reveal-scale,
+        .scroll-reveal-fade {
+          will-change: transform, opacity;
+          contain: layout style paint;
+        }
+
         @media (max-width: 767px) {
           .scroll-reveal-up,
           .scroll-reveal-down,
@@ -150,10 +160,12 @@ export default function ScrollReveal({
           .scroll-reveal-right,
           .scroll-reveal-scale,
           .scroll-reveal-fade {
-            opacity: 1 !important;
-            transform: none !important;
-            transition: none !important;
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
           }
+          .scroll-reveal-up { transform: translateY(20px) translateZ(0); }
+          .scroll-reveal-down { transform: translateY(-20px) translateZ(0); }
+          .scroll-reveal-left { transform: translateX(20px) translateZ(0); }
+          .scroll-reveal-right { transform: translateX(-20px) translateZ(0); }
         }
       `}</style>
     </>
