@@ -1,27 +1,8 @@
-import { useMemo } from 'react';
 import { Leaf, Sparkles, ArrowDown } from 'lucide-react';
 import DewEffect from './DewEffect';
 import FlyingUFOs from './FlyingUFOs';
 
 export default function HeroSection() {
-  const leaves = useMemo(() => Array.from({ length: 12 }, () => ({
-    left: Math.random() * 100,
-    top: Math.random() * 100,
-    animationDelay: Math.random() * 8,
-    animationDuration: 12 + Math.random() * 8,
-    size: 20 + Math.random() * 40,
-    rotation: Math.random() * 360,
-  })), []);
-
-  const orbs = useMemo(() => Array.from({ length: 10 }, () => ({
-    left: Math.random() * 100,
-    top: Math.random() * 100,
-    animationDelay: Math.random() * 5,
-    animationDuration: 8 + Math.random() * 6,
-    width: 15 + Math.random() * 35,
-    height: 15 + Math.random() * 35,
-  })), []);
-
   const scrollToProducts = () => {
     const productsSection = document.getElementById('products');
     productsSection?.scrollIntoView({ behavior: 'smooth' });
@@ -43,22 +24,22 @@ export default function HeroSection() {
       <DewEffect />
 
       <div className="absolute inset-0 opacity-30">
-        {leaves.map((leaf, i) => (
+        {[...Array(12)].map((_, i) => (
           <div
             key={i}
             className="absolute animate-float"
             style={{
-              left: `${leaf.left}%`,
-              top: `${leaf.top}%`,
-              animationDelay: `${leaf.animationDelay}s`,
-              animationDuration: `${leaf.animationDuration}s`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 8}s`,
+              animationDuration: `${12 + Math.random() * 8}s`,
             }}
           >
             <Leaf
               className="text-green-400/40"
-              size={leaf.size}
+              size={20 + Math.random() * 40}
               style={{
-                transform: `rotate(${leaf.rotation}deg) translateZ(0)`,
+                transform: `rotate(${Math.random() * 360}deg) translateZ(0)`,
                 filter: 'blur(1px)'
               }}
             />
@@ -67,22 +48,22 @@ export default function HeroSection() {
       </div>
 
       <div className="absolute inset-0 opacity-50">
-        {orbs.map((orb, i) => (
+        {[...Array(10)].map((_, i) => (
           <div
             key={i}
             className="absolute animate-float-gentle"
             style={{
-              left: `${orb.left}%`,
-              top: `${orb.top}%`,
-              animationDelay: `${orb.animationDelay}s`,
-              animationDuration: `${orb.animationDuration}s`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${8 + Math.random() * 6}s`,
             }}
           >
             <div
               className="rounded-full bg-gradient-to-br from-orange-400/40 to-amber-500/40 animate-pulse-gentle"
               style={{
-                width: `${orb.width}px`,
-                height: `${orb.height}px`,
+                width: `${15 + Math.random() * 35}px`,
+                height: `${15 + Math.random() * 35}px`,
                 filter: 'blur(2px)',
                 boxShadow: '0 0 30px rgba(251, 146, 60, 0.6), 0 0 60px rgba(251, 146, 60, 0.3)',
                 transform: 'translateZ(0)',
