@@ -14,9 +14,17 @@ export default function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { particleCount, enableShadows } = usePerformance();
 
+  const particlesRef = useRef<Particle[]>([]);
+  const animationFrameIdRef = useRef<number>(0);
+  const particleCountRef = useRef(particleCount);
+  const enableShadowsRef = useRef(enableShadows);
+
+  particleCountRef.current = particleCount;
+  enableShadowsRef.current = enableShadows;
+
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || particleCount === 0) return;
+    if (!canvas) return;
 
     const isMobile = window.innerWidth < 768;
     if (isMobile) return;
@@ -27,30 +35,61 @@ export default function ParticleBackground() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const particles: Particle[] = [];
     const colors = ['#FFD700', '#FF6B9D', '#C084FC', '#06B6D4', '#34D399'];
 
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
+    const initParticles = (count: number) => {
+      particlesRef.current = Array.from({ length: count }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
         size: Math.random() * 3 + 1,
         speedY: Math.random() * 0.5 + 0.2,
         opacity: Math.random() * 0.5 + 0.2,
         color: colors[Math.floor(Math.random() * colors.length)],
-      });
+      }));
+    };
+
+    if (particlesRef.current.length === 0) {
+      initParticles(particleCountRef.current || 30);
     }
 
-    let animationFrameId: number;
+    if (animationFrameIdRef.current) {
+      cancelAnimationFrame(animationFrameIdRef.current);
+    }
 
     const animate = () => {
+      const count = particleCountRef.current;
+      const shadows = enableShadowsRef.current;
+
+      if (count === 0) {
+        animationFrameIdRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
+      if (particlesRef.current.length !== count) {
+        if (count > particlesRef.current.length) {
+          const extra = count - particlesRef.current.length;
+          for (let i = 0; i < extra; i++) {
+            particlesRef.current.push({
+              x: Math.random() * canvas.width,
+              y: Math.random() * canvas.height,
+              size: Math.random() * 3 + 1,
+              speedY: Math.random() * 0.5 + 0.2,
+              opacity: Math.random() * 0.5 + 0.2,
+              color: colors[Math.floor(Math.random() * colors.length)],
+            });
+          }
+        } else {
+          particlesRef.current = particlesRef.current.slice(0, count);
+        }
+      }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach((particle) => {
+      particlesRef.current.forEach((particle) => {
         ctx.save();
         ctx.globalAlpha = particle.opacity;
 
-        if (enableShadows) {
+        if (shadows) {
           const gradient = ctx.createRadialGradient(
             particle.x, particle.y, 0,
             particle.x, particle.y, particle.size * 4
@@ -78,12 +117,12 @@ export default function ParticleBackground() {
         }
       });
 
-      animationFrameId = requestAnimationFrame(animate);
+      animationFrameIdRef.current = requestAnimationFrame(animate);
     };
 
     animate();
 
-    let resizeTimeout: NodeJS.Timeout;
+    let resizeTimeout: ReturnType<typeof setTimeout>;
     const handleResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
@@ -96,10 +135,8 @@ export default function ParticleBackground() {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrameId);
-      clearTimeout(resizeTimeout);
     };
-  }, [particleCount, enableShadows]);
+  }, []);
 
   return (
     <canvas

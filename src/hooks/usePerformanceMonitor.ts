@@ -73,21 +73,21 @@ export function usePerformanceMonitor(enabled: boolean = true): PerformanceMetri
     switch (level) {
       case 'high':
         return {
-          particleCount: 50,
-          enableShadows: true,
-          enableAnimations: true,
-          enableCursor: true,
-        };
-      case 'medium':
-        return {
           particleCount: 30,
           enableShadows: true,
           enableAnimations: true,
-          enableCursor: true,
+          enableCursor: false,
+        };
+      case 'medium':
+        return {
+          particleCount: 20,
+          enableShadows: false,
+          enableAnimations: true,
+          enableCursor: false,
         };
       case 'low':
         return {
-          particleCount: 15,
+          particleCount: 10,
           enableShadows: false,
           enableAnimations: true,
           enableCursor: false,

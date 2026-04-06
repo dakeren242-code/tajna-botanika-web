@@ -15,7 +15,7 @@ export default function DewEffect() {
   const [snowflakes, setSnowflakes] = useState<Snowflake[]>([]);
 
   useEffect(() => {
-    const flakes: Snowflake[] = Array.from({ length: 50 }, (_, i) => {
+    const flakes: Snowflake[] = Array.from({ length: 25 }, (_, i) => {
       const size = 8 + Math.random() * 20;
 
       return {

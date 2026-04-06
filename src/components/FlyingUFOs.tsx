@@ -24,7 +24,7 @@ export default function FlyingUFOs() {
   useEffect(() => {
     if (!enableAnimations) return;
 
-    const newUfos: UFO[] = Array.from({ length: 6 }, (_, i) => ({
+    const newUfos: UFO[] = Array.from({ length: 3 }, (_, i) => ({
       id: i,
       x: Math.random() * window.innerWidth,
       y: Math.random() * 150 + 50,

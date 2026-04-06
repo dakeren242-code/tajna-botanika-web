@@ -5,7 +5,6 @@ import { CartProvider } from './contexts/CartContext';
 import { PerformanceProvider } from './contexts/PerformanceContext';
 import { ConsentProvider } from './contexts/ConsentContext';
 import { useTracking, trackPageView } from './hooks/useTracking';
-import CustomCursor from './components/CustomCursor';
 import ParticleBackground from './components/ParticleBackground';
 import HeroSection from './components/HeroSection';
 import Header from './components/Header';
@@ -176,7 +175,6 @@ function App() {
           <CartProvider>
             <Router>
               <TrackingWrapper>
-                <CustomCursor />
                 <ParticleBackground />
                 <Header />
                 <Suspense fallback={null}>

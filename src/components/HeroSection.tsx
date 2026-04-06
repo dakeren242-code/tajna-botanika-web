@@ -24,7 +24,7 @@ export default function HeroSection() {
       <DewEffect />
 
       <div className="absolute inset-0 opacity-30">
-        {[...Array(15)].map((_, i) => (
+        {[...Array(12)].map((_, i) => (
           <div
             key={i}
             className="absolute animate-float"
@@ -48,7 +48,7 @@ export default function HeroSection() {
       </div>
 
       <div className="absolute inset-0 opacity-50">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(10)].map((_, i) => (
           <div
             key={i}
             className="absolute animate-float-gentle"
