@@ -7,14 +7,6 @@ interface TrailPoint {
   age: number;
 }
 
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  life: number;
-}
-
 export default function CustomCursor() {
   const { enableCursor } = usePerformance();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -82,10 +74,8 @@ export default function CustomCursor() {
     let mouseX = -100;
     let mouseY = -100;
     let isHovering = false;
-    let isClicking = false;
     let clickScale = 1;
     const trail: TrailPoint[] = [];
-    const particles: Particle[] = [];
     let spinAngle = 0;
     let pingOpacity = 0.4;
     let pingScale = 1;
@@ -105,28 +95,6 @@ export default function CustomCursor() {
       }
     };
 
-    const handleMouseDown = (e: MouseEvent) => {
-      isClicking = true;
-      clickScale = 0.75;
-
-      // Spawn particles (sparks from hammer hit)
-      for (let i = 0; i < 12; i++) {
-        const angle = (Math.PI * 2 * i) / 12;
-        particles.push({
-          x: e.clientX,
-          y: e.clientY,
-          vx: Math.cos(angle) * (4 + Math.random() * 4),
-          vy: Math.sin(angle) * (4 + Math.random() * 4) - 2,
-          life: 1
-        });
-      }
-    };
-
-    const handleMouseUp = () => {
-      isClicking = false;
-      clickScale = 1;
-    };
-
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       isHovering = !!(
@@ -137,8 +105,6 @@ export default function CustomCursor() {
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('mouseover', handleMouseOver, { passive: true });
 
     // Animation loop
@@ -159,50 +125,11 @@ export default function CustomCursor() {
       }
 
       // Smooth scale transition
-      const targetScale = isClicking ? 0.75 : (isHovering ? 1.5 : 1);
+      const targetScale = isHovering ? 1.5 : 1;
       clickScale += (targetScale - clickScale) * 0.2;
 
       // Age trail points
       trail.forEach(point => point.age++);
-
-      // Update & draw particles
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.2; // gravity
-        p.life -= 0.02;
-
-        if (p.life <= 0) {
-          particles.splice(i, 1);
-          continue;
-        }
-
-        // Draw particle (crystal trichome)
-        ctx.globalAlpha = p.life * 0.8;
-
-        // Crystal colors - white/yellow sparkles
-        const crystalColors = ['#fef9c3', '#fef3c7', '#fde68a', '#ffffff'];
-        const color = crystalColors[i % crystalColors.length];
-
-        // Outer glow
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = color;
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Bright center
-        ctx.shadowBlur = 6;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.2, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.shadowBlur = 0;
-      }
-      ctx.globalAlpha = 1;
 
       // Draw trail (smoke/vapor effect)
       trail.forEach((point, index) => {
@@ -327,8 +254,6 @@ ctx.drawImage(
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('mouseover', handleMouseOver);
       window.removeEventListener('resize', resize);
     };
