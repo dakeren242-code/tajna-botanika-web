@@ -115,7 +115,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         )}
 
         <div className="relative p-8">
-          <div className="mb-6 h-64 flex items-center justify-center relative overflow-hidden rounded-2xl">
+          <div className="mb-6 h-80 flex items-center justify-center relative overflow-hidden rounded-2xl">
             <div
               className="absolute inset-0 rounded-2xl blur-3xl opacity-30 group-hover:opacity-50 transition-opacity duration-500"
               style={{ backgroundColor: product.glow_color }}
@@ -128,7 +128,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
               <img
                 src={product.image_url}
                 alt={product.name}
-                className="relative w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                className="relative w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
               />
             ) : (
               <div className="relative">
