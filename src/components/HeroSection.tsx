@@ -1,6 +1,5 @@
 import { Leaf, Sparkles, ArrowDown } from 'lucide-react';
 import DewEffect from './DewEffect';
-import FlyingUFOs from './FlyingUFOs';
 
 export default function HeroSection() {
   const scrollToProducts = () => {
@@ -10,7 +9,6 @@ export default function HeroSection() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <FlyingUFOs />
       <DewEffect />
 
       <div className="absolute inset-0 opacity-30">

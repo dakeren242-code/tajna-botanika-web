@@ -135,7 +135,7 @@ export default function FlyingUFOs() {
   }
 
   return (
-    <div ref={containerRef} className="absolute inset-0 overflow-hidden pointer-events-none z-5">
+    <div ref={containerRef} className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 5 }}>
       {ufos.map((ufo) => (
         <div
           key={ufo.id}
