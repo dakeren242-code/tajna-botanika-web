@@ -31,6 +31,7 @@ export default function Header() {
             to="/"
             className="logo-link absolute flex items-center gap-3"
             style={{ left: '50%', transform: 'translateX(-50%)' }}
+            onClick={() => { document.documentElement.style.scrollBehavior = 'auto'; window.scrollTo(0, 0); document.documentElement.style.scrollBehavior = ''; }}
           >
             <img
               src="/logo_botanika.png"
