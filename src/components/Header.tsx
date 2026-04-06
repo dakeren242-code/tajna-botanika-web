@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { usePerformance } from '../contexts/PerformanceContext';
@@ -10,40 +10,6 @@ export default function Header() {
   const { totalItems } = useCart();
   const { mode, manualLevel, currentLevel, fps, setMode, setManualLevel } = usePerformance();
   const [showPerformanceMenu, setShowPerformanceMenu] = useState(false);
-  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
-  const location = useLocation();
-  const isHomePage = location.pathname === '/';
-
-  useEffect(() => {
-    if (!isHomePage) {
-      setIsHeaderVisible(true);
-      return;
-    }
-
-    let mouseY = 0;
-
-    const updateHeaderVisibility = () => {
-      const scrolled = window.scrollY > 100;
-      const mouseAtTop = mouseY < 100;
-      setIsHeaderVisible(scrolled || mouseAtTop);
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseY = e.clientY;
-      updateHeaderVisibility();
-    };
-
-    const handleScroll = () => {
-      updateHeaderVisibility();
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [isHomePage]);
 
   const performanceLevelLabel = {
     high: 'Vysoký',
@@ -53,30 +19,26 @@ export default function Header() {
   };
 
   return (
-    <>
-      <header
-        className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-xl border-b border-emerald-500/20 transition-transform duration-300 ease-in-out"
-        style={{
-          overflow: 'visible',
-          transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)'
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 py-3" style={{ overflow: 'visible' }}>
-          <div className="flex items-center justify-between relative" style={{ overflow: 'visible' }}>
-            <div className="flex-1" />
+    <header
+      className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-emerald-500/20"
+      style={{ overflow: 'visible' }}
+    >
+      <div className="max-w-7xl mx-auto px-4 py-2" style={{ overflow: 'visible' }}>
+        <div className="flex items-center justify-between relative" style={{ overflow: 'visible' }}>
+          <div className="flex-1" />
 
-            <Link to="/" className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-3 group">
-              <img
-                src="/logo_botanika.png"
-                alt="Tajná Botanika"
-                className="h-12 w-12 object-cover rounded-full group-hover:scale-105 transition-transform drop-shadow-lg"
-              />
-              <span className="text-2xl font-serif font-bold bg-gradient-to-br from-white via-yellow-100 to-yellow-600 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)] group-hover:drop-shadow-[0_2px_12px_rgba(250,204,21,0.5)] transition-all tracking-wide">
-                Tajná Botanika
-              </span>
-            </Link>
+          <Link to="/" className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-3 group">
+            <img
+              src="/logo_botanika.png"
+              alt="Tajná Botanika"
+              className="h-14 w-14 object-cover rounded-full ring-2 ring-emerald-500/30 group-hover:ring-emerald-400/60 group-hover:scale-105 transition-all drop-shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+            />
+            <span className="hidden sm:inline text-xl font-serif font-bold bg-gradient-to-br from-white via-yellow-100 to-yellow-600 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)] group-hover:drop-shadow-[0_2px_12px_rgba(250,204,21,0.5)] transition-all tracking-wide">
+              Tajná Botanika
+            </span>
+          </Link>
 
-            <nav className="flex items-center gap-4 flex-1 justify-end" style={{ overflow: 'visible' }}>
+          <nav className="flex items-center gap-4 flex-1 justify-end" style={{ overflow: 'visible' }}>
             <div className="relative">
               <button
                 onClick={() => setShowPerformanceMenu(!showPerformanceMenu)}
@@ -172,7 +134,6 @@ export default function Header() {
               className="relative flex items-center gap-2 px-4 py-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all"
             >
               <ShoppingCart className="w-5 h-5" />
-
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
                   {totalItems}
@@ -201,7 +162,6 @@ export default function Header() {
           </nav>
         </div>
       </div>
-      </header>
-    </>
+    </header>
   );
 }
