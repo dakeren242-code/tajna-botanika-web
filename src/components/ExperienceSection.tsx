@@ -29,7 +29,7 @@ export default function ExperienceSection() {
   ];
 
   return (
-    <section className="relative py-20 px-6 overflow-hidden">
+    <section id="o-nas" className="relative py-20 px-6 overflow-hidden">
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-black via-yellow-950/10 to-black" />
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent" />

@@ -32,7 +32,7 @@ export default function FAQSection() {
   ];
 
   return (
-    <section className="relative py-20 px-6 overflow-hidden">
+    <section id="faq" className="relative py-20 px-6 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-black via-slate-950 to-black" />
 
       <div className="absolute inset-0">

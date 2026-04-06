@@ -45,15 +45,19 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-bold mb-6 text-lg">Produkty</h4>
             <ul className="space-y-3">
-              {['Všechny květy', 'Nové příchody', 'Bestsellery', 'Limitované edice'].map(
-                (item, index) => (
+              {[
+                { label: 'Všechny květy', href: '/#products' },
+                { label: 'Nové příchody', href: '/#products' },
+                { label: 'Bestsellery', href: '/#products' },
+                { label: 'Limitované edice', href: '/#products' },
+              ].map((item, index) => (
                   <li key={index}>
                     <a
-                      href="#"
+                      href={item.href}
                       data-cursor-hover
                       className="text-gray-400 hover:text-yellow-400 transition-colors duration-300 inline-block hover:translate-x-2 transform transition-transform"
                     >
-                      {item}
+                      {item.label}
                     </a>
                   </li>
                 )
@@ -64,14 +68,19 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-bold mb-6 text-lg">Informace</h4>
             <ul className="space-y-3">
-              {['O nás', 'Kontakt', 'Certifikace', 'FAQ'].map((item, index) => (
+              {[
+                { label: 'O nás', href: '/#o-nas' },
+                { label: 'Kontakt', href: '/#kontakt' },
+                { label: 'Certifikace', href: '/#o-nas' },
+                { label: 'FAQ', href: '/#faq' },
+              ].map((item, index) => (
                 <li key={index}>
                   <a
-                    href="#"
+                    href={item.href}
                     data-cursor-hover
                     className="text-gray-400 hover:text-yellow-400 transition-colors duration-300 inline-block hover:translate-x-2 transform transition-transform"
                   >
-                    {item}
+                    {item.label}
                   </a>
                 </li>
               ))}
