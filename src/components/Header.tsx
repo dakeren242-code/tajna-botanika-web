@@ -23,17 +23,17 @@ export default function Header() {
       className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-emerald-500/20"
       style={{ overflow: 'visible' }}
     >
-      <div className="max-w-7xl mx-auto px-4 py-2" style={{ overflow: 'visible' }}>
+      <div className="max-w-7xl mx-auto px-4 py-3" style={{ overflow: 'visible' }}>
         <div className="flex items-center justify-between relative" style={{ overflow: 'visible' }}>
           <div className="flex-1" />
 
-          <Link to="/" className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-3 group">
+          <Link to="/" className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-3">
             <img
               src="/logo_botanika.png"
               alt="Tajná Botanika"
-              className="h-14 w-14 object-cover rounded-full ring-2 ring-emerald-500/30 group-hover:ring-emerald-400/60 group-hover:scale-105 transition-all drop-shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+              className="h-12 w-12 object-cover rounded-full"
             />
-            <span className="hidden sm:inline text-xl font-serif font-bold bg-gradient-to-br from-white via-yellow-100 to-yellow-600 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(250,204,21,0.3)] group-hover:drop-shadow-[0_2px_12px_rgba(250,204,21,0.5)] transition-all tracking-wide">
+            <span className="hidden sm:inline text-xl font-serif font-bold bg-gradient-to-br from-white via-yellow-100 to-yellow-600 bg-clip-text text-transparent tracking-wide">
               Tajná Botanika
             </span>
           </Link>
