@@ -50,7 +50,7 @@ export default function FloatingActionButton() {
         </div>
       )}
 
-      <div className="fixed bottom-32 right-6 z-[10000]">
+      <div className="fixed bottom-36 right-6 z-[10000]">
         {isOpen && (
           <div className="absolute bottom-20 right-0 w-80 animate-scale-in">
             <div className="relative">

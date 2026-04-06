@@ -153,6 +153,20 @@ export default function OrderDetail() {
                     <p>{address.country}</p>
                     <p className="pt-2 text-sm text-gray-400">Tel: {address.phone}</p>
                   </div>
+                ) : (order as any).shipping_address ? (
+                  <div className="text-gray-300 space-y-1">
+                    <p className="font-semibold text-white">{(order as any).first_name} {(order as any).last_name}</p>
+                    <p>{(order as any).shipping_address.street}</p>
+                    <p>{(order as any).shipping_address.city}, {(order as any).shipping_address.zip}</p>
+                    {(order as any).email && <p className="pt-2 text-sm text-gray-400">Email: {(order as any).email}</p>}
+                    {(order as any).phone && <p className="text-sm text-gray-400">Tel: {(order as any).phone}</p>}
+                  </div>
+                ) : (order as any).first_name ? (
+                  <div className="text-gray-300 space-y-1">
+                    <p className="font-semibold text-white">{(order as any).first_name} {(order as any).last_name}</p>
+                    {(order as any).email && <p className="text-sm text-gray-400">Email: {(order as any).email}</p>}
+                    {(order as any).phone && <p className="text-sm text-gray-400">Tel: {(order as any).phone}</p>}
+                  </div>
                 ) : (
                   <p className="text-gray-400">Adresa není k dispozici</p>
                 )}
