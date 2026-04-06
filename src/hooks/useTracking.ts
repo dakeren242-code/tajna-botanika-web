@@ -216,7 +216,10 @@ export function initializeTracking(consent?: ConsentState) {
     })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
     window.fbq!('init', fbPixelId);
-    window.fbq!('track', 'PageView');
+    // Do NOT fire PageView here — PageViewTracker in App.tsx fires trackPageView()
+    // on every route change (including initial load), sending both pixel + CAPI
+    // with a shared eventID for deduplication. Firing here produces a pixel-only
+    // PageView with no CAPI counterpart, worsening the coverage ratio.
   }
 
   if (effectiveConsent.analytics && gaId && !window.gtag && isProduction) {
