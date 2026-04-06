@@ -151,11 +151,19 @@ export default function ProductDetail() {
               />
               <div className="relative z-10 flex items-center justify-center w-full h-full">
                 {product.image_url && (
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className="w-full max-w-md h-auto object-contain drop-shadow-2xl"
-                  />
+                  <div
+                    className="w-80 h-80 md:w-96 md:h-96 rounded-full overflow-hidden"
+                    style={{
+                      boxShadow: `0 0 80px ${product.glow_color || product.color_accent}60`,
+                      border: `3px solid ${product.glow_color || product.color_accent}40`,
+                    }}
+                  >
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 )}
               </div>
             </div>
