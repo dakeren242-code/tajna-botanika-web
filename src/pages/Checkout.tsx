@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { supabase } from '../lib/supabase';
 import { trackEvent } from '../hooks/useTracking';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
 import PaymentAndShipping from '../components/checkout/PaymentAndShipping';
 
 interface CustomerData {
@@ -236,6 +236,9 @@ export default function Checkout() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-emerald-950 to-black py-20 px-4">
       <div className="max-w-4xl mx-auto">
+        <Link to="/cart" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-4">
+          <ArrowLeft className="w-4 h-4" />Zpět do košíku
+        </Link>
         <div className="bg-black/50 backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-8">
           {error && (
             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">

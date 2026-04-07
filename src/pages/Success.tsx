@@ -98,7 +98,7 @@ export function Success() {
 
   // Generate QR payment string (SPAYD format for Czech banks)
   const iban = 'CZ6520100000002001645045';
-  const spayd = `SPD*1.0*ACC:${iban}*AM:${totalAmount.toFixed(2)}*CC:CZK*X-VS:${(orderNumber || '').replace(/\D/g, '')}*MSG:Objednavka ${orderNumber || ''}`;
+  const spayd = `SPD*1.0*ACC:${iban}*AM:${totalAmount.toFixed(2)}*CC:CZK*X-VS:${(orderNumber || '').replace(/\D/g, '')}*MSG:Objednávka ${orderNumber || ''}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(spayd)}`;
 
   const copyToClipboard = (text: string) => {
@@ -300,7 +300,7 @@ export function Success() {
                   <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                     <h4 className="text-yellow-400 font-semibold mb-2">Další kroky:</h4>
                     <ol className="text-yellow-300 text-sm space-y-1 list-decimal list-inside">
-                      <li>Proveďte platbu podle instrukcí výše (pošlete nám obrazek z mobilu po zaplacení)</li>
+                      <li>Proveďte platbu podle instrukcí výše (pošlete nám obrázek z mobilu po zaplacení)</li>
                       <li>Po ověření platby vám domlouváme místo předání v oblasti Praha - Beroun</li>
                       <li>Vyzvednutí je možné 24/7 dle vzájemné dohody</li>
                     </ol>

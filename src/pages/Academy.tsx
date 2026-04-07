@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  BookOpen, Sparkles, Leaf, Wind, ArrowRight,
+  BookOpen, Sparkles, Leaf, Wind, ArrowRight, ArrowLeft,
   Clock, Tag, ChevronRight, FlaskConical,
   Moon, Heart, Brain, CheckCircle2, XCircle, Trophy,
   Flower2, Droplets, Sun, TreePine, Flame
@@ -369,8 +369,15 @@ export default function Academy() {
     <div className="min-h-screen text-white relative">
       <AcademyParticles />
 
+      {/* Back button */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-28 md:pt-32">
+        <Link to="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm">
+          <ArrowLeft className="w-4 h-4" />Zpět
+        </Link>
+      </div>
+
       {/* ────── HERO ────── */}
-      <section className="relative z-10 flex flex-col items-center justify-center pt-32 md:pt-40 pb-16 md:pb-24 px-6">
+      <section className="relative z-10 flex flex-col items-center justify-center pt-8 md:pt-12 pb-16 md:pb-24 px-6">
         <div className="absolute inset-0 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse 60% 40% at 50% 30%, rgba(16,185,129,0.08) 0%, transparent 70%)' }} />
         <div className="absolute inset-0 pointer-events-none"

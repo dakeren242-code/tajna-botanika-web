@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Phone, Save, LogOut, Package, AlertCircle, CheckCircle, Gift, Copy } from 'lucide-react';
+import { User, Mail, Phone, Save, LogOut, Package, AlertCircle, CheckCircle, Gift, Copy, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function Profile() {
@@ -71,6 +71,9 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-emerald-950 to-black py-20 px-4">
       <div className="max-w-4xl mx-auto">
+        <Link to="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-4">
+          <ArrowLeft className="w-4 h-4" />Zpět
+        </Link>
         <div className="bg-black/50 backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-8">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
