@@ -329,13 +329,13 @@ const academyRooms = [
 const scienceFacts = [
   { icon: Brain, title: 'Endokanabinoidn\u00ed syst\u00e9m', text: 'Va\u0161e t\u011blo m\u00e1 vlastn\u00ed syst\u00e9m kanabinoidn\u00edch receptor\u016f (CB1 a CB2). Reguluje n\u00e1ladu, bolest, apetit i sp\u00e1nek. Objeven v roce 1992.', color: '#a855f7' },
   { icon: Droplets, title: 'Entourage effect', text: 'Kanabinoidy a terp\u00e9ny p\u016fsob\u00ed siln\u011bji spole\u010dn\u011b ne\u017e ka\u017ed\u00fd zvl\u00e1\u0161\u0165. Proto jsou full-spectrum extrakty \u00fa\u010dinn\u011bj\u0161\u00ed ne\u017e izol\u00e1ty.', color: '#10b981' },
-  { icon: FlaskConical, title: 'THC-X vs HHC', text: 'THC-X je hexylovi\u0301 ester s unika\u0301tni\u0301mi vlastnostmi. HHC je hydrogenovaná forma THC — stabiln\u011bj\u0161\u00ed, ale jednodu\u0161\u0161\u00ed. Oba leg\u00e1ln\u00ed v \u010cR.', color: '#6366f1' },
+  { icon: FlaskConical, title: 'THC-X vs HHC', text: 'THC-X je hexylový ester s unikátními vlastnostmi. HHC je hydrogenovaná forma THC — stabilnější, ale jednodušší. Oba legální v ČR.', color: '#6366f1' },
   { icon: Flower2, title: '5 kl\u00ed\u010dov\u00fdch terp\u00e9n\u016f', text: 'Myrcen (relax), Limonen (energie), Karyofylen (protiz\u00e1n\u011bt), Linalool (sp\u00e1nek), Pinen (soust\u0159ed\u011bn\u00ed). Ka\u017ed\u00fd m\u00e1 jinou v\u016fni a \u00fa\u010dinek.', color: '#f59e0b' },
 ];
 
 /* Garden tips */
 const gardenTips = [
-  { icon: Sun, title: 'Nepř\u00edtel \u010d. 1: Sv\u011btlo', text: 'UV z\u00e1\u0159en\u00ed rozkl\u00e1d\u00e1 kanabinoidy. V\u017edy skladujte v temnu, v nepr\u016fhledn\u00e9 n\u00e1dob\u011b.', color: '#f59e0b' },
+  { icon: Sun, title: 'Nepřítel č. 1: Světlo', text: 'UV záření rozkládá kanabinoidy. Vždy skladujte v temnu, v neprůhledné nádobě.', color: '#f59e0b' },
   { icon: Droplets, title: 'Vlhkost 55\u201362 %', text: 'P\u0159\u00edli\u0161 sucho = l\u00e1mav\u00e9 trichomy. P\u0159\u00edli\u0161 vlhko = pl\u00edsn\u011b. Boveda pack pom\u016f\u017ee udr\u017eet ide\u00e1l.', color: '#06b6d4' },
   { icon: Flame, title: 'Teplota 15\u201321 \u00b0C', text: 'Ne lednice (kondenzace), ne mraz\u00e1k (po\u0161kozuje strukturu). Pokojov\u00e1 teplota mimo radi\u00e1tor.', color: '#f43f5e' },
   { icon: TreePine, title: 'Jak poznat kvalitu', text: 'Hust\u00e9 trichomy, syt\u00e1 barva, v\u00fdrazn\u00e9 aroma. Pokud nevoní nebo je such\u00fd — nen\u00ed \u010derstv\u00fd.', color: '#10b981' },
