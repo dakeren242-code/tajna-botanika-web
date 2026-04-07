@@ -1,5 +1,5 @@
 import { useState, useEffect, memo } from 'react';
-import { X, Gift, ArrowRight, Sparkles, Percent } from 'lucide-react';
+import { X, Gift, ArrowRight, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 function ExitIntentPopup() {
@@ -122,13 +122,13 @@ function ExitIntentPopup() {
 
           <div className="relative p-10 text-center">
             {/* Discount badge — big and bold */}
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/30 mb-6 relative">
-              <div className="text-center">
-                <Percent className="w-6 h-6 text-emerald-400 mx-auto mb-0.5" />
-                <span className="text-3xl font-black text-white leading-none">15</span>
+            <div className="inline-flex items-center justify-center w-28 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/30 mb-6 relative">
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-black text-white leading-none">15</span>
+                <span className="text-xl font-black text-emerald-400 leading-none">%</span>
               </div>
               {/* Pulse ring */}
-              <div className="absolute inset-0 rounded-3xl border-2 border-emerald-400/30 animate-ping-slow" />
+              <div className="absolute inset-0 rounded-2xl border-2 border-emerald-400/30 animate-ping-slow" />
             </div>
 
             <h3 className="text-3xl font-black text-white mb-2">
