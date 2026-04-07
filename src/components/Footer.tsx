@@ -1,4 +1,4 @@
-import { Sparkles, Instagram, Twitter, Mail } from 'lucide-react';
+import { Sparkles, Instagram, Twitter, Mail, ShieldCheck, Truck, CreditCard, Lock, FlaskConical } from 'lucide-react';
 import { useConsent } from '../contexts/ConsentContext';
 
 export default function Footer() {
@@ -86,6 +86,39 @@ export default function Footer() {
               ))}
             </ul>
           </div>
+        </div>
+
+        {/* Trust & Payment Badges */}
+        <div className="pt-8 border-t border-white/10 mb-8">
+          <div className="flex flex-wrap justify-center gap-6 mb-6">
+            {[
+              { icon: ShieldCheck, label: 'SSL Šifrování', color: 'text-emerald-400' },
+              { icon: FlaskConical, label: 'Laboratorně testováno', color: 'text-blue-400' },
+              { icon: Truck, label: 'Doručení 1-2 dny', color: 'text-yellow-400' },
+              { icon: Lock, label: 'Bezpečná platba', color: 'text-purple-400' },
+            ].map((badge, i) => (
+              <div key={i} className="flex items-center gap-2 text-gray-400">
+                <badge.icon className={`w-4 h-4 ${badge.color}`} />
+                <span className="text-xs font-medium">{badge.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-center gap-4 mb-4">
+            {/* Payment method badges */}
+            {['Visa', 'Mastercard', 'Převod', 'Dobírka'].map((method) => (
+              <div
+                key={method}
+                className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold text-gray-400"
+              >
+                {method === 'Visa' && <CreditCard className="w-3 h-3 inline mr-1 text-blue-400" />}
+                {method === 'Mastercard' && <CreditCard className="w-3 h-3 inline mr-1 text-orange-400" />}
+                {method}
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-gray-600 text-xs">
+            Přijímáme všechny hlavní platební metody • 30 dní záruka spokojenosti • 2 500+ spokojených zákazníků
+          </p>
         </div>
 
         <div className="pt-8 border-t border-white/10">

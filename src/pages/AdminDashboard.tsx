@@ -5,6 +5,7 @@ import { supabase, Order } from '../lib/supabase';
 import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag, Facebook, Radio, Trash2 } from 'lucide-react';
 import ProductManagement from '../components/admin/ProductManagement';
 import FacebookCatalogManager from '../components/admin/FacebookCatalogManager';
+import SupportAdmin from '../components/admin/SupportAdmin';
 import { getVisitorCount, onVisitorCountChange } from '../App';
 
 const statusLabels = {
@@ -25,7 +26,7 @@ const paymentStatusLabels = {
 export default function AdminDashboard() {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'catalog'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'catalog' | 'support'>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -189,6 +190,17 @@ export default function AdminDashboard() {
               <Facebook className="w-5 h-5" />
               Facebook Catalog
             </button>
+            <button
+              onClick={() => setActiveTab('support')}
+              className={`flex items-center gap-2 px-4 py-3 font-semibold transition-colors border-b-2 ${
+                activeTab === 'support'
+                  ? 'text-emerald-400 border-emerald-400'
+                  : 'text-gray-400 border-transparent hover:text-white'
+              }`}
+            >
+              <Radio className="w-5 h-5" />
+              Podpora
+            </button>
           </div>
 
           {activeTab === 'orders' && (
@@ -318,6 +330,8 @@ export default function AdminDashboard() {
           {activeTab === 'products' && <ProductManagement />}
 
           {activeTab === 'catalog' && <FacebookCatalogManager />}
+
+          {activeTab === 'support' && <SupportAdmin />}
         </div>
       </div>
     </div>

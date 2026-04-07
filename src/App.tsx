@@ -43,6 +43,7 @@ const CookieBanner = lazy(() => import('./components/CookieBanner'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const BlogSection = lazy(() => import('./components/BlogSection'));
+const SupportChat = lazy(() => import('./components/SupportChat'));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen bg-black">
@@ -267,6 +268,9 @@ function App() {
                 </Suspense>
                 <Suspense fallback={null}>
                   <CookieBanner />
+                </Suspense>
+                <Suspense fallback={null}>
+                  <SupportChat />
                 </Suspense>
               </TrackingWrapper>
             </Router>
