@@ -52,13 +52,18 @@ export default function AdminDashboard() {
   }, [user, isAdmin, authLoading, navigate]);
 
   useEffect(() => {
-    const ch = supabase.channel('visitors')
-      .on('presence', { event: 'sync' }, () => {
-        const state = ch.presenceState();
-        setLiveVisitors(Object.keys(state).length);
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    // Poll the existing visitors channel presence state
+    const interval = setInterval(() => {
+      const channels = supabase.getChannels();
+      for (const ch of channels) {
+        if ((ch as any).topic === 'realtime:visitors') {
+          const state = ch.presenceState();
+          setLiveVisitors(Object.keys(state).length);
+          return;
+        }
+      }
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const loadOrders = async () => {

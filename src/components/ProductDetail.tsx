@@ -223,7 +223,7 @@ export default function ProductDetail() {
                     <div>
                       <div className="text-gray-400 text-sm mb-2">Botanický Profil</div>
                       <div className="text-white font-bold text-lg">
-                        {Array.isArray(product.effects) ? product.effects.map(e => String(e).replace(/[{}\[\]"]/g, '').trim()).filter(Boolean).join(', ') : String(product.effects || '').replace(/[{}\[\]"]/g, '').trim()}
+                        {Array.isArray(product.effects) ? product.effects.map(e => String(e).replace(/[{}\[\]"\\]/g, '').trim()).filter(Boolean).join(', ') : String(product.effects || '').replace(/[{}\[\]"\\]/g, '').trim()}
                       </div>
                     </div>
                   </div>

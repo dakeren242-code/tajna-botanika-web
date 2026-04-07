@@ -184,8 +184,8 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                 <p className="text-gray-400 text-xs">
                   <strong>Profil:</strong>{' '}
                   {Array.isArray(product.effects)
-                    ? product.effects.map(e => String(e).replace(/[{}\[\]"]/g, '').trim()).filter(Boolean).join(', ')
-                    : String(product.effects).replace(/[{}\[\]"]/g, '').trim()}
+                    ? product.effects.map(e => String(e).replace(/[{}\[\]"\\]/g, '').trim()).filter(Boolean).join(', ')
+                    : String(product.effects).replace(/[{}\[\]"\\]/g, '').trim()}
                 </p>
               </div>
             )}
