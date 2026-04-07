@@ -1,4 +1,5 @@
 import { Sparkles, ArrowDown, Instagram } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function HeroSection() {
   const scrollToProducts = () => {
@@ -64,9 +65,12 @@ export default function HeroSection() {
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>
 
-        {/* 15% sleva banner */}
-        <div className="relative inline-flex items-center justify-center gap-2 md:gap-3 px-3 md:px-8 py-2.5 md:py-4 mb-4 md:mb-6 rounded-xl md:rounded-2xl backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 max-w-[280px] md:max-w-none mx-auto">
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-yellow-500/20 rounded-xl md:rounded-2xl border-2 border-yellow-400/40" />
+        {/* 15% sleva banner — clickable, links to registration */}
+        <Link
+          to="/register"
+          className="relative inline-flex items-center justify-center gap-2 md:gap-3 px-4 md:px-8 py-3 md:py-4 mb-4 md:mb-6 rounded-xl md:rounded-2xl backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 max-w-[320px] md:max-w-none mx-auto cursor-pointer"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-yellow-500/20 rounded-xl md:rounded-2xl border-2 border-yellow-400/40 group-hover:border-yellow-400/70 group-hover:shadow-[0_0_30px_rgba(250,204,21,0.3)] transition-all duration-500" />
 
           <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 animate-pulse relative z-10" />
           <div className="relative z-10 text-center">
@@ -75,11 +79,11 @@ export default function HeroSection() {
               <span className="text-yellow-100 text-lg md:text-2xl font-black">15% slevu</span>
             </span>
             <span className="block text-yellow-200/80 text-xs md:text-sm mt-0.5 md:mt-1">
-              Slevový kód můžete uplatnit při jakékoliv objednávce
+              Klikněte a získejte kód na email →
             </span>
           </div>
           <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 animate-pulse relative z-10" style={{ animationDelay: '0.5s' }} />
-        </div>
+        </Link>
 
         {/* Scroll down + Instagram — centered, compact */}
         <div className="flex items-center justify-center gap-4 mt-4">

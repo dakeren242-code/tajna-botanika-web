@@ -53,6 +53,7 @@ const ProductComparisonSection = lazy(() => import('./components/ProductComparis
 const InstagramSection = lazy(() => import('./components/InstagramSection'));
 const SeasonalBanner = lazy(() => import('./components/SeasonalBanner'));
 const ReferralSection = lazy(() => import('./components/ReferralSection'));
+const FloatingRegisterCTA = lazy(() => import('./components/FloatingRegisterCTA'));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen bg-black">
@@ -298,6 +299,9 @@ function App() {
                 </Suspense>
                 <Suspense fallback={null}>
                   <ExitIntentPopup />
+                </Suspense>
+                <Suspense fallback={null}>
+                  <FloatingRegisterCTA />
                 </Suspense>
                 <Suspense fallback={null}>
                   <CookieBanner />
