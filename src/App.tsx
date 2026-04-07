@@ -41,6 +41,8 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const CookieBanner = lazy(() => import('./components/CookieBanner'));
 const Blog = lazy(() => import('./pages/Blog'));
+const Terms = lazy(() => import('./pages/Terms'));
+const Privacy = lazy(() => import('./pages/Privacy'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const BlogSection = lazy(() => import('./components/BlogSection'));
 const SupportChat = lazy(() => import('./components/SupportChat'));
@@ -262,6 +264,8 @@ function App() {
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/blog" element={<Blog />} />
                     <Route path="/blog/:slug" element={<BlogPost />} />
+                    <Route path="/podminky" element={<Terms />} />
+                    <Route path="/soukromi" element={<Privacy />} />
                   </Routes>
                 </Suspense>
                 <Suspense fallback={null}>

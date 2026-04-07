@@ -128,14 +128,14 @@ export default function Footer() {
             </p>
             <div className="flex gap-6">
               <a
-                href="#"
+                href="/soukromi"
                 data-cursor-hover
                 className="text-gray-500 hover:text-yellow-400 text-sm transition-colors duration-300"
               >
                 Ochrana soukromí
               </a>
               <a
-                href="#"
+                href="/podminky"
                 data-cursor-hover
                 className="text-gray-500 hover:text-yellow-400 text-sm transition-colors duration-300"
               >
