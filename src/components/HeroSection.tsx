@@ -65,24 +65,24 @@ export default function HeroSection() {
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>
 
-        {/* 15% sleva — big yellow-green box like tajnabotanika.com */}
+        {/* 15% sleva — big golden CTA like tajnabotanika.com */}
         <Link
           to="/register"
-          className="flex flex-col items-center gap-1 px-8 md:px-12 py-4 md:py-5 mb-6 rounded-2xl border-2 hover:scale-[1.02] transition-all duration-300 group"
+          className="inline-flex flex-col items-center gap-2 px-10 md:px-16 py-5 md:py-6 mb-6 rounded-2xl border-2 hover:scale-[1.03] transition-all duration-300 group cursor-pointer"
           style={{
-            background: 'linear-gradient(135deg, rgba(202,138,4,0.15), rgba(34,197,94,0.1))',
-            borderColor: 'rgba(202,138,4,0.35)',
-            boxShadow: '0 0 30px rgba(202,138,4,0.1)',
+            background: 'linear-gradient(135deg, rgba(202,138,4,0.25), rgba(234,179,8,0.2), rgba(202,138,4,0.15))',
+            borderColor: 'rgba(234,179,8,0.5)',
+            boxShadow: '0 0 40px rgba(234,179,8,0.15), 0 0 80px rgba(202,138,4,0.08)',
           }}
         >
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-yellow-400" />
-            <span className="text-base md:text-lg font-medium text-yellow-100">
-              Zaregistrujte se a získejte <span className="font-black text-white">15% slevu</span>
+          <div className="flex items-center gap-3">
+            <Sparkles className="w-6 h-6 text-yellow-400 group-hover:rotate-12 transition-transform" />
+            <span className="text-lg md:text-2xl font-semibold text-yellow-100">
+              Zaregistrujte se a získejte <span className="font-black text-white text-xl md:text-3xl">15% slevu</span>
             </span>
-            <Sparkles className="w-5 h-5 text-yellow-400" />
+            <Sparkles className="w-6 h-6 text-yellow-400 group-hover:-rotate-12 transition-transform" />
           </div>
-          <span className="text-xs text-yellow-300/60">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
+          <span className="text-sm md:text-base text-yellow-300/70 font-light">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
         </Link>
 
         {/* Tags — IG + 9 odrůd */}
