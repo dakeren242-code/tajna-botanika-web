@@ -54,8 +54,8 @@ export default function SpinWheel({ onClose }: Props) {
         </button>
 
         <div className="text-center mb-6">
-          <h3 className="text-xl font-black text-white mb-1">Kolo \u0161t\u011bst\u00ed</h3>
-          <p className="text-sm text-gray-500">Zato\u010d a vyhraj! Stoj\u00ed {spinCost} bod\u016f.</p>
+          <h3 className="text-xl font-black text-white mb-1">Kolo štěstí</h3>
+          <p className="text-sm text-gray-500">Zatoč a vyhraj! Stojí {spinCost} bodů.</p>
         </div>
 
         {/* Wheel */}
@@ -124,7 +124,7 @@ export default function SpinWheel({ onClose }: Props) {
         {prize && (
           <div className="text-center mb-4 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20"
             style={{ animation: 'fadeIn 0.5s ease-out' }}>
-            <p className="text-yellow-400 text-sm font-bold mb-1">V\u00fdhra!</p>
+            <p className="text-yellow-400 text-sm font-bold mb-1">Výhra!</p>
             <p className="text-white text-lg font-black">{prize.label}</p>
           </div>
         )}
@@ -145,10 +145,10 @@ export default function SpinWheel({ onClose }: Props) {
               : 'bg-gray-700 text-gray-500 cursor-not-allowed'
           }`}
         >
-          {spinning ? 'To\u010d\u00ed se...' : prize ? 'Zato\u010dit znovu' : `Zato\u010dit (${spinCost} bod\u016f)`}
+          {spinning ? 'Točí se...' : prize ? 'Zatočit znovu' : `Zatočit (${spinCost} bodů)`}
         </button>
 
-        <p className="text-center text-[10px] text-gray-600 mt-3">Max 3 to\u010den\u00ed denn\u011b</p>
+        <p className="text-center text-[10px] text-gray-600 mt-3">Max 3 točení denně</p>
 
         <style>{`
           @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }

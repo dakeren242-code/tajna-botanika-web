@@ -234,7 +234,7 @@ function LoyaltySection() {
     if (isSpinType) { setShowSpin(true); return; }
     setRedeemMsg('');
     const res = await redeemReward(rewardId);
-    setRedeemMsg(res.success ? 'Odm\u011bna vym\u011bn\u011bna!' : (res.error || 'Chyba'));
+    setRedeemMsg(res.success ? 'Odměna vyměněna!' : (res.error || 'Chyba'));
     if (res.success) setTimeout(() => setRedeemMsg(''), 3000);
   };
 
@@ -244,7 +244,7 @@ function LoyaltySection() {
     <div className="mb-8 border-t border-emerald-500/20 pt-8" id="loyalty">
       <div className="flex items-center gap-3 mb-6">
         <Award className="w-6 h-6 text-yellow-400" />
-        <h2 className="text-xl font-bold text-white">V\u011brnostn\u00ed program</h2>
+        <h2 className="text-xl font-bold text-white">Věrnostní program</h2>
       </div>
 
       {/* Badge + stats */}
@@ -253,22 +253,22 @@ function LoyaltySection() {
         <div className="grid grid-cols-2 gap-3">
           <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 text-center">
             <p className="text-2xl font-black text-white">{points.current_points}</p>
-            <p className="text-[10px] text-gray-500">Aktu\u00e1ln\u00ed body</p>
+            <p className="text-[10px] text-gray-500">Aktuální body</p>
           </div>
           <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 text-center">
             <p className="text-2xl font-black text-white">{points.lifetime_points}</p>
-            <p className="text-[10px] text-gray-500">Celkem z\u00edskan\u00e9</p>
+            <p className="text-[10px] text-gray-500">Celkem získané</p>
           </div>
           <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 text-center col-span-2">
             <p className={`text-lg font-bold ${tier.color}`}>{tier.name}</p>
-            <p className="text-[10px] text-gray-500">{tier.multiplier}x n\u00e1sobi\u010d bod\u016f</p>
+            <p className="text-[10px] text-gray-500">{tier.multiplier}x násobič bodů</p>
           </div>
         </div>
       </div>
 
       {/* Rewards catalog */}
       <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-        <Star className="w-4 h-4 text-yellow-400" />Odm\u011bny k vym\u011bn\u011b
+        <Star className="w-4 h-4 text-yellow-400" />Odměny k vyměně
       </h3>
       {redeemMsg && (
         <div className={`mb-3 p-2.5 rounded-lg text-sm font-medium ${redeemMsg.includes('!') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
@@ -298,7 +298,7 @@ function LoyaltySection() {
                       : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/25'
                     : 'bg-white/3 text-gray-600 border border-white/5 cursor-not-allowed'
                 }`}>
-                {isSpin ? 'Zato\u010dit!' : 'Vym\u011bnit'}
+                {isSpin ? 'Zatočit!' : 'Vyměnit'}
               </button>
             </div>
           );
@@ -309,16 +309,16 @@ function LoyaltySection() {
       {activeRedemptions.length > 0 && (
         <div className="mb-6">
           <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-            <Gift className="w-4 h-4 text-amber-400" />Aktivn\u00ed odm\u011bny (pou\u017eijte p\u0159i objedn\u00e1vce)
+            <Gift className="w-4 h-4 text-amber-400" />Aktivní odměny (použijte při objednávce)
           </h3>
           <div className="space-y-2">
             {activeRedemptions.map(rd => (
               <div key={rd.id} className="flex items-center justify-between px-4 py-3 rounded-xl bg-amber-500/5 border border-amber-500/15">
                 <div>
-                  <span className="text-sm font-bold text-amber-300">{(rd.reward as any)?.name_cs || 'Odm\u011bna'}</span>
-                  <p className="text-[10px] text-gray-500">Plat\u00ed do {new Date(rd.expires_at).toLocaleDateString('cs-CZ')}</p>
+                  <span className="text-sm font-bold text-amber-300">{(rd.reward as any)?.name_cs || 'Odměna'}</span>
+                  <p className="text-[10px] text-gray-500">Platí do {new Date(rd.expires_at).toLocaleDateString('cs-CZ')}</p>
                 </div>
-                <span className="text-xs text-amber-400 font-bold">Aktivn\u00ed</span>
+                <span className="text-xs text-amber-400 font-bold">Aktivní</span>
               </div>
             ))}
           </div>
@@ -329,7 +329,7 @@ function LoyaltySection() {
       {transactions.length > 0 && (
         <div>
           <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-gray-400" />Posledn\u00ed pohyby
+            <Clock className="w-4 h-4 text-gray-400" />Poslední pohyby
           </h3>
           <div className="space-y-1">
             {transactions.slice(0, 5).map(tx => (

@@ -87,7 +87,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
 
   const ago = (d: string) => {
     const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
-    if (m < 1) return 'pr\u00e1v\u011b';
+    if (m < 1) return 'právě';
     if (m < 60) return `${m}m`;
     const h = Math.floor(m / 60);
     if (h < 24) return `${h}h`;
@@ -98,7 +98,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">P\u0159ehled</h2>
+        <h2 className="text-xl font-bold text-white">Přehled</h2>
         <button onClick={load} disabled={loading}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg hover:bg-emerald-500/20 transition-all disabled:opacity-50">
           <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />Obnovit
@@ -114,13 +114,13 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
             <span className="text-green-400 text-[10px] font-bold uppercase">Live</span>
           </div>
           <span className="text-3xl font-black text-white">{liveVisitors}</span>
-          <p className="text-gray-500 text-[10px]">na webu te\u010f</p>
+          <p className="text-gray-500 text-[10px]">na webu teď</p>
         </div>
         {[
           { l: 'Registrace', v: userCount, icon: Users, c: 'emerald' },
-          { l: 'Objedn\u00e1vky', v: `${paid.length}/${orders.length}`, icon: Package, c: 'blue' },
-          { l: 'Tr\u017eby', v: `${revenue.toFixed(0)} K\u010d`, icon: DollarSign, c: 'green' },
-          { l: 'Pr\u016fm\u011br', v: `${avg.toFixed(0)} K\u010d`, icon: TrendingUp, c: 'purple' },
+          { l: 'Objednávky', v: `${paid.length}/${orders.length}`, icon: Package, c: 'blue' },
+          { l: 'Tržby', v: `${revenue.toFixed(0)} Kč`, icon: DollarSign, c: 'green' },
+          { l: 'Průměr', v: `${avg.toFixed(0)} Kč`, icon: TrendingUp, c: 'purple' },
         ].map((k, i) => {
           const I = k.icon;
           const colors: Record<string, string> = {
@@ -166,23 +166,23 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
         <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
           <div className="flex items-center gap-2">
             <UserCheck className="w-4 h-4 text-emerald-400" />
-            <span className="text-sm font-bold text-white">Z\u00e1kazn\u00edci ({contacts.length})</span>
+            <span className="text-sm font-bold text-white">Zákazníci ({contacts.length})</span>
           </div>
           <div className="flex gap-3 text-[10px]">
             <span className="text-emerald-400">{contacts.filter(c => c.has_ordered).length} objednalo</span>
-            <span className="text-gray-500">{contacts.filter(c => !c.has_ordered).length} bez objedn\u00e1vky</span>
+            <span className="text-gray-500">{contacts.filter(c => !c.has_ordered).length} bez objednávky</span>
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/5 text-xs text-gray-500">
-                <th className="text-left px-4 py-2.5">Z\u00e1kazn\u00edk</th>
+                <th className="text-left px-4 py-2.5">Zákazník</th>
                 <th className="text-left px-4 py-2.5">Zdroj</th>
                 <th className="text-center px-4 py-2.5">Obj.</th>
                 <th className="text-right px-4 py-2.5">Utratil</th>
                 <th className="text-center px-4 py-2.5">Sleva</th>
-                <th className="text-center px-4 py-2.5">Odb\u011br</th>
+                <th className="text-center px-4 py-2.5">Odběr</th>
                 <th className="text-right px-4 py-2.5">Kdy</th>
               </tr>
             </thead>
@@ -190,7 +190,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
               {contacts.slice(0, 15).map(c => (
                 <tr key={c.id} className="border-b border-white/3 hover:bg-white/3 transition-colors">
                   <td className="px-4 py-2.5">
-                    <p className="text-white font-medium truncate max-w-[200px]">{c.full_name || '\u2014'}</p>
+                    <p className="text-white font-medium truncate max-w-[200px]">{c.full_name || '—'}</p>
                     <p className="text-[10px] text-gray-500 truncate max-w-[200px]">{c.email}</p>
                   </td>
                   <td className="px-4 py-2.5">
@@ -205,16 +205,16 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
                   </td>
                   <td className="px-4 py-2.5 text-right">
                     {c.total_spent > 0 ? (
-                      <span className="text-white font-medium">{c.total_spent.toFixed(0)} K\u010d</span>
+                      <span className="text-white font-medium">{c.total_spent.toFixed(0)} Kč</span>
                     ) : (
-                      <span className="text-gray-600">\u2014</span>
+                      <span className="text-gray-600">—</span>
                     )}
                   </td>
                   <td className="px-4 py-2.5 text-center">
                     {c.discount_code ? (
                       <code className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">{c.discount_code}</code>
                     ) : (
-                      <span className="text-gray-600">\u2014</span>
+                      <span className="text-gray-600">—</span>
                     )}
                   </td>
                   <td className="px-4 py-2.5 text-center">
@@ -237,11 +237,11 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Ticket className="w-4 h-4 text-amber-400" />
-            <span className="text-sm font-bold text-white">Slevov\u00e9 k\u00f3dy</span>
+            <span className="text-sm font-bold text-white">Slevové kódy</span>
           </div>
           <div className="flex gap-3 text-[10px]">
-            <span className="text-emerald-400">{activeDisc.length} aktivn\u00edch</span>
-            <span className="text-gray-500">{usedDisc.length} pou\u017eit\u00fdch</span>
+            <span className="text-emerald-400">{activeDisc.length} aktivních</span>
+            <span className="text-gray-500">{usedDisc.length} použitých</span>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -254,7 +254,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
                   : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
             }`}>
               {d.code} &middot; -{d.discount_percent}%
-              {d.is_used && <span className="no-underline text-gray-600 line-through-none"> (pou\u017eit)</span>}
+              {d.is_used && <span className="no-underline text-gray-600 line-through-none"> (použit)</span>}
             </span>
           ))}
         </div>
@@ -264,17 +264,17 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
       <div className="bg-black/30 border border-white/5 rounded-xl overflow-hidden">
         <div className="flex items-center gap-2 px-5 py-3 border-b border-white/5">
           <ShoppingCart className="w-4 h-4 text-emerald-400" />
-          <span className="text-sm font-bold text-white">Posledn\u00ed objedn\u00e1vky</span>
+          <span className="text-sm font-bold text-white">Poslední objednávky</span>
         </div>
         {orders.length === 0 ? (
-          <p className="text-gray-500 text-sm text-center py-8">\u017d\u00e1dn\u00e9 objedn\u00e1vky</p>
+          <p className="text-gray-500 text-sm text-center py-8">Žádné objednávky</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/5 text-xs text-gray-500">
-                  <th className="text-left px-4 py-2.5">Z\u00e1kazn\u00edk</th>
-                  <th className="text-right px-4 py-2.5">\u010c\u00e1stka</th>
+                  <th className="text-left px-4 py-2.5">Zákazník</th>
+                  <th className="text-right px-4 py-2.5">Částka</th>
                   <th className="text-center px-4 py-2.5">Platba</th>
                   <th className="text-center px-4 py-2.5">Stav</th>
                   <th className="text-center px-4 py-2.5">Doprava</th>
@@ -289,29 +289,29 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
                       <p className="text-white font-medium">{o.customer_first_name ? `${o.customer_first_name} ${o.customer_last_name || ''}` : o.customer_email || 'Anonym'}</p>
                       {o.customer_email && o.customer_first_name && <p className="text-[10px] text-gray-500">{o.customer_email}</p>}
                     </td>
-                    <td className="px-4 py-2.5 text-right font-bold text-white">{Number(o.total_amount).toFixed(0)} K\u010d</td>
+                    <td className="px-4 py-2.5 text-right font-bold text-white">{Number(o.total_amount).toFixed(0)} Kč</td>
                     <td className="px-4 py-2.5 text-center">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                         o.payment_status === 'paid' ? 'bg-emerald-500/10 text-emerald-400' :
                         o.payment_status === 'failed' ? 'bg-red-500/10 text-red-400' :
                         'bg-yellow-500/10 text-yellow-400'
                       }`}>
-                        {o.payment_status === 'paid' ? 'Zaplaceno' : o.payment_status === 'failed' ? 'Selhala' : '\u010cek\u00e1'}
+                        {o.payment_status === 'paid' ? 'Zaplaceno' : o.payment_status === 'failed' ? 'Selhala' : 'Čeká'}
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-center">
                       <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-white/5 text-gray-400">
-                        {o.status === 'pending' ? '\u010cek\u00e1' : o.status === 'shipped' ? 'Odesl\u00e1no' : o.status === 'delivered' ? 'Doru\u010deno' : o.status}
+                        {o.status === 'pending' ? 'Čeká' : o.status === 'shipped' ? 'Odesláno' : o.status === 'delivered' ? 'Doručeno' : o.status}
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-center text-xs text-gray-400">
-                      {o.shipping_method === 'zasilkovna' ? 'Z\u00e1silkovna' : o.shipping_method === 'personal_pickup' ? 'Osobn\u011b' : o.shipping_method || '\u2014'}
+                      {o.shipping_method === 'zasilkovna' ? 'Zásilkovna' : o.shipping_method === 'personal_pickup' ? 'Osobně' : o.shipping_method || '—'}
                     </td>
                     <td className="px-4 py-2.5 text-right">
                       {(o.discount_amount ?? 0) > 0 ? (
-                        <span className="text-amber-400 text-xs font-bold">-{Number(o.discount_amount).toFixed(0)} K\u010d</span>
+                        <span className="text-amber-400 text-xs font-bold">-{Number(o.discount_amount).toFixed(0)} Kč</span>
                       ) : (
-                        <span className="text-gray-600">\u2014</span>
+                        <span className="text-gray-600">—</span>
                       )}
                     </td>
                     <td className="px-4 py-2.5 text-right text-xs text-gray-500">{ago(o.created_at)}</td>

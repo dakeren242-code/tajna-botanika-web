@@ -65,39 +65,39 @@ function MysticalBook() {
    ═══════════════════════════════════════════ */
 const quizQuestions = [
   {
-    q: 'Kter\u00fd terp\u00e9n je zodpov\u011bdn\u00fd za citrusovou v\u016fni konop\u00ed?',
+    q: 'Který terpén je zodpovědný za citrusovou vůni konopí?',
     options: ['Myrcen', 'Limonen', 'Karyofylen', 'Linalool'],
     correct: 1,
-    explanation: 'Limonen je terp\u00e9n s v\u00fdrazn\u011b citrusovou v\u016fn\u00ed. Najdete ho i v citronech a pomeran\u010d\u00edch.',
+    explanation: 'Limonen je terpén s výrazně citrusovou vůní. Najdete ho i v citronech a pomerančích.',
   },
   {
-    q: 'Co je \u201eentourage effect\u201c?',
+    q: 'Co je „entourage effect"?',
     options: [
-      'N\u00e1zev odr\u016fdy konop\u00ed',
-      'Synergick\u00e9 p\u016fsoben\u00ed kanabinoid\u016f a terp\u00e9n\u016f dohromady',
-      'Metoda p\u011bstov\u00e1n\u00ed',
+      'Název odrůdy konopí',
+      'Synergické působení kanabinoidů a terpénů dohromady',
+      'Metoda pěstování',
       'Typ extrakce',
     ],
     correct: 1,
-    explanation: 'Entourage effect znamen\u00e1, \u017ee kanabinoidy a terp\u00e9ny p\u016fsob\u00ed siln\u011bji spole\u010dn\u011b ne\u017e ka\u017ed\u00fd zvl\u00e1\u0161\u0165.',
+    explanation: 'Entourage effect znamená, že kanabinoidy a terpény působí silněji společně než každý zvlášť.',
   },
   {
-    q: 'Jak\u00e1 je ide\u00e1ln\u00ed vlhkost pro skladov\u00e1n\u00ed kv\u011bt\u016f?',
-    options: ['30\u201340 %', '55\u201362 %', '70\u201380 %', '90 %+'],
+    q: 'Jaká je ideální vlhkost pro skladování květů?',
+    options: ['30–40 %', '55–62 %', '70–80 %', '90 %+'],
     correct: 1,
-    explanation: 'Ide\u00e1l je 55\u201362 %. P\u0159\u00edli\u0161 sucho l\u00e1me trichomy, p\u0159\u00edli\u0161 vlhko zp\u016fsobuje pl\u00edsn\u011b.',
+    explanation: 'Ideál je 55–62 %. Příliš sucho láme trichomy, příliš vlhko způsobuje plísně.',
   },
   {
-    q: 'Kter\u00fd terp\u00e9n se p\u0159\u00edmo v\u00e1\u017ee na CB2 receptory?',
+    q: 'Který terpén se přímo váže na CB2 receptory?',
     options: ['Limonen', 'Pinen', 'Karyofylen', 'Myrcen'],
     correct: 2,
-    explanation: 'Karyofylen je jedin\u00fd terp\u00e9n, kter\u00fd se p\u0159\u00edmo v\u00e1\u017ee na CB2 receptory. M\u00e1 siln\u00e9 protiz\u00e1n\u011btliv\u00e9 \u00fa\u010dinky.',
+    explanation: 'Karyofylen je jediný terpén, který se přímo váže na CB2 receptory. Má silné protizánětlivé účinky.',
   },
   {
-    q: 'Co NEJV\u00cdCE po\u0161kozuje kanabinoidy p\u0159i skladov\u00e1n\u00ed?',
-    options: ['Tma', 'UV sv\u011btlo', 'N\u00edzk\u00e1 teplota', 'Vakuum'],
+    q: 'Co NEJVÍCE poškozuje kanabinoidy při skladování?',
+    options: ['Tma', 'UV světlo', 'Nízká teplota', 'Vakuum'],
     correct: 1,
-    explanation: 'UV z\u00e1\u0159en\u00ed rozkl\u00e1d\u00e1 kanabinoidy nejrychleji. Proto v\u017edy skladujte v temnu.',
+    explanation: 'UV záření rozkládá kanabinoidy nejrychleji. Proto vždy skladujte v temnu.',
   },
 ];
 
@@ -139,9 +139,9 @@ function BotanyQuiz() {
     return (
       <div className="text-center py-6">
         <Trophy className={`w-12 h-12 mx-auto mb-4 ${pct >= 60 ? 'text-yellow-400' : 'text-gray-400'}`} />
-        <h4 className="text-2xl font-black text-white mb-2">{score}/{quizQuestions.length} spr\u00e1vn\u011b</h4>
+        <h4 className="text-2xl font-black text-white mb-2">{score}/{quizQuestions.length} správně</h4>
         <p className="text-gray-400 mb-1">
-          {pct === 100 ? 'Mistr botaniky! Gratulujeme.' : pct >= 60 ? 'Slu\u0161n\u00e9! M\u00e1\u0161 dobr\u00e9 znalosti.' : 'Nevad\u00ed! Prohl\u00e9dni si na\u0161e \u010dl\u00e1nky a zkus to znovu.'}
+          {pct === 100 ? 'Mistr botaniky! Gratulujeme.' : pct >= 60 ? 'Slušné! Máš dobré znalosti.' : 'Nevadí! Prohlédni si naše články a zkus to znovu.'}
         </p>
         <button onClick={restart}
           className="mt-4 px-6 py-2.5 rounded-full text-sm font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all">
@@ -154,8 +154,8 @@ function BotanyQuiz() {
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <span className="text-xs text-gray-500">Ot\u00e1zka {current + 1}/{quizQuestions.length}</span>
-        <span className="text-xs font-bold text-emerald-400">{score} bod\u016f</span>
+        <span className="text-xs text-gray-500">Otázka {current + 1}/{quizQuestions.length}</span>
+        <span className="text-xs font-bold text-emerald-400">{score} bodů</span>
       </div>
       <div className="flex gap-1 mb-6">
         {quizQuestions.map((_, i) => (
@@ -195,7 +195,7 @@ function BotanyQuiz() {
           <p className="text-sm text-gray-400 mb-4 leading-relaxed">{q.explanation}</p>
           <button onClick={next}
             className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white bg-emerald-500/15 border border-emerald-500/25 hover:bg-emerald-500/25 transition-all">
-            {current < quizQuestions.length - 1 ? 'Dal\u0161\u00ed ot\u00e1zka' : 'V\u00fdsledky'}
+            {current < quizQuestions.length - 1 ? 'Další otázka' : 'Výsledky'}
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -238,9 +238,9 @@ function BreathingExercise() {
       <div className="text-center">
         <button onClick={() => { setActive(true); setCount(0); }}
           className="px-6 py-3 rounded-full text-sm font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500/20 transition-all">
-          {count > 0 ? 'Znovu' : 'Za\u010d\u00edt d\u00fdchac\u00ed cvi\u010den\u00ed'}
+          {count > 0 ? 'Znovu' : 'Začít dýchací cvičení'}
         </button>
-        {count >= 3 && <p className="text-xs text-gray-500 mt-3">Hotovo! 3 cykly dokon\u010deny.</p>}
+        {count >= 3 && <p className="text-xs text-gray-500 mt-3">Hotovo! 3 cykly dokončeny.</p>}
       </div>
     );
   }
@@ -254,7 +254,7 @@ function BreathingExercise() {
         }`} />
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-lg font-bold text-cyan-300">
-            {phase === 'in' ? 'N\u00e1dech' : phase === 'hold' ? 'Dr\u017e' : 'V\u00fddech'}
+            {phase === 'in' ? 'Nádech' : phase === 'hold' ? 'Drž' : 'Výdech'}
           </span>
         </div>
       </div>
@@ -270,36 +270,36 @@ const academyRooms = [
   {
     id: 'knihovna',
     title: 'Knihovna',
-    subtitle: 'Znalosti & Pr\u016fvodci',
-    description: 'Odborn\u00e9 \u010dl\u00e1nky o kanabinoidech, terp\u00e9nech a botanick\u00e9m sv\u011bt\u011b.',
+    subtitle: 'Znalosti & Průvodci',
+    description: 'Odborné články o kanabinoidech, terpénech a botanickém světě.',
     icon: BookOpen,
     gradient: 'from-emerald-500/20 to-teal-500/20',
     borderColor: 'border-emerald-500/30',
     glowColor: 'rgba(16,185,129,0.15)',
     accentColor: '#10b981',
     iconBg: 'bg-emerald-500/10',
-    articles: ['Vzd\u011bl\u00e1n\u00ed', 'Pr\u016fvodce', 'Srovn\u00e1n\u00ed'],
+    articles: ['Vzdělání', 'Průvodce', 'Srovnání'],
     type: 'articles' as const,
   },
   {
     id: 'laborator',
-    title: 'Laborato\u0159',
-    subtitle: 'V\u011bda & V\u00fdzkum',
-    description: 'Jak funguj\u00ed kanabinoidy, terp\u00e9ny a pro\u010d na slo\u017een\u00ed z\u00e1le\u017e\u00ed.',
+    title: 'Laboratoř',
+    subtitle: 'Věda & Výzkum',
+    description: 'Jak fungují kanabinoidy, terpény a proč na složení záleží.',
     icon: FlaskConical,
     gradient: 'from-purple-500/20 to-violet-500/20',
     borderColor: 'border-purple-500/30',
     glowColor: 'rgba(168,85,247,0.15)',
     accentColor: '#a855f7',
     iconBg: 'bg-purple-500/10',
-    articles: ['V\u011bda'],
+    articles: ['Věda'],
     type: 'science' as const,
   },
   {
     id: 'zahrada',
-    title: 'Botanick\u00e1 zahrada',
-    subtitle: 'Odr\u016fdy & P\u00e9\u010de',
-    description: 'Jak spr\u00e1vn\u011b skladovat, poznat kvalitu a pe\u010dovat o sb\u00edrku.',
+    title: 'Botanická zahrada',
+    subtitle: 'Odrůdy & Péče',
+    description: 'Jak správně skladovat, poznat kvalitu a pečovat o sbírku.',
     icon: Leaf,
     gradient: 'from-amber-500/20 to-orange-500/20',
     borderColor: 'border-amber-500/30',
@@ -311,9 +311,9 @@ const academyRooms = [
   },
   {
     id: 'relaxacni-zona',
-    title: 'Relaxa\u010dn\u00ed z\u00f3na',
+    title: 'Relaxační zóna',
     subtitle: 'Klid & Pohoda',
-    description: 'Zastav se, nadechni se, vypo\u0159\u00e1dej se se stresem.',
+    description: 'Zastav se, nadechni se, vypořádej se se stresem.',
     icon: Moon,
     gradient: 'from-cyan-500/20 to-blue-500/20',
     borderColor: 'border-cyan-500/30',
@@ -327,27 +327,27 @@ const academyRooms = [
 
 /* Science inline content */
 const scienceFacts = [
-  { icon: Brain, title: 'Endokanabinoidn\u00ed syst\u00e9m', text: 'Va\u0161e t\u011blo m\u00e1 vlastn\u00ed syst\u00e9m kanabinoidn\u00edch receptor\u016f (CB1 a CB2). Reguluje n\u00e1ladu, bolest, apetit i sp\u00e1nek. Objeven v roce 1992.', color: '#a855f7' },
-  { icon: Droplets, title: 'Entourage effect', text: 'Kanabinoidy a terp\u00e9ny p\u016fsob\u00ed siln\u011bji spole\u010dn\u011b ne\u017e ka\u017ed\u00fd zvl\u00e1\u0161\u0165. Proto jsou full-spectrum extrakty \u00fa\u010dinn\u011bj\u0161\u00ed ne\u017e izol\u00e1ty.', color: '#10b981' },
+  { icon: Brain, title: 'Endokanabinoidní systém', text: 'Vaše tělo má vlastní systém kanabinoidních receptorů (CB1 a CB2). Reguluje náladu, bolest, apetit i spánek. Objeven v roce 1992.', color: '#a855f7' },
+  { icon: Droplets, title: 'Entourage effect', text: 'Kanabinoidy a terpény působí silněji společně než každý zvlášť. Proto jsou full-spectrum extrakty účinnější než izoláty.', color: '#10b981' },
   { icon: FlaskConical, title: 'THC-X vs HHC', text: 'THC-X je hexylový ester s unikátními vlastnostmi. HHC je hydrogenovaná forma THC — stabilnější, ale jednodušší. Oba legální v ČR.', color: '#6366f1' },
-  { icon: Flower2, title: '5 kl\u00ed\u010dov\u00fdch terp\u00e9n\u016f', text: 'Myrcen (relax), Limonen (energie), Karyofylen (protiz\u00e1n\u011bt), Linalool (sp\u00e1nek), Pinen (soust\u0159ed\u011bn\u00ed). Ka\u017ed\u00fd m\u00e1 jinou v\u016fni a \u00fa\u010dinek.', color: '#f59e0b' },
+  { icon: Flower2, title: '5 klíčových terpénů', text: 'Myrcen (relax), Limonen (energie), Karyofylen (protizánět), Linalool (spánek), Pinen (soustředění). Každý má jinou vůni a účinek.', color: '#f59e0b' },
 ];
 
 /* Garden tips */
 const gardenTips = [
   { icon: Sun, title: 'Nepřítel č. 1: Světlo', text: 'UV záření rozkládá kanabinoidy. Vždy skladujte v temnu, v neprůhledné nádobě.', color: '#f59e0b' },
-  { icon: Droplets, title: 'Vlhkost 55\u201362 %', text: 'P\u0159\u00edli\u0161 sucho = l\u00e1mav\u00e9 trichomy. P\u0159\u00edli\u0161 vlhko = pl\u00edsn\u011b. Boveda pack pom\u016f\u017ee udr\u017eet ide\u00e1l.', color: '#06b6d4' },
-  { icon: Flame, title: 'Teplota 15\u201321 \u00b0C', text: 'Ne lednice (kondenzace), ne mraz\u00e1k (po\u0161kozuje strukturu). Pokojov\u00e1 teplota mimo radi\u00e1tor.', color: '#f43f5e' },
-  { icon: TreePine, title: 'Jak poznat kvalitu', text: 'Hust\u00e9 trichomy, syt\u00e1 barva, v\u00fdrazn\u00e9 aroma. Pokud nevoní nebo je such\u00fd — nen\u00ed \u010derstv\u00fd.', color: '#10b981' },
+  { icon: Droplets, title: 'Vlhkost 55–62 %', text: 'Příliš sucho = lámavé trichomy. Příliš vlhko = plísně. Boveda pack pomůže udržet ideál.', color: '#06b6d4' },
+  { icon: Flame, title: 'Teplota 15–21 °C', text: 'Ne lednice (kondenzace), ne mrazák (poškozuje strukturu). Pokojová teplota mimo radiátor.', color: '#f43f5e' },
+  { icon: TreePine, title: 'Jak poznat kvalitu', text: 'Husté trichomy, sytá barva, výrazné aroma. Pokud nevoní nebo je suchý — není čerstvý.', color: '#10b981' },
 ];
 
 /* Relax quotes */
 const relaxQuotes = [
-  'P\u0159\u00edroda nesp\u011bch\u00e1, a p\u0159esto v\u0161echno stihne. \u2014 Lao-c\u2019',
-  'Nejlep\u0161\u00ed \u010das na zasazen\u00ed stromu byl p\u0159ed 20 lety. Druh\u00fd nejlep\u0161\u00ed je te\u010f.',
-  'Kde kvete trp\u011blivost, tam roste i moudrost.',
-  'V ka\u017ed\u00e9m sem\u00ednku je p\u0159\u00edslib cel\u00e9ho lesa.',
-  'Ticho lesa l\u00e9\u010d\u00ed v\u00edce ne\u017e tis\u00edc slov.',
+  'Příroda nespěchá, a přesto všechno stihne. — Lao-cʼ',
+  'Nejlepší čas na zasazení stromu byl před 20 lety. Druhý nejlepší je teď.',
+  'Kde kvete trpělivost, tam roste i moudrost.',
+  'V každém semínku je příslib celého lesa.',
+  'Ticho lesa léčí více než tisíc slov.',
 ];
 
 /* ═══════════════════════════════════════════
@@ -387,19 +387,19 @@ export default function Academy() {
 
         <div className="inline-flex items-center gap-2 mb-6 px-5 py-2.5 rounded-full bg-emerald-400/5 border border-emerald-400/20 backdrop-blur-sm">
           <Sparkles className="w-4 h-4 text-yellow-400" />
-          <span className="text-emerald-400 text-sm font-bold tracking-[0.2em] uppercase">Tajn\u00e1 Akademie</span>
+          <span className="text-emerald-400 text-sm font-bold tracking-[0.2em] uppercase">Tajná Akademie</span>
           <Sparkles className="w-4 h-4 text-yellow-400" />
         </div>
 
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-center mb-6 leading-tight">
           <span className="bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 bg-clip-text text-transparent">Poznej</span>
           <br />
-          <span className="text-white">tajemstv\u00ed </span>
+          <span className="text-white">tajemství </span>
           <span className="bg-gradient-to-r from-purple-400 via-violet-300 to-purple-500 bg-clip-text text-transparent">botaniky</span>
         </h1>
 
         <p className="text-lg md:text-xl text-gray-400 max-w-2xl text-center mb-10 leading-relaxed">
-          V\u00edtej v akademii, kde se sv\u011bt rostlin a kanabinoid\u016f otv\u00edr\u00e1 jinak ne\u017e kdekoliv jinde.
+          Vítej v akademii, kde se svět rostlin a kanabinoidů otvírá jinak než kdekoliv jinde.
         </p>
 
         <div className="flex flex-col items-center gap-2 text-gray-600 animate-bounce" style={{ animationDuration: '3s' }}>
@@ -412,10 +412,10 @@ export default function Academy() {
       <section className="relative z-10 max-w-7xl mx-auto px-6 pb-24">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-black mb-4">
-            <span className="text-white">M\u00edstnosti </span>
+            <span className="text-white">Místnosti </span>
             <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">akademie</span>
           </h2>
-          <p className="text-gray-500 max-w-lg mx-auto">Ka\u017ed\u00e1 m\u00edstnost skr\u00fdv\u00e1 n\u011bco jin\u00e9ho. Klikni a prozkoumej.</p>
+          <p className="text-gray-500 max-w-lg mx-auto">Každá místnost skrývá něco jiného. Klikni a prozkoumej.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -560,9 +560,9 @@ export default function Academy() {
                       <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(6,182,212,0.1)' }}>
                         <div className="flex items-center gap-2 mb-4">
                           <Heart className="w-4 h-4 text-cyan-400" />
-                          <span className="text-sm font-bold text-white">D\u00fdchac\u00ed cvi\u010den\u00ed 4-4-6</span>
+                          <span className="text-sm font-bold text-white">Dýchací cvičení 4-4-6</span>
                         </div>
-                        <p className="text-xs text-gray-500 mb-4">3 cykly: 4s n\u00e1dech, 4s zadr\u017een\u00ed, 6s v\u00fddech. Pom\u00e1h\u00e1 zklidnit mysl.</p>
+                        <p className="text-xs text-gray-500 mb-4">3 cykly: 4s nádech, 4s zadržení, 6s výdech. Pomáhá zklidnit mysl.</p>
                         <BreathingExercise />
                       </div>
                     </div>
@@ -584,9 +584,9 @@ export default function Academy() {
           }}>
           <div className="flex items-center gap-3 mb-2">
             <Trophy className="w-5 h-5 text-yellow-400" />
-            <h2 className="text-xl font-black text-white">Otestuj sv\u00e9 znalosti</h2>
+            <h2 className="text-xl font-black text-white">Otestuj své znalosti</h2>
           </div>
-          <p className="text-sm text-gray-500 mb-6">5 ot\u00e1zek ze sv\u011bta botaniky a kanabinoid\u016f. Kolik d\u00e1\u0161 spr\u00e1vn\u011b?</p>
+          <p className="text-sm text-gray-500 mb-6">5 otázek ze světa botaniky a kanabinoidů. Kolik dáš správně?</p>
           <BotanyQuiz />
         </div>
       </section>

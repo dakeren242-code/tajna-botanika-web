@@ -39,7 +39,7 @@ function LoyaltyBadge({ variant = 'compact' }: { variant?: 'compact' | 'full' })
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-gray-400">{tier.multiplier}x body</span>
           )}
         </div>
-        <span className="text-gray-400 text-sm font-mono">{currentPts} bod\u016f</span>
+        <span className="text-gray-400 text-sm font-mono">{currentPts} bodů</span>
       </div>
 
       {nextTierKey && tier.next && (
@@ -47,9 +47,9 @@ function LoyaltyBadge({ variant = 'compact' }: { variant?: 'compact' | 'full' })
           <div className="flex items-center justify-between text-xs text-gray-500 mb-1.5">
             <span className="flex items-center gap-1">
               <TrendingUp className="w-3 h-3" />
-              Do \u00farovn\u011b {nextTierKey.name}
+              Do úrovně {nextTierKey.name}
             </span>
-            <span>{tier.next - lifetimePts} bod\u016f</span>
+            <span>{tier.next - lifetimePts} bodů</span>
           </div>
           <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
             <div
@@ -61,7 +61,7 @@ function LoyaltyBadge({ variant = 'compact' }: { variant?: 'compact' | 'full' })
       )}
 
       {!nextTierKey && (
-        <p className="text-purple-300 text-xs">Maxim\u00e1ln\u00ed \u00farove\u0148 \u2014 2x body za ka\u017ed\u00fd n\u00e1kup!</p>
+        <p className="text-purple-300 text-xs">Maximální úroveň — 2x body za každý nákup!</p>
       )}
     </div>
   );
