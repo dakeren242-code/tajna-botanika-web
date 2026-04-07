@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CheckCircle, Home, Package, Building2, Truck, Copy, Phone, MapPin, Clock } from 'lucide-react';
+import { CheckCircle, Home, Package, Building2, Truck, Copy, Phone, MapPin, Clock, QrCode } from 'lucide-react';
 
 interface Confetti {
   id: number;
@@ -95,6 +95,11 @@ export function Success() {
     amount: `${totalAmount.toFixed(2)} Kč`,
     variableSymbol: orderNumber || '',
   };
+
+  // Generate QR payment string (SPAYD format for Czech banks)
+  const iban = 'CZ6520100000002001645045';
+  const spayd = `SPD*1.0*ACC:${iban}*AM:${totalAmount.toFixed(2)}*CC:CZK*X-VS:${(orderNumber || '').replace(/\D/g, '')}*MSG:Objednavka ${orderNumber || ''}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(spayd)}`;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -223,6 +228,27 @@ export function Success() {
                     </button>
                   </div>
                 </div>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-emerald-500/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <QrCode className="w-5 h-5 text-emerald-400" />
+                  <p className="text-white font-semibold">QR platba</p>
+                </div>
+                <p className="text-sm text-gray-400 mb-4">
+                  Naskenujte QR kód v bankovní aplikaci pro rychlou platbu - údaje se vyplní automaticky.
+                </p>
+                <div className="flex justify-center">
+                  <div className="bg-white rounded-xl p-3">
+                    <img src={qrUrl} alt="QR platba" className="w-[200px] h-[200px]" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                <p className="text-yellow-300 text-sm font-medium">
+                  Po uhrazení objednávku ihned zpracujeme a odešleme. Potvrďte platbu zasláním screenshotu na náš kontakt pro rychlejší vyřízení.
+                </p>
               </div>
             </div>
           )}
