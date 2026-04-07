@@ -107,10 +107,14 @@ export default function LiveNotifications() {
       }, 5000);
     };
 
-    const interval = setInterval(showNotification, 8000);
-    showNotification();
+    // First notification after 15s, then every 12s
+    const initialDelay = setTimeout(() => {
+      showNotification();
+      interval = setInterval(showNotification, 12000);
+    }, 15000);
+    let interval: ReturnType<typeof setInterval>;
 
-    return () => clearInterval(interval);
+    return () => { clearTimeout(initialDelay); clearInterval(interval); };
   }, [notifications, productNames]);
 
   if (!currentNotification) return null;
