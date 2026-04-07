@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Order, OrderItem, Address } from '../lib/supabase';
-import { ArrowLeft, Package, MapPin, CreditCard, FileText } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, CreditCard, FileText, User, Mail, Phone } from 'lucide-react';
 
 const statusLabels = {
   pending: { label: 'Čeká na zpracování', color: 'text-yellow-400 bg-yellow-500/10' },
@@ -21,7 +21,7 @@ const paymentStatusLabels = {
 
 export default function OrderDetail() {
   const { orderId } = useParams();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [order, setOrder] = useState<Order | null>(null);
   const [items, setItems] = useState<OrderItem[]>([]);
@@ -45,12 +45,12 @@ export default function OrderDetail() {
   const loadOrderDetails = async () => {
     if (!user || !orderId) return;
 
-    const { data: orderData, error: orderError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', orderId)
-      .eq('user_id', user.id)
-      .maybeSingle();
+    // Admin can view any order, regular users only their own
+    let query = supabase.from('orders').select('*').eq('id', orderId);
+    if (!isAdmin) {
+      query = query.eq('user_id', user.id);
+    }
+    const { data: orderData, error: orderError } = await query.maybeSingle();
 
     if (orderError || !orderData) {
       navigate('/orders');

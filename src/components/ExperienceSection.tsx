@@ -59,7 +59,7 @@ export default function ExperienceSection() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group relative p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-500"
+              className="group relative p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:border-white/15 transition-all duration-700 ease-out"
               data-cursor-hover
               style={{
                 animation: 'float-up 0.8s ease-out forwards',
@@ -67,40 +67,36 @@ export default function ExperienceSection() {
                 opacity: 0,
               }}
             >
+              {/* Subtle top glow line on hover */}
               <div
-                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                className="absolute top-0 left-[15%] right-[15%] h-px opacity-0 group-hover:opacity-60 transition-opacity duration-700"
                 style={{
-                  background: `radial-gradient(circle at 50% 0%, ${feature.color}15, transparent 70%)`,
+                  background: `linear-gradient(90deg, transparent, ${feature.color}80, transparent)`,
                 }}
               />
 
               <div className="relative">
                 <div
-                  className="w-16 h-16 mb-6 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:rotate-6"
+                  className="w-14 h-14 mb-6 rounded-xl flex items-center justify-center transition-all duration-700 group-hover:scale-105"
                   style={{
-                    background: `linear-gradient(135deg, ${feature.color}30, ${feature.color}10)`,
-                    boxShadow: `0 0 30px ${feature.color}20`,
+                    background: `linear-gradient(135deg, ${feature.color}18, ${feature.color}08)`,
+                    boxShadow: `0 0 20px ${feature.color}10`,
                   }}
                 >
                   <feature.icon
-                    className="w-8 h-8 transition-colors duration-300"
+                    className="w-7 h-7 transition-all duration-500 group-hover:drop-shadow-lg"
                     style={{ color: feature.color }}
                   />
                 </div>
 
-                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-yellow-400 transition-colors duration-300">
+                <h3 className="text-lg font-bold text-white/90 mb-3 group-hover:text-white transition-colors duration-500">
                   {feature.title}
                 </h3>
 
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <p className="text-gray-500 text-sm leading-relaxed group-hover:text-gray-400 transition-colors duration-500">
                   {feature.description}
                 </p>
               </div>
-
-              <div
-                className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-current to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                style={{ color: feature.color }}
-              />
             </div>
           ))}
         </div>

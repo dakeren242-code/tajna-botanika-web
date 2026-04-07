@@ -1,6 +1,6 @@
 import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { PerformanceProvider } from './contexts/PerformanceContext';
 import { ConsentProvider } from './contexts/ConsentContext';
@@ -95,21 +95,17 @@ function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen text-white overflow-x-hidden">
-      {/* SupportChat replaces old FloatingActionButton — loaded globally via SupportChat component */}
-
+    <div className="text-white overflow-x-hidden">
       <main className="relative z-10">
         <HeroSection />
 
-        <Suspense fallback={<div className="h-32" />}>
-          <div className="relative">
-            <ScrollReveal direction="up">
-              <TrustBadgesSection />
-            </ScrollReveal>
-          </div>
+        <Suspense fallback={null}>
+          <ScrollReveal direction="up">
+            <TrustBadgesSection />
+          </ScrollReveal>
         </Suspense>
 
-        <Suspense fallback={<div className="h-96 flex items-center justify-center"><Loader2 className="w-8 h-8 text-emerald-400 animate-spin" /></div>}>
+        <Suspense fallback={<div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-emerald-400 animate-spin" /></div>}>
           <div className="relative overflow-hidden">
             <MovingCarts />
             <ScrollReveal direction="fade">
@@ -118,55 +114,43 @@ function Home() {
           </div>
         </Suspense>
 
-        <Suspense fallback={<div className="h-64" />}>
-          <div className="relative">
-            <ScrollReveal direction="scale">
-              <SpecialOffersSection />
-            </ScrollReveal>
-          </div>
+        <Suspense fallback={null}>
+          <ScrollReveal direction="fade">
+            <ExperienceSection />
+          </ScrollReveal>
         </Suspense>
 
-        <Suspense fallback={<div className="h-64" />}>
-          <div className="relative">
-            <ScrollReveal direction="up">
-              <BlogSection />
-            </ScrollReveal>
-          </div>
+        <Suspense fallback={null}>
+          <ScrollReveal direction="up">
+            <SpecialOffersSection />
+          </ScrollReveal>
         </Suspense>
 
-        <Suspense fallback={<div className="h-64" />}>
-          <div className="relative">
-            <ScrollReveal direction="fade">
-              <ExperienceSection />
-            </ScrollReveal>
-          </div>
+        <Suspense fallback={null}>
+          <ScrollReveal direction="fade">
+            <TestimonialsSection />
+          </ScrollReveal>
         </Suspense>
 
-        <Suspense fallback={<div className="h-64" />}>
-          <div className="relative">
-            <ScrollReveal direction="scale">
-              <TestimonialsSection />
-            </ScrollReveal>
-          </div>
+        <Suspense fallback={null}>
+          <ScrollReveal direction="up">
+            <BlogSection />
+          </ScrollReveal>
         </Suspense>
 
-        <Suspense fallback={<div className="h-64" />}>
-          <div className="relative">
-            <ScrollReveal direction="up">
-              <FAQSection />
-            </ScrollReveal>
-          </div>
+        <Suspense fallback={null}>
+          <ScrollReveal direction="fade">
+            <FAQSection />
+          </ScrollReveal>
         </Suspense>
 
-        <Suspense fallback={<div className="h-64" />}>
-          <div className="relative">
-            <ScrollReveal direction="fade">
-              <ContactSection />
-            </ScrollReveal>
-          </div>
+        <Suspense fallback={null}>
+          <ScrollReveal direction="fade">
+            <ContactSection />
+          </ScrollReveal>
         </Suspense>
 
-        <Suspense fallback={<div className="h-32" />}>
+        <Suspense fallback={null}>
           <Footer />
         </Suspense>
       </main>
@@ -207,6 +191,8 @@ export function onVisitorCountChange(cb: (n: number) => void) {
 }
 
 function VisitorPresenceTracker() {
+  const { isAdmin } = useAuth();
+
   useEffect(() => {
     let sid = sessionStorage.getItem('vsid');
     if (!sid) {
@@ -215,16 +201,25 @@ function VisitorPresenceTracker() {
     }
     const ch = supabase.channel('visitors', { config: { presence: { key: sid } } });
     ch.on('presence', { event: 'sync' }, () => {
-      _visitorCount = Object.keys(ch.presenceState()).length;
+      // Count only non-admin visitors
+      const state = ch.presenceState();
+      let count = 0;
+      for (const key of Object.keys(state)) {
+        const entries = state[key] as any[];
+        if (entries && entries.length > 0 && !entries[0].isAdmin) {
+          count++;
+        }
+      }
+      _visitorCount = count;
       _visitorListeners.forEach(cb => cb(_visitorCount));
     });
     ch.subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
-        await ch.track({ t: Date.now() });
+        await ch.track({ t: Date.now(), isAdmin: !!isAdmin });
       }
     });
     return () => { supabase.removeChannel(ch); };
-  }, []);
+  }, [isAdmin]);
   return null;
 }
 
