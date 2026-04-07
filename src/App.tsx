@@ -127,6 +127,14 @@ function Home() {
 
         <Suspense fallback={<div className="h-64" />}>
           <div className="relative">
+            <ScrollReveal direction="up">
+              <BlogSection />
+            </ScrollReveal>
+          </div>
+        </Suspense>
+
+        <Suspense fallback={<div className="h-64" />}>
+          <div className="relative">
             <ScrollReveal direction="fade">
               <ExperienceSection />
             </ScrollReveal>
@@ -145,14 +153,6 @@ function Home() {
           <div className="relative">
             <ScrollReveal direction="up">
               <FAQSection />
-            </ScrollReveal>
-          </div>
-        </Suspense>
-
-        <Suspense fallback={<div className="h-64" />}>
-          <div className="relative">
-            <ScrollReveal direction="up">
-              <BlogSection />
             </ScrollReveal>
           </div>
         </Suspense>

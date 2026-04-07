@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { ShoppingCart, User, LogIn, Shield } from 'lucide-react';
+import { ShoppingCart, User, LogIn, Shield, BookOpen } from 'lucide-react';
 
 export default function Header() {
   const { user, isAdmin } = useAuth();
@@ -33,6 +33,14 @@ export default function Header() {
           </Link>
 
           <nav className="flex items-center gap-4 flex-1 justify-end" style={{ overflow: 'visible' }}>
+            <Link
+              to="/blog"
+              className="hidden md:flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all text-sm"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Akademie</span>
+            </Link>
+
             {isAdmin && (
               <Link
                 to="/admin"
