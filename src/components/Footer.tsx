@@ -120,6 +120,15 @@ export default function Footer() {
           <p className="text-center text-gray-600 text-xs">
             Přijímáme všechny hlavní platební metody • 30 dní záruka spokojenosti • 250+ spokojených zákazníků
           </p>
+          <div className="text-center mt-4">
+            <Link to="/podminky" className="text-gray-500 hover:text-emerald-400 text-xs transition-colors underline underline-offset-2">
+              Obchodní podmínky
+            </Link>
+            <span className="text-gray-700 mx-2">•</span>
+            <Link to="/soukromi" className="text-gray-500 hover:text-emerald-400 text-xs transition-colors underline underline-offset-2">
+              Ochrana soukromí
+            </Link>
+          </div>
         </div>
 
         <div className="pt-8 border-t border-white/10">
