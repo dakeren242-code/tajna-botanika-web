@@ -38,22 +38,17 @@ export default function ProductsSection() {
   const filterAndSortProducts = () => {
     let filtered = [...products];
 
+    // Map filter IDs to actual DB category values
+    const filterCategoryMap: Record<string, string> = {
+      relaxing: 'indica',
+      energizing: 'sativa',
+      balanced: 'hybrid',
+    };
+
     const getRelevanceScore = (product: Product) => {
       if (activeFilter === 'all') return 0;
-
-      if (activeFilter === 'balanced') {
-        return product.category === 'balanced' ? 2 : 0;
-      }
-
-      if (activeFilter === 'relaxing') {
-        return product.category === 'relaxing' ? 2 : 0;
-      }
-
-      if (activeFilter === 'energizing') {
-        return product.category === 'energizing' ? 2 : 0;
-      }
-
-      return 0;
+      const dbCategory = filterCategoryMap[activeFilter] || activeFilter;
+      return product.category === dbCategory ? 2 : 0;
     };
 
     filtered.sort((a, b) => {

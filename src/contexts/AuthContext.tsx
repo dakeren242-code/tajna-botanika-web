@@ -116,6 +116,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (profileError) {
         return { error: profileError };
       }
+
+      // Generate unique 15% discount code for new user
+      const code = 'TB-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+      await supabase.from('discount_codes').insert({
+        code,
+        discount_percent: 15,
+        user_id: data.user.id,
+      });
     }
 
     return { error };

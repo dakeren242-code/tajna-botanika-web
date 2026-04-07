@@ -184,6 +184,15 @@ function TrackingWrapper({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Global visitor count exposed for AdminDashboard
+let _visitorCount = 0;
+let _visitorListeners: Array<(n: number) => void> = [];
+export function getVisitorCount() { return _visitorCount; }
+export function onVisitorCountChange(cb: (n: number) => void) {
+  _visitorListeners.push(cb);
+  return () => { _visitorListeners = _visitorListeners.filter(l => l !== cb); };
+}
+
 function VisitorPresenceTracker() {
   useEffect(() => {
     let sid = sessionStorage.getItem('vsid');
@@ -192,6 +201,10 @@ function VisitorPresenceTracker() {
       sessionStorage.setItem('vsid', sid);
     }
     const ch = supabase.channel('visitors', { config: { presence: { key: sid } } });
+    ch.on('presence', { event: 'sync' }, () => {
+      _visitorCount = Object.keys(ch.presenceState()).length;
+      _visitorListeners.forEach(cb => cb(_visitorCount));
+    });
     ch.subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
         await ch.track({ t: Date.now() });

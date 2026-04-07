@@ -174,7 +174,7 @@ export default function ProductDetail() {
                 </h1>
                 <div className="text-lg text-gray-300 leading-relaxed space-y-3 whitespace-pre-line">
                   {product.description?.split('\n').map((paragraph: string, idx: number) => (
-                    <p key={idx} dangerouslySetInnerHTML={{ __html: paragraph }} />
+                    <p key={idx}>{paragraph}</p>
                   ))}
                 </div>
               </div>

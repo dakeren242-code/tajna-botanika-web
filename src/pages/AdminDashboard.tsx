@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase, Order } from '../lib/supabase';
-import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag, Facebook, Radio } from 'lucide-react';
+import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag, Facebook, Radio, Trash2 } from 'lucide-react';
 import ProductManagement from '../components/admin/ProductManagement';
 import FacebookCatalogManager from '../components/admin/FacebookCatalogManager';
+import { getVisitorCount, onVisitorCountChange } from '../App';
 
 const statusLabels = {
   pending: { label: 'Čeká na zpracování', color: 'text-yellow-400 bg-yellow-500/10' },
@@ -52,18 +53,8 @@ export default function AdminDashboard() {
   }, [user, isAdmin, authLoading, navigate]);
 
   useEffect(() => {
-    // Poll the existing visitors channel presence state
-    const interval = setInterval(() => {
-      const channels = supabase.getChannels();
-      for (const ch of channels) {
-        if ((ch as any).topic === 'realtime:visitors') {
-          const state = ch.presenceState();
-          setLiveVisitors(Object.keys(state).length);
-          return;
-        }
-      }
-    }, 3000);
-    return () => clearInterval(interval);
+    setLiveVisitors(getVisitorCount());
+    return onVisitorCountChange(setLiveVisitors);
   }, []);
 
   const loadOrders = async () => {
@@ -123,6 +114,15 @@ export default function AdminDashboard() {
       .update(updates)
       .eq('id', orderId);
 
+    if (!error) {
+      loadOrders();
+    }
+  };
+
+  const deleteOrder = async (orderId: string, orderNumber: string) => {
+    if (!confirm(`Opravdu smazat objednávku ${orderNumber}? Tato akce je nevratná.`)) return;
+    await supabase.from('order_items').delete().eq('order_id', orderId);
+    const { error } = await supabase.from('orders').delete().eq('id', orderId);
     if (!error) {
       loadOrders();
     }
@@ -252,6 +252,7 @@ export default function AdminDashboard() {
                     <th className="text-left py-4 px-4 text-gray-400 font-semibold">Částka</th>
                     <th className="text-left py-4 px-4 text-gray-400 font-semibold">Stav objednávky</th>
                     <th className="text-left py-4 px-4 text-gray-400 font-semibold">Stav platby</th>
+                    <th className="text-left py-4 px-4 text-gray-400 font-semibold"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -295,6 +296,15 @@ export default function AdminDashboard() {
                           <option value="failed">Platba selhala</option>
                           <option value="refunded">Vráceno</option>
                         </select>
+                      </td>
+                      <td className="py-4 px-4">
+                        <button
+                          onClick={() => deleteOrder(order.id, order.order_number)}
+                          className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all"
+                          title="Smazat objednávku"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}

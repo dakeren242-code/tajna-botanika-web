@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { CreditCard, Building2, Truck, Package, Check, ChevronRight, MapPin, Clock, User, Mail, Phone as PhoneIcon } from 'lucide-react';
+import { CreditCard, Building2, Truck, Package, Check, ChevronRight, MapPin, Clock, User, Mail, Phone as PhoneIcon, Tag, Loader2 } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 interface PaymentAndShippingProps {
   totalPrice: number;
@@ -13,7 +14,7 @@ interface PaymentAndShippingProps {
     city?: string;
     zip?: string;
     notes?: string;
-  }) => void;
+  }, discountCode?: string, discountPercent?: number) => void;
   loading?: boolean;
 }
 
@@ -36,6 +37,10 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
   const [city, setCity] = useState('');
   const [zip, setZip] = useState('');
   const [notes, setNotes] = useState('');
+  const [promoCode, setPromoCode] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState('');
+  const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; percent: number; id: string } | null>(null);
 
   const canUsePersonalPickup = totalGrams > PERSONAL_PICKUP_MIN_GRAMS;
 
@@ -46,7 +51,30 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
 
   const shippingCost = !shippingMethod ? 0 : (isPersonalPickup || isPersonalInvoice ? 0 : (isFreeShipping ? 0 : SHIPPING_COST));
   const codFee = paymentMethod === 'cash_on_delivery' && !isPersonalPickup && !isPersonalInvoice && shippingMethod ? COD_FEE : 0;
-  const finalTotal = totalPrice + shippingCost + codFee;
+  const discountAmount = appliedDiscount ? Math.round(totalPrice * appliedDiscount.percent / 100) : 0;
+  const finalTotal = totalPrice - discountAmount + shippingCost + codFee;
+
+  const applyPromoCode = async () => {
+    if (!promoCode.trim()) return;
+    setPromoLoading(true);
+    setPromoError('');
+    const { data, error } = await supabase
+      .from('discount_codes')
+      .select('*')
+      .eq('code', promoCode.trim().toUpperCase())
+      .maybeSingle();
+    if (error || !data) {
+      setPromoError('Neplatný slevový kód');
+    } else if (data.is_used) {
+      setPromoError('Tento kód byl již použit');
+    } else if (data.expires_at && new Date(data.expires_at) < new Date()) {
+      setPromoError('Platnost kódu vypršela');
+    } else {
+      setAppliedDiscount({ code: data.code, percent: data.discount_percent, id: data.id });
+      setPromoError('');
+    }
+    setPromoLoading(false);
+  };
 
   const handleSubmit = () => {
     setSubmitted(true);
@@ -67,7 +95,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
       city: shippingMethod === 'zasilkovna' ? city : undefined,
       zip: shippingMethod === 'zasilkovna' ? zip : undefined,
       notes,
-    });
+    }, appliedDiscount?.code, appliedDiscount?.percent);
   };
 
   const isFormValid = firstName && lastName && email && phone && shippingMethod && termsAccepted &&
@@ -535,6 +563,41 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
           )}
         </div>
 
+        <div className="bg-white/5 rounded-xl p-6 border border-emerald-500/20">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <Tag className="w-6 h-6 text-emerald-400" />
+            Slevový kód
+          </h2>
+          {appliedDiscount ? (
+            <div className="flex items-center justify-between p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-emerald-400" />
+                <span className="text-emerald-300 font-bold">{appliedDiscount.code}</span>
+                <span className="text-emerald-400 text-sm">-{appliedDiscount.percent}%</span>
+              </div>
+              <button onClick={() => setAppliedDiscount(null)} className="text-gray-400 hover:text-red-400 text-sm transition-colors">Odebrat</button>
+            </div>
+          ) : (
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => { setPromoCode(e.target.value.toUpperCase()); setPromoError(''); }}
+                placeholder="Zadejte slevový kód"
+                className="flex-1 px-4 py-3 bg-black/30 border border-emerald-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
+              />
+              <button
+                onClick={applyPromoCode}
+                disabled={promoLoading || !promoCode.trim()}
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {promoLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Použít'}
+              </button>
+            </div>
+          )}
+          {promoError && <p className="mt-2 text-sm text-red-400">{promoError}</p>}
+        </div>
+
         <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-xl p-6 border border-emerald-500/30">
           <h3 className="text-white font-bold mb-4">Rekapitulace objednávky</h3>
           <div className="space-y-3">
@@ -542,6 +605,13 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               <span className="text-gray-400">Cena zboží</span>
               <span className="text-white font-semibold">{totalPrice.toFixed(2)} Kč</span>
             </div>
+
+            {appliedDiscount && (
+              <div className="flex justify-between text-sm">
+                <span className="text-emerald-400">Sleva {appliedDiscount.percent}% ({appliedDiscount.code})</span>
+                <span className="text-emerald-400 font-semibold">-{discountAmount.toFixed(2)} Kč</span>
+              </div>
+            )}
 
             {paymentMethod === 'cash_on_delivery' && shippingMethod && !isPersonalPickup && !isPersonalInvoice && (
               <div className="flex justify-between text-sm">

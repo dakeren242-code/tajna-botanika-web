@@ -38,7 +38,7 @@ export default function Checkout() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleCompleteOrder = async (paymentMethod: string, shippingMethod: string, customerData: CustomerData) => {
+  const handleCompleteOrder = async (paymentMethod: string, shippingMethod: string, customerData: CustomerData, discountCode?: string, discountPercent?: number) => {
     setError('');
     setLoading(true);
 
@@ -79,11 +79,13 @@ export default function Checkout() {
       const SHIPPING_COST = 79;
       const COD_FEE = 30;
 
-      const isFreeShipping = totalPrice >= FREE_SHIPPING_THRESHOLD;
+      const discountAmount = discountPercent ? Math.round(totalPrice * discountPercent / 100) : 0;
+      const discountedPrice = totalPrice - discountAmount;
+      const isFreeShipping = discountedPrice >= FREE_SHIPPING_THRESHOLD;
       const isPersonalPickup = shippingMethod === 'personal_pickup' || shippingMethod === 'personal_invoice';
       const shippingCost = isPersonalPickup ? 0 : (isFreeShipping ? 0 : SHIPPING_COST);
       const codFee = paymentMethod === 'cash_on_delivery' && !isPersonalPickup ? COD_FEE : 0;
-      const finalTotal = totalPrice + shippingCost + codFee;
+      const finalTotal = discountedPrice + shippingCost + codFee;
 
       const shippingAddress = shippingMethod === 'zasilkovna' && customerData.address ? {
         street: customerData.address,
@@ -158,6 +160,14 @@ export default function Checkout() {
             .update({ stock: (product.stock || 0) - item.quantity })
             .eq('id', item.product.id);
         }
+      }
+
+      // Mark discount code as used
+      if (discountCode) {
+        await supabase
+          .from('discount_codes')
+          .update({ is_used: true, used_at: new Date().toISOString(), used_order_id: order.id })
+          .eq('code', discountCode);
       }
 
       const priceMap: Record<string, number> = { '1g': 190, '3g': 490, '5g': 690, '10g': 1290 };

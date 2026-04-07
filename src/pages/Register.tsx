@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { UserPlus, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, AlertCircle, CheckCircle, Gift, Copy } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { trackEvent } from '../hooks/useTracking';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -11,6 +13,7 @@ export default function Register() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [discountCode, setDiscountCode] = useState('');
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -44,10 +47,23 @@ export default function Register() {
       return;
     }
 
+    trackEvent('CompleteRegistration', { user_email: email });
+
+    // Fetch the generated discount code
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const { data: codes } = await supabase
+        .from('discount_codes')
+        .select('code')
+        .eq('user_id', session.user.id)
+        .eq('is_used', false)
+        .limit(1);
+      if (codes && codes.length > 0) {
+        setDiscountCode(codes[0].code);
+      }
+    }
+
     setSuccess(true);
-    setTimeout(() => {
-      navigate('/');
-    }, 2000);
   };
 
   return (
@@ -70,11 +86,33 @@ export default function Register() {
           )}
 
           {success && (
-            <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-              <p className="text-emerald-400 text-sm">
-                Registrace úspěšná! Přesměrování...
-              </p>
+            <div className="mb-6 p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-xl space-y-4">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <p className="text-emerald-400 font-semibold">Registrace úspěšná!</p>
+              </div>
+              {discountCode && (
+                <div className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-400/40 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Gift className="w-5 h-5 text-yellow-400" />
+                    <span className="text-yellow-300 font-bold">Váš slevový kód na 15%</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl font-black text-white tracking-wider">{discountCode}</span>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(discountCode)}
+                      className="p-2 hover:bg-white/10 rounded transition-colors"
+                      title="Kopírovat"
+                    >
+                      <Copy className="w-4 h-4 text-yellow-400" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">Použijte při objednávce. Platí 30 dní, jednorázově.</p>
+                </div>
+              )}
+              <Link to="/" className="inline-block w-full text-center py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all">
+                Začít nakupovat
+              </Link>
             </div>
           )}
 
