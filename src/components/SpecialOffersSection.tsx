@@ -11,6 +11,7 @@ export default function SpecialOffersSection() {
       title: 'Discovery Box',
       subtitle: 'Poznejte 3 odrůdy',
       weight: '3× 1g',
+      tier: 'discovery',
       originalPrice: 570, // 3 × 190
       price: 449,
       savings: 121,
@@ -34,6 +35,7 @@ export default function SpecialOffersSection() {
       title: 'Sběratelský Set',
       subtitle: '5 top odrůd po 3g',
       weight: '5× 3g',
+      tier: 'collector',
       originalPrice: 2450, // 5 × 490
       price: 1799,
       savings: 651,
@@ -58,6 +60,7 @@ export default function SpecialOffersSection() {
       title: 'Kompletní Kolekce',
       subtitle: 'Všech 9 odrůd',
       weight: '9× 3g',
+      tier: 'complete',
       originalPrice: 4410, // 9 × 490
       price: 2999,
       savings: 1411,
@@ -182,14 +185,14 @@ export default function SpecialOffersSection() {
 
                 {/* CTA */}
                 <button
-                  onClick={() => navigate('/#products')}
+                  onClick={() => navigate(`/balicek?tier=${offer.tier}`)}
                   className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all duration-500 ${
                     offer.popular
                       ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black hover:shadow-[0_0_30px_rgba(251,191,36,0.4)] hover:scale-[1.02]'
                       : 'bg-white/[0.06] text-white/80 hover:bg-white/[0.1] hover:text-white'
                   }`}
                 >
-                  {offer.popular ? 'VYBRAT ODRŮDY' : 'SESTAVIT BALÍČEK'}
+                  {offer.popular ? 'VYBRAT ODRŮDY →' : 'SESTAVIT BALÍČEK →'}
                 </button>
               </div>
             </div>

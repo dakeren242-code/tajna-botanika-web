@@ -110,8 +110,11 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-gray-400">Načítání...</div>
+      <div className="min-h-screen text-white flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin" />
+          <span className="text-gray-500 text-sm">Načítání produktu...</span>
+        </div>
       </div>
     );
   }
@@ -121,7 +124,7 @@ export default function ProductDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
+    <div className="min-h-screen text-white overflow-x-hidden animate-[fadeIn_0.4s_ease-out]">
       <main className="relative z-10 pt-24">
         <div className="container mx-auto px-4 py-8">
           <button

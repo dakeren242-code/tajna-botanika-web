@@ -41,6 +41,7 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 const Deals = lazy(() => import('./pages/Deals'));
+const BundleBuilder = lazy(() => import('./pages/BundleBuilder'));
 const CookieBanner = lazy(() => import('./components/CookieBanner'));
 const Blog = lazy(() => import('./pages/Blog'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -291,6 +292,7 @@ function App() {
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/auth/callback" element={<AuthCallback />} />
                     <Route path="/akce" element={<Deals />} />
+                    <Route path="/balicek" element={<BundleBuilder />} />
                     <Route path="/blog" element={<Blog />} />
                     <Route path="/blog/:slug" element={<BlogPost />} />
                     <Route path="/podminky" element={<Terms />} />

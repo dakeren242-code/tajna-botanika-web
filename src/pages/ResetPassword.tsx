@@ -17,21 +17,27 @@ export default function ResetPassword() {
     setSuccess(false);
     setLoading(true);
 
-    const { error: resetError } = await resetPassword(email);
+    try {
+      const { error: resetError } = await resetPassword(email);
 
-    if (resetError) {
-      setError('Chyba při odesílání e-mailu pro reset hesla');
-      setLoading(false);
-      return;
+      if (resetError) {
+        console.error('Reset password error:', resetError);
+        // Don't reveal if email exists or not — always show success
+        // This prevents email enumeration attacks
+      }
+
+      // Save email to contacts for marketing (source: password_reset)
+      await supabase.from('email_contacts').upsert(
+        { email, source: 'password_reset', updated_at: new Date().toISOString() },
+        { onConflict: 'email' }
+      ).catch(() => {}); // ignore contact save errors
+
+      // Always show success (even if email doesn't exist — security best practice)
+      setSuccess(true);
+    } catch (err) {
+      console.error('Unexpected reset error:', err);
+      setSuccess(true); // still show success for security
     }
-
-    // Save email to contacts for marketing (source: password_reset)
-    await supabase.from('email_contacts').upsert(
-      { email, source: 'password_reset', updated_at: new Date().toISOString() },
-      { onConflict: 'email' }
-    );
-
-    setSuccess(true);
     setLoading(false);
   };
 
