@@ -23,7 +23,7 @@ const ContactSection = lazy(() => import('./components/ContactSection'));
 const Footer = lazy(() => import('./components/Footer'));
 const ProductDetail = lazy(() => import('./components/ProductDetail'));
 const MovingCarts = lazy(() => import('./components/MovingCarts'));
-const FloatingActionButton = lazy(() => import('./components/FloatingActionButton'));
+// FloatingActionButton removed — replaced by SupportChat
 const ScrollReveal = lazy(() => import('./components/ScrollReveal'));
 const LiveNotifications = lazy(() => import('./components/LiveNotifications'));
 const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
@@ -43,6 +43,7 @@ const CookieBanner = lazy(() => import('./components/CookieBanner'));
 const Blog = lazy(() => import('./pages/Blog'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const BlogSection = lazy(() => import('./components/BlogSection'));
 const SupportChat = lazy(() => import('./components/SupportChat'));
@@ -266,6 +267,7 @@ function App() {
                     <Route path="/blog/:slug" element={<BlogPost />} />
                     <Route path="/podminky" element={<Terms />} />
                     <Route path="/soukromi" element={<Privacy />} />
+                    <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
                 <Suspense fallback={null}>
