@@ -7,8 +7,10 @@ function UrgencyBanner() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Show after 2 seconds
-    const showTimer = setTimeout(() => setIsVisible(true), 2000);
+    // Show after 15s for 13s, then hide. Reappear after 3.5min.
+    const showTimer = setTimeout(() => setIsVisible(true), 15000);
+    const hideTimer = setTimeout(() => setIsVisible(false), 28000);
+    const reshowTimer = setTimeout(() => setIsVisible(true), 210000);
 
     const updateCountdown = () => {
       const now = new Date();
@@ -36,13 +38,15 @@ function UrgencyBanner() {
     return () => {
       clearInterval(interval);
       clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+      clearTimeout(reshowTimer);
     };
   }, []);
 
-  if (dismissed || !isVisible) return null;
+  if (dismissed) return null;
 
   return (
-    <div className="hidden md:block fixed z-40 top-[73px] left-0 right-0">
+    <div className={`hidden md:block fixed z-40 top-[73px] left-0 right-0 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
       <div className="relative bg-gradient-to-r from-emerald-900/95 via-emerald-800/95 to-teal-900/95 backdrop-blur-md border-b border-emerald-500/20">
         <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-center gap-3 text-sm">
           <Truck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
