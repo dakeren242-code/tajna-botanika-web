@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SignupForm } from '../components/auth/SignupForm'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../contexts/AuthContext'
 import { UserPlus } from 'lucide-react'
 
 export function Signup() {

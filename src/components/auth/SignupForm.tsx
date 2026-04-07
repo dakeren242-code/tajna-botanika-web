@@ -46,10 +46,28 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
 
       if (error) {
         setMessage({ type: 'error', text: error.message })
-      } else {
-        setMessage({ type: 'success', text: 'Účet byl úspěšně vytvořen!' })
-        onSuccess?.()
+        setLoading(false)
+        return
       }
+
+      // Auto-sign in (DB trigger auto-confirmed the email)
+      await new Promise(r => setTimeout(r, 500))
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+
+      if (signInError) {
+        setMessage({ type: 'error', text: 'Účet vytvořen, ale přihlášení selhalo. Zkuste se přihlásit ručně.' })
+        setLoading(false)
+        return
+      }
+
+      // Update profile full_name
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        await supabase.from('user_profiles').update({ full_name: fullName }).eq('id', session.user.id)
+      }
+
+      setMessage({ type: 'success', text: 'Účet byl úspěšně vytvořen!' })
+      onSuccess?.()
     } catch (error) {
       setMessage({ type: 'error', text: 'Došlo k neočekávané chybě' })
     } finally {

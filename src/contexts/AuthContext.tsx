@@ -102,31 +102,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: { full_name: fullName },
+      },
     });
 
-    if (!error && data.user) {
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .insert({
-          id: data.user.id,
-          full_name: fullName,
-          phone: '',
-        });
-
-      if (profileError) {
-        return { error: profileError };
-      }
-
-      // Generate unique 15% discount code for new user
-      const code = 'TB-' + Math.random().toString(36).substring(2, 7).toUpperCase();
-      await supabase.from('discount_codes').insert({
-        code,
-        discount_percent: 15,
-        user_id: data.user.id,
-      });
+    if (error) {
+      return { error };
     }
 
-    return { error };
+    // The database trigger (handle_new_user) auto-confirms email,
+    // creates user_profile, and generates a 15% discount code.
+    // We just need to update the profile with the full name if the trigger
+    // used a fallback.
+    if (data.user) {
+      // Small delay to let the trigger complete
+      await new Promise(r => setTimeout(r, 500));
+
+      // Update profile with proper full name
+      await supabase
+        .from('user_profiles')
+        .update({ full_name: fullName })
+        .eq('id', data.user.id);
+    }
+
+    return { error: null };
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {

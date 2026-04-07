@@ -49,6 +49,12 @@ export default function Register() {
 
     trackEvent('CompleteRegistration', { user_email: email });
 
+    // Auto-sign in after registration (trigger auto-confirmed the email)
+    await supabase.auth.signInWithPassword({ email, password });
+
+    // Small delay to let the trigger + session settle
+    await new Promise(r => setTimeout(r, 800));
+
     // Fetch the generated discount code
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
@@ -64,6 +70,7 @@ export default function Register() {
     }
 
     setSuccess(true);
+    setLoading(false);
   };
 
   return (
