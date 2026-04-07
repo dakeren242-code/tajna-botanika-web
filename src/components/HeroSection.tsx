@@ -1,4 +1,4 @@
-import { Sparkles, ArrowDown, Instagram } from 'lucide-react';
+import { Sparkles, ArrowDown, Instagram, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function HeroSection() {
@@ -91,11 +91,10 @@ export default function HeroSection() {
 
           <button
             onClick={scrollToProducts}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:border-white/30 hover:scale-105 transition-all duration-300 text-sm font-medium cursor-pointer group"
-            data-cursor-hover
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-rose-500/10 to-red-500/10 border border-rose-400/20 text-rose-300 hover:text-rose-200 hover:border-rose-400/40 hover:scale-105 transition-all duration-300 text-sm font-medium cursor-pointer group"
           >
-            <span>Objevte naši kolekci</span>
-            <ArrowDown className="w-4 h-4 animate-bounce group-hover:text-emerald-400 transition-colors" style={{ animationDuration: '2s' }} />
+            <ShieldCheck className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+            <span>9 odrůd skladem</span>
           </button>
         </div>
       </div>
