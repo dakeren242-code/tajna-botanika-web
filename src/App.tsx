@@ -39,6 +39,8 @@ const OrderHistory = lazy(() => import('./pages/OrderHistory'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
+const Deals = lazy(() => import('./pages/Deals'));
 const CookieBanner = lazy(() => import('./components/CookieBanner'));
 const Blog = lazy(() => import('./pages/Blog'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -287,6 +289,8 @@ function App() {
                     <Route path="/orders/:orderId" element={<OrderDetail />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route path="/akce" element={<Deals />} />
                     <Route path="/blog" element={<Blog />} />
                     <Route path="/blog/:slug" element={<BlogPost />} />
                     <Route path="/podminky" element={<Terms />} />

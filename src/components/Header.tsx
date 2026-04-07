@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { ShoppingCart, User, LogIn, Shield, BookOpen, UserPlus, Sparkles } from 'lucide-react';
+import { ShoppingCart, User, LogIn, Shield, BookOpen, UserPlus, Sparkles, Flame } from 'lucide-react';
 
 export default function Header() {
   const { user, isAdmin } = useAuth();
@@ -55,6 +55,15 @@ export default function Header() {
 
           {/* ───── RIGHT SIDE ───── */}
           <nav className="flex items-center gap-2 md:gap-3 flex-1 justify-end" style={{ overflow: 'visible' }}>
+            <Link
+              to="/akce"
+              className="relative flex items-center gap-1.5 px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all text-sm"
+            >
+              <Flame className="w-4 h-4" />
+              <span className="hidden sm:inline font-medium">Akce</span>
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            </Link>
+
             <Link
               to="/cart"
               className="relative flex items-center gap-1.5 px-3 py-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all text-sm"
