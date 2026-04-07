@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Phone, Save, LogOut, Package, AlertCircle, CheckCircle } from 'lucide-react';
+import { User, Mail, Phone, Save, LogOut, Package, AlertCircle, CheckCircle, Gift, Copy } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export default function Profile() {
   const { user, profile, updateProfile, signOut } = useAuth();
@@ -11,6 +12,8 @@ export default function Profile() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [discountCode, setDiscountCode] = useState<{ code: string; is_used: boolean; expires_at: string } | null>(null);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -22,6 +25,16 @@ export default function Profile() {
       setFullName(profile.full_name || '');
       setPhone(profile.phone || '');
     }
+
+    // Load user's discount code
+    supabase
+      .from('discount_codes')
+      .select('code, is_used, expires_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => { if (data) setDiscountCode(data); });
   }, [user, profile, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,6 +163,33 @@ export default function Profile() {
               {loading ? 'Ukládání...' : 'Uložit změny'}
             </button>
           </form>
+
+          {discountCode && (
+            <div className="mb-8 p-6 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-yellow-400/30 rounded-xl">
+              <div className="flex items-center gap-2 mb-3">
+                <Gift className="w-5 h-5 text-yellow-400" />
+                <h2 className="text-lg font-bold text-white">Váš slevový kód 15%</h2>
+              </div>
+              {discountCode.is_used ? (
+                <p className="text-gray-400 text-sm">Kód <span className="text-white font-mono font-bold">{discountCode.code}</span> byl již použit.</p>
+              ) : (
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl font-black text-yellow-300 tracking-wider font-mono">{discountCode.code}</span>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(discountCode.code); setCodeCopied(true); setTimeout(() => setCodeCopied(false), 2000); }}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    >
+                      {codeCopied ? <CheckCircle className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-yellow-400" />}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    Platí do {new Date(discountCode.expires_at).toLocaleDateString('cs-CZ')}. Zadejte při objednávce v poli "Slevový kód".
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="border-t border-emerald-500/20 pt-8">
             <h2 className="text-xl font-bold text-white mb-4">Rychlé odkazy</h2>

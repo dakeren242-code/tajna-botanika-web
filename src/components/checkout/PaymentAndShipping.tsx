@@ -78,11 +78,21 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
 
   const handleSubmit = () => {
     setSubmitted(true);
-    if (!shippingMethod || !termsAccepted || !firstName || !lastName || !email || !phone) {
-      return;
-    }
 
-    if (shippingMethod === 'zasilkovna' && (!address || !city || !zip)) {
+    // Auto-scroll to first empty required field
+    const checks = [
+      { ok: !!firstName, id: 'field-firstname' },
+      { ok: !!lastName, id: 'field-lastname' },
+      { ok: !!email, id: 'field-email' },
+      { ok: !!phone, id: 'field-phone' },
+      { ok: !!shippingMethod, id: 'section-shipping' },
+      { ok: shippingMethod !== 'zasilkovna' || !!address, id: 'field-address' },
+      { ok: shippingMethod !== 'zasilkovna' || !!city, id: 'field-city' },
+      { ok: !!termsAccepted, id: 'section-terms' },
+    ];
+    const first = checks.find(c => !c.ok);
+    if (first) {
+      document.getElementById(first.id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
@@ -120,7 +130,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div id="field-firstname">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Jméno <span className="text-red-400">*</span>
               </label>
@@ -135,7 +145,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               {submitted && !firstName && <p className="mt-1 text-xs text-red-400">Vyplnte jmeno</p>}
             </div>
 
-            <div>
+            <div id="field-lastname">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Příjmení <span className="text-red-400">*</span>
               </label>
@@ -150,7 +160,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               {submitted && !lastName && <p className="mt-1 text-xs text-red-400">Vyplnte prijmeni</p>}
             </div>
 
-            <div>
+            <div id="field-email">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Email <span className="text-red-400">*</span>
               </label>
@@ -168,7 +178,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               {submitted && !email && <p className="mt-1 text-xs text-red-400">Vyplnte emailovou adresu</p>}
             </div>
 
-            <div>
+            <div id="field-phone">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Telefon <span className="text-red-400">*</span>
               </label>
@@ -191,7 +201,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
             <div className="mt-6 pt-6 border-t border-emerald-500/20">
               <h3 className="text-lg font-bold text-white mb-4">Dodací adresa</h3>
               <div className="grid grid-cols-1 gap-4">
-                <div>
+                <div id="field-address">
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Ulice a číslo popisné <span className="text-red-400">*</span>
                   </label>
@@ -207,7 +217,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
+                  <div id="field-city">
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Město <span className="text-red-400">*</span>
                     </label>
@@ -409,7 +419,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
           </div>
         </div>
 
-        <div className="bg-white/5 rounded-xl p-6 border border-emerald-500/20">
+        <div id="section-shipping" className="bg-white/5 rounded-xl p-6 border border-emerald-500/20">
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
             <Package className="w-6 h-6 text-emerald-400" />
             Způsob dopravy
@@ -654,7 +664,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
         </div>
 
         <div className="space-y-4">
-          <div className={`bg-white/5 rounded-xl p-4 border transition-all ${submitted && !termsAccepted ? 'border-red-500/40 bg-red-500/5' : 'border-emerald-500/20'}`}>
+          <div id="section-terms" className={`bg-white/5 rounded-xl p-4 border transition-all ${submitted && !termsAccepted ? 'border-red-500/40 bg-red-500/5' : 'border-emerald-500/20'}`}>
             <label className="flex items-start gap-3 cursor-pointer group">
               <div className="flex-shrink-0 pt-1">
                 <input

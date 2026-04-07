@@ -197,7 +197,10 @@ export function initializeTracking(consent?: ConsentState) {
   const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
   const tiktokPixelId = import.meta.env.VITE_TIKTOK_PIXEL_ID;
 
-  if (effectiveConsent.marketing && fbPixelId && !window.fbq && isProduction) {
+  // Always load FB pixel (even without consent) for better event coverage.
+  // Without consent: Limited Data Use mode (no PII, no cookies stored by pixel).
+  // With consent: full tracking with user matching.
+  if (fbPixelId && !window.fbq && isProduction) {
     (function(f: any, b: any, e: any, v: any, n?: any, t?: any, s?: any) {
       if (f.fbq) return;
       n = f.fbq = function() {
@@ -215,11 +218,11 @@ export function initializeTracking(consent?: ConsentState) {
       s.parentNode.insertBefore(t, s);
     })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
+    if (!effectiveConsent.marketing) {
+      // Limited Data Use - no advanced matching, restricted data processing
+      window.fbq!('dataProcessingOptions', ['LDU'], 0, 0);
+    }
     window.fbq!('init', fbPixelId);
-    // Do NOT fire PageView here — PageViewTracker in App.tsx fires trackPageView()
-    // on every route change (including initial load), sending both pixel + CAPI
-    // with a shared eventID for deduplication. Firing here produces a pixel-only
-    // PageView with no CAPI counterpart, worsening the coverage ratio.
   }
 
   if (effectiveConsent.analytics && gaId && !window.gtag && isProduction) {
@@ -408,7 +411,7 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
 
   const eventId = generateEventId(eventName);
 
-  if (consent.marketing && window.fbq) {
+  if (window.fbq) {
     window.fbq('track', eventName, data, { eventID: eventId });
   }
 
@@ -433,10 +436,8 @@ export function trackPageView(pagePath?: string) {
   const consent = getConsentState();
   const eventId = generateEventId('PageView');
 
-  if (consent.marketing) {
-    if (window.fbq) {
-      window.fbq('track', 'PageView', {}, { eventID: eventId });
-    }
+  if (window.fbq) {
+    window.fbq('track', 'PageView', {}, { eventID: eventId });
   }
 
   if (import.meta.env.VITE_FB_PIXEL_ID && isProduction) {
