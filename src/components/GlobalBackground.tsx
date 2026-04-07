@@ -10,7 +10,6 @@ export default function GlobalBackground() {
       </div>
       <div
         className="fixed inset-0 z-0 bg-gradient-to-br from-white/[0.03] via-transparent to-white/[0.02] pointer-events-none"
-        style={{ backdropFilter: 'blur(0.5px)' }}
       />
       <style>{`
         @keyframes global-color-shift {

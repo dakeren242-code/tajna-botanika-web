@@ -33,7 +33,7 @@ interface Snowflake {
 }
 
 const createInitialLeaves = (): FloatingLeaf[] =>
-  Array.from({ length: 12 }, (_, i) => ({
+  Array.from({ length: 5 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
@@ -44,7 +44,7 @@ const createInitialLeaves = (): FloatingLeaf[] =>
   }));
 
 const createInitialSpheres = (): FloatingSphere[] =>
-  Array.from({ length: 10 }, (_, i) => ({
+  Array.from({ length: 4 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     y: Math.random() * 100,
@@ -55,7 +55,7 @@ const createInitialSpheres = (): FloatingSphere[] =>
   }));
 
 const createInitialSnowflakes = (): Snowflake[] =>
-  Array.from({ length: 25 }, (_, i) => ({
+  Array.from({ length: 8 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
     startY: -10 - Math.random() * 20,

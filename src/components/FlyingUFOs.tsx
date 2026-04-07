@@ -111,7 +111,14 @@ export default function FlyingUFOs() {
         return ufo;
       });
 
-      forceUpdate(n => n + 1);
+      // Update DOM directly instead of React re-render for performance
+      ufosRef.current.forEach((ufo, i) => {
+        const el = document.getElementById(`ufo-${i}`);
+        if (el) {
+          el.style.transform = `translate(${ufo.x}px, ${ufo.y}px) scale(${ufo.scared ? 0.8 : 1})`;
+          el.style.opacity = ufo.scared ? '0.5' : '0.7';
+        }
+      });
       animationFrame.current = requestAnimationFrame(animate);
     };
 
@@ -131,17 +138,17 @@ export default function FlyingUFOs() {
 
   return (
     <div ref={containerRef} className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 5 }}>
-      {ufosRef.current.map((ufo) => (
+      {ufosRef.current.map((ufo, i) => (
         <div
           key={ufo.id}
-          className="absolute"
+          id={`ufo-${i}`}
+          className="absolute will-change-transform"
           style={{
-            left: `${ufo.x}px`,
-            top: `${ufo.y}px`,
+            left: 0,
+            top: 0,
             width: `${ufo.size}px`,
             height: `${ufo.size}px`,
-            transform: `translate(-50%, -50%) ${ufo.scared ? 'scale(0.85)' : 'scale(1)'}`,
-            transition: 'transform 0.2s ease-out',
+            transform: `translate(${ufo.x}px, ${ufo.y}px)`,
           }}
         >
           <div className={`relative w-full h-full ${ufo.fleeing ? 'animate-ufo-panic' : 'animate-ufo-wobble'}`}>
