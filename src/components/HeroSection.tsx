@@ -116,7 +116,6 @@ export default function HeroSection() {
         <span className="text-[10px] tracking-[0.2em] uppercase font-medium">Objevte naši kolekci</span>
         <ArrowDown className="w-5 h-5 animate-bounce" style={{ animationDuration: '2s' }} />
       </button>
-      </div>
 
       <style>{`
         @keyframes levitate {
