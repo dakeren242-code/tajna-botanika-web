@@ -7,7 +7,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-28 md:pt-32">
+    <section className="relative h-screen max-h-[900px] flex items-center justify-center overflow-hidden pt-20 md:pt-24 pb-16">
       <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
         {/* Limitovaná edice badge — visual glow + particles, GPU-optimized */}
         <div className="relative inline-flex items-center gap-3 px-8 py-4 mb-10 rounded-2xl animate-levitate">
@@ -65,7 +65,7 @@ export default function HeroSection() {
         </p>
 
         {/* 15% sleva banner */}
-        <div className="relative inline-flex items-center justify-center gap-2 md:gap-3 px-3 md:px-8 py-2.5 md:py-4 mb-8 md:mb-10 rounded-xl md:rounded-2xl backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 max-w-[280px] md:max-w-none mx-auto">
+        <div className="relative inline-flex items-center justify-center gap-2 md:gap-3 px-3 md:px-8 py-2.5 md:py-4 mb-4 md:mb-6 rounded-xl md:rounded-2xl backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 max-w-[280px] md:max-w-none mx-auto">
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-yellow-500/20 rounded-xl md:rounded-2xl border-2 border-yellow-400/40" />
 
           <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 animate-pulse relative z-10" />
@@ -81,30 +81,26 @@ export default function HeroSection() {
           <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 animate-pulse relative z-10" style={{ animationDelay: '0.5s' }} />
         </div>
 
-        {/* Scroll down + Instagram — centered */}
-        <div className="flex flex-col items-center gap-4 mt-4 md:mt-6">
-          <button
-            onClick={scrollToProducts}
-            className="flex flex-col items-center gap-2 cursor-pointer group"
-            data-cursor-hover
-          >
-            <span className="text-white/80 text-sm font-semibold group-hover:text-white transition-colors tracking-wide">
-              Objevte naši kolekci
-            </span>
-            <div className="w-8 h-8 rounded-full border-2 border-white/40 flex items-center justify-center group-hover:border-white/70 transition-all bg-white/5 backdrop-blur-sm animate-bounce" style={{ animationDuration: '2.5s' }}>
-              <ArrowDown className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
-            </div>
-          </button>
-
+        {/* Scroll down + Instagram — centered, compact */}
+        <div className="flex items-center justify-center gap-4 mt-4">
           <a
             href="https://www.instagram.com/tajnabotanika"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-400/20 text-pink-300 hover:text-pink-200 hover:border-pink-400/40 hover:scale-105 transition-all duration-300 text-sm font-medium group"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-400/20 text-pink-300 hover:text-pink-200 hover:border-pink-400/40 hover:scale-105 transition-all duration-300 text-sm font-medium group"
           >
             <Instagram className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-            <span>Sledujte nás na Instagramu</span>
+            <span>@tajnabotanika</span>
           </a>
+
+          <button
+            onClick={scrollToProducts}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:border-white/30 hover:scale-105 transition-all duration-300 text-sm font-medium cursor-pointer group"
+            data-cursor-hover
+          >
+            <span>Objevte naši kolekci</span>
+            <ArrowDown className="w-4 h-4 animate-bounce group-hover:text-emerald-400 transition-colors" style={{ animationDuration: '2s' }} />
+          </button>
         </div>
       </div>
 
