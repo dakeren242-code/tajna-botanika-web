@@ -93,9 +93,7 @@ function Home() {
 
   return (
     <div className="min-h-screen text-white overflow-x-hidden">
-      <Suspense fallback={null}>
-        <FloatingActionButton />
-      </Suspense>
+      {/* SupportChat replaces old FloatingActionButton — loaded globally via SupportChat component */}
 
       <main className="relative z-10">
         <HeroSection />

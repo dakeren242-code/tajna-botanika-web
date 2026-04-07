@@ -35,10 +35,11 @@ export default function Header() {
           <nav className="flex items-center gap-4 flex-1 justify-end" style={{ overflow: 'visible' }}>
             <Link
               to="/blog"
-              className="hidden md:flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all text-sm"
+              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-400/20 text-emerald-400 hover:from-emerald-500/20 hover:to-teal-500/20 hover:border-emerald-400/40 hover:text-emerald-300 hover:scale-105 transition-all duration-300 text-sm font-semibold group"
             >
-              <BookOpen className="w-4 h-4" />
+              <BookOpen className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
               <span>Akademie</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             </Link>
 
             {isAdmin && (

@@ -175,7 +175,7 @@ export default function SupportChat() {
       {!isOpen && (
         <button
           onClick={handleOpen}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center group"
+          className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center group"
           style={{ boxShadow: '0 8px 32px rgba(16, 185, 129, 0.4)' }}
         >
           <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
@@ -189,7 +189,7 @@ export default function SupportChat() {
 
       {/* Chat window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[360px] max-h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+        <div className="fixed bottom-6 right-6 z-[9999] w-[360px] max-h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-white/10"
           style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.5)' }}
         >
           {/* Header */}

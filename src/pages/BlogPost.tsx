@@ -1,4 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { ArrowLeft, Clock, Tag, ArrowRight, BookOpen } from 'lucide-react';
 import { blogPosts } from '../components/BlogSection';
 
@@ -6,6 +7,37 @@ export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const post = blogPosts.find(p => p.slug === slug);
+
+  // SEO meta tags
+  useEffect(() => {
+    if (!post) return;
+    document.title = `${post.title} | Tajná Botanika`;
+
+    const setMeta = (name: string, content: string, property?: boolean) => {
+      const attr = property ? 'property' : 'name';
+      let tag = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement;
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute(attr, name);
+        document.head.appendChild(tag);
+      }
+      tag.content = content;
+    };
+
+    setMeta('description', post.excerpt);
+    setMeta('og:title', post.title, true);
+    setMeta('og:description', post.excerpt, true);
+    setMeta('og:type', 'article', true);
+    setMeta('og:url', `https://tajnabotanika.online/blog/${post.slug}`, true);
+    setMeta('og:site_name', 'Tajná Botanika', true);
+    setMeta('twitter:card', 'summary');
+    setMeta('twitter:title', post.title);
+    setMeta('twitter:description', post.excerpt);
+
+    return () => {
+      document.title = 'Tajná Botanika | Prémiové Květy a Sběratelské Produkty';
+    };
+  }, [post]);
 
   if (!post) {
     return (
