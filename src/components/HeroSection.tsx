@@ -3,14 +3,13 @@ import { Sparkles, ArrowDown, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function HeroSection() {
-  const [badgeVisible, setBadgeVisible] = useState(false);
+  const [badgeVisible, setBadgeVisible] = useState(true);
 
   useEffect(() => {
-    // Show after 5s, hide after 10s, show again after 3min
-    const showTimer = setTimeout(() => setBadgeVisible(true), 5000);
-    const hideTimer = setTimeout(() => setBadgeVisible(false), 15000);
+    // Badge visible immediately. Hide after 12s, reappear after 3min.
+    const hideTimer = setTimeout(() => setBadgeVisible(false), 12000);
     const reshowTimer = setTimeout(() => setBadgeVisible(true), 180000);
-    return () => { clearTimeout(showTimer); clearTimeout(hideTimer); clearTimeout(reshowTimer); };
+    return () => { clearTimeout(hideTimer); clearTimeout(reshowTimer); };
   }, []);
 
   const scrollToProducts = () => {
@@ -21,42 +20,75 @@ export default function HeroSection() {
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-28 md:pt-32 pb-16">
       <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
-        {/* Limitovaná edice badge — appears 5s, hides 10s, reappears 3min */}
-        <div className={`relative inline-flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 mb-8 md:mb-10 rounded-2xl animate-levitate transition-all duration-700 ${badgeVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/30 via-orange-500/40 via-pink-500/30 to-purple-500/30 rounded-2xl backdrop-blur-xl border-2 animate-rainbow-glow" style={{ backgroundSize: '300% 100%' }} />
+        {/* Limitovaná edice badge — premium glassmorphism with inner light */}
+        <div className={`relative inline-flex items-center mb-8 md:mb-10 animate-levitate transition-all duration-1000 ${badgeVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-6 scale-95 pointer-events-none'}`}>
+          {/* Outer glow layers */}
+          <div className="absolute -inset-4 rounded-3xl opacity-60 blur-xl animate-badge-glow"
+            style={{ background: 'conic-gradient(from 0deg, rgba(251,191,36,0.3), rgba(236,72,153,0.3), rgba(168,85,247,0.3), rgba(16,185,129,0.2), rgba(251,191,36,0.3))' }} />
+          <div className="absolute -inset-1 rounded-2xl opacity-40 blur-sm"
+            style={{ background: 'linear-gradient(135deg, rgba(251,191,36,0.4), rgba(236,72,153,0.3), rgba(168,85,247,0.4))' }} />
 
-          {/* Orbiting particles — reduced from 20 to 8, GPU only */}
-          <div className="absolute -inset-3">
-            {[0,1,2,3,4,5,6,7].map((i) => {
-              const colors = ['#fbbf24', '#f97316', '#ec4899', '#a855f7'];
-              const color = colors[i % colors.length];
-              return (
-                <div
-                  key={i}
-                  className="absolute rounded-full animate-orbit-particle"
+          {/* Main badge body */}
+          <div className="relative px-7 md:px-10 py-3.5 md:py-4 rounded-2xl overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5))',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(251,191,36,0.2)',
+            }}>
+
+            {/* Shimmer sweep */}
+            <div className="absolute inset-0 animate-badge-shimmer"
+              style={{ background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.06) 45%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 55%, transparent 60%)', backgroundSize: '250% 100%' }} />
+
+            {/* Top edge light */}
+            <div className="absolute top-0 left-[15%] right-[15%] h-px"
+              style={{ background: 'linear-gradient(90deg, transparent, rgba(251,191,36,0.5), rgba(236,72,153,0.5), rgba(168,85,247,0.5), transparent)' }} />
+
+            {/* Content */}
+            <div className="relative flex items-center gap-3 z-10">
+              {/* Left diamond */}
+              <div className="w-5 h-5 rotate-45 rounded-sm flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, rgba(251,191,36,0.3), rgba(236,72,153,0.2))', border: '1px solid rgba(251,191,36,0.3)' }}>
+                <Sparkles className="w-3 h-3 -rotate-45 text-yellow-300" style={{ filter: 'drop-shadow(0 0 6px rgba(250,204,21,0.8))' }} />
+              </div>
+
+              {/* Text with breathing glow */}
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] md:text-xs font-medium tracking-[0.3em] uppercase text-yellow-400/60 mb-0.5">
+                  kolekce
+                </span>
+                <span className="text-sm md:text-base font-black tracking-[0.15em] uppercase animate-badge-text"
                   style={{
-                    left: '50%',
-                    top: '50%',
-                    width: '5px',
-                    height: '5px',
-                    backgroundColor: color,
-                    animationDelay: `${i * 0.45}s`,
-                    animationDuration: '3.6s',
-                    boxShadow: `0 0 10px ${color}`,
-                    contain: 'layout style paint',
-                  }}
-                />
-              );
-            })}
+                    background: 'linear-gradient(135deg, #fde68a, #fbbf24, #f59e0b, #ec4899, #a855f7, #fbbf24)',
+                    backgroundSize: '300% 100%',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    filter: 'drop-shadow(0 0 8px rgba(251,191,36,0.4))',
+                  }}>
+                  Limitovaná edice
+                </span>
+              </div>
+
+              {/* Right diamond */}
+              <div className="w-5 h-5 rotate-45 rounded-sm flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(236,72,153,0.3))', border: '1px solid rgba(168,85,247,0.3)' }}>
+                <Sparkles className="w-3 h-3 -rotate-45 text-pink-300" style={{ filter: 'drop-shadow(0 0 6px rgba(236,72,153,0.8))' }} />
+              </div>
+            </div>
           </div>
 
-          <div className="relative flex items-center gap-3 z-10">
-            <Sparkles className="w-6 h-6 text-yellow-300 animate-spin-slow" style={{ filter: 'drop-shadow(0 0 12px rgba(250, 204, 21, 1))' }} />
-            <span className="text-base font-black tracking-wider bg-gradient-to-r from-yellow-200 via-orange-300 via-pink-300 to-yellow-200 bg-clip-text text-transparent animate-gradient-text" style={{ backgroundSize: '300% 100%' }}>
-              LIMITOVANÁ EDICE 2026
-            </span>
-            <Sparkles className="w-6 h-6 text-pink-300 animate-spin-slow" style={{ animationDelay: '1s', filter: 'drop-shadow(0 0 12px rgba(236, 72, 153, 1))' }} />
-          </div>
+          {/* Floating micro-particles */}
+          {[0,1,2,3,4].map(i => (
+            <div key={i} className="absolute w-1 h-1 rounded-full animate-badge-particle"
+              style={{
+                background: ['#fbbf24','#ec4899','#a855f7','#10b981','#fbbf24'][i],
+                boxShadow: `0 0 4px ${['#fbbf24','#ec4899','#a855f7','#10b981','#fbbf24'][i]}`,
+                left: `${15 + i * 18}%`,
+                top: '-8px',
+                animationDelay: `${i * 0.8}s`,
+                animationDuration: `${2.5 + i * 0.5}s`,
+              }} />
+          ))}
         </div>
 
         <h1 className="text-3xl md:text-7xl lg:text-8xl font-black mb-5 md:mb-8 tracking-tight">
@@ -120,53 +152,34 @@ export default function HeroSection() {
           animation: levitate 3s ease-in-out infinite;
           transform: translateZ(0);
         }
-        @keyframes rainbow-glow {
-          0%, 100% {
-            box-shadow: 0 0 30px rgba(251,146,60,0.6), 0 0 60px rgba(250,204,21,0.4), inset 0 0 20px rgba(251,146,60,0.3);
-            border-color: rgba(251,146,60,0.7);
-          }
-          33% {
-            box-shadow: 0 0 30px rgba(236,72,153,0.6), 0 0 60px rgba(168,85,247,0.4), inset 0 0 20px rgba(236,72,153,0.3);
-            border-color: rgba(236,72,153,0.7);
-          }
-          66% {
-            box-shadow: 0 0 30px rgba(168,85,247,0.6), 0 0 60px rgba(251,146,60,0.4), inset 0 0 20px rgba(168,85,247,0.3);
-            border-color: rgba(168,85,247,0.7);
-          }
+        @keyframes badge-glow {
+          0%, 100% { transform: rotate(0deg); opacity: 0.5; }
+          50% { transform: rotate(180deg); opacity: 0.7; }
         }
-        .animate-rainbow-glow {
-          animation: rainbow-glow 4s ease-in-out infinite;
-          will-change: box-shadow;
+        .animate-badge-glow {
+          animation: badge-glow 8s linear infinite;
         }
-        @keyframes orbit-particle {
-          0% {
-            transform: translate(-50%,-50%) rotate(0deg) translateX(50px) rotate(0deg);
-            opacity: 0;
-          }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% {
-            transform: translate(-50%,-50%) rotate(360deg) translateX(50px) rotate(-360deg);
-            opacity: 0;
-          }
+        @keyframes badge-shimmer {
+          0% { background-position: -100% 0; }
+          100% { background-position: 200% 0; }
         }
-        .animate-orbit-particle {
-          animation: orbit-particle linear infinite;
-          will-change: transform;
+        .animate-badge-shimmer {
+          animation: badge-shimmer 4s ease-in-out infinite;
         }
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .animate-spin-slow {
-          animation: spin-slow 5s linear infinite;
-        }
-        @keyframes gradient-text {
+        @keyframes badge-text {
           0%, 100% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
         }
-        .animate-gradient-text {
-          animation: gradient-text 6s ease infinite;
+        .animate-badge-text {
+          animation: badge-text 5s ease infinite;
+        }
+        @keyframes badge-particle {
+          0% { transform: translateY(0) scale(1); opacity: 0; }
+          20% { opacity: 1; }
+          100% { transform: translateY(-30px) scale(0); opacity: 0; }
+        }
+        .animate-badge-particle {
+          animation: badge-particle ease-out infinite;
         }
       `}</style>
     </section>
