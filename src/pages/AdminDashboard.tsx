@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase, Order } from '../lib/supabase';
-import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag, Facebook, Radio, Trash2 } from 'lucide-react';
+import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag, Facebook, Radio, Trash2, BarChart3 } from 'lucide-react';
 import ProductManagement from '../components/admin/ProductManagement';
 import FacebookCatalogManager from '../components/admin/FacebookCatalogManager';
 import SupportAdmin from '../components/admin/SupportAdmin';
+import LivePanel from '../components/admin/LivePanel';
 import { getVisitorCount, onVisitorCountChange } from '../App';
 
 const statusLabels = {
@@ -26,7 +27,7 @@ const paymentStatusLabels = {
 export default function AdminDashboard() {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'catalog' | 'support'>('orders');
+  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'products' | 'catalog' | 'support'>('overview');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -156,10 +157,21 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
           </div>
 
-          <div className="flex gap-4 mb-8 border-b border-emerald-500/20">
+          <div className="flex gap-4 mb-8 border-b border-emerald-500/20 overflow-x-auto">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`flex items-center gap-2 px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
+                activeTab === 'overview'
+                  ? 'text-emerald-400 border-emerald-400'
+                  : 'text-gray-400 border-transparent hover:text-white'
+              }`}
+            >
+              <BarChart3 className="w-5 h-5" />
+              Přehled
+            </button>
             <button
               onClick={() => setActiveTab('orders')}
-              className={`flex items-center gap-2 px-4 py-3 font-semibold transition-colors border-b-2 ${
+              className={`flex items-center gap-2 px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'orders'
                   ? 'text-emerald-400 border-emerald-400'
                   : 'text-gray-400 border-transparent hover:text-white'
@@ -202,6 +214,8 @@ export default function AdminDashboard() {
               Podpora
             </button>
           </div>
+
+          {activeTab === 'overview' && <LivePanel liveVisitors={liveVisitors} />}
 
           {activeTab === 'orders' && (
             <>
