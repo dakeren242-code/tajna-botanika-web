@@ -125,10 +125,160 @@ Nepoužívejte plastové sáčky — statická elektřina odlamuje trichomy. Neu
 Při správném skladování vydrží produkt plně aromatický 6–12 měsíců. Po roce začíná oxidace a degradace THC-X na méně aktivní metabolity.
     `,
   },
+  {
+    slug: 'thc-x-vs-hhc-rozdily',
+    title: 'THC-X vs HHC: Klíčové rozdíly, které musíte znát',
+    excerpt: 'THC-X a HHC jsou dva populární kanabinoidy, ale liší se v síle, účincích i legálním statusu. Porovnáváme je bod po bodu, abyste věděli, co si vybrat.',
+    category: 'Srovnání',
+    categoryColor: 'from-rose-500 to-pink-600',
+    readTime: '6 min',
+    date: '7. dubna 2026',
+    gradient: 'from-rose-900/40 to-pink-900/20',
+    accentColor: '#f43f5e',
+    image: null,
+    content: `
+THC-X a HHC patří mezi nejdiskutovanější kanabinoidy současnosti. Oba jsou legálně dostupné v ČR, ale jejich profily se výrazně liší.
+
+## Co je HHC?
+
+HHC (hexahydrokanabinol) je hydrogenovaná forma THC. Vzniká přidáním vodíku k molekule THC, čímž získá vyšší stabilitu a odolnost vůči teplu a UV záření. Síla je přibližně 70–80 % klasického THC.
+
+## Co je THC-X?
+
+THC-X je hexylový ester THC-O-acetátu — výrazně silnější derivát. Síla dosahuje 2–3× klasického THC, s hlubším a delším účinkem.
+
+## Hlavní rozdíly
+
+**Síla účinku:** THC-X je výrazně silnější než HHC. Pokud hledáte intenzivnější zážitek, THC-X je jasná volba.
+
+**Nástup:** HHC nastupuje rychleji (15–30 min), THC-X pomaleji (30–90 min), ale účinek trvá déle.
+
+**Stabilita:** HHC je chemicky stabilnější a má delší trvanlivost. THC-X vyžaduje pečlivější skladování.
+
+**Chuť:** Oba mají odlišné terpénové profily. THC-X květy na Tajné Botanice nabízejí prémiové aroma díky pečlivě vybraným odrůdám.
+
+## Pro koho je který?
+
+HHC je vhodné pro začátečníky a ty, kdo preferují mírnější efekt. THC-X je pro zkušenější uživatele hledající silnější a hlubší zážitek.
+    `,
+  },
+  {
+    slug: 'nejlepsi-thc-x-pro-relaxaci',
+    title: 'Nejlepší THC-X odrůdy pro relaxaci a lepší spánek',
+    excerpt: 'Trápí vás nespavost nebo stres? THC-X indica-dominantní odrůdy mohou pomoci. Představujeme top výběr pro večerní klid a kvalitní odpočinek.',
+    category: 'Průvodce',
+    categoryColor: 'from-indigo-500 to-blue-600',
+    readTime: '5 min',
+    date: '5. dubna 2026',
+    gradient: 'from-indigo-900/40 to-blue-900/20',
+    accentColor: '#6366f1',
+    image: null,
+    content: `
+Kvalitní odpočinek je základ zdraví. THC-X odrůdy s indica-dominantním profilem nabízejí přirozený způsob, jak se uvolnit po náročném dni.
+
+## Proč THC-X pomáhá s relaxací?
+
+THC-X se váže na CB1 receptory, které regulují náladu, spánek a bolest. Indica-dominantní odrůdy obsahují vyšší podíl myrcenu a linaloolu — terpénů známých svými sedativními vlastnostmi.
+
+## Top odrůdy pro relaxaci
+
+**Purple Haze** — Sladká, ovocná vůně s výrazným indica efektem. Ideální 1–2 hodiny před spánkem.
+
+**OG Kush** — Klasická relaxační odrůda s vysokým obsahem myrcenu. Zemitá, borová chuť.
+
+**Amnesia** — Navzdory názvu excelentní pro hlubokou relaxaci v THC-X verzi. Citrusové tóny.
+
+## Jak používat pro nejlepší výsledek
+
+Začněte s malou dávkou (0,1–0,3 g) 60–90 minut před spaním. THC-X má pomalejší nástup, takže nezvyšujte dávku příliš brzy. Kombinujte s tmavou místností a odložením telefonu.
+
+## Důležité upozornění
+
+THC-X produkty jsou určeny výhradně pro dospělé. Pokud užíváte léky na spaní, konzultujte kombinaci s lékařem.
+    `,
+  },
+  {
+    slug: 'jak-poznat-kvalitni-thc-x',
+    title: 'Jak poznat kvalitní THC-X květ? 5 znaků prémiového produktu',
+    excerpt: 'Ne každý THC-X květ je stejný. Naučte se rozlišit prémiovou kvalitu od průměru podle 5 jednoduchých kritérií, které zvládne i začátečník.',
+    category: 'Vzdělání',
+    categoryColor: 'from-yellow-500 to-amber-600',
+    readTime: '4 min',
+    date: '3. dubna 2026',
+    gradient: 'from-yellow-900/30 to-amber-900/20',
+    accentColor: '#eab308',
+    image: null,
+    content: `
+Kvalita THC-X květů se dramaticky liší. Zde je 5 spolehlivých ukazatelů, podle kterých poznáte prémiový produkt.
+
+## 1. Vzhled a struktura
+
+Kvalitní květ má hustou, kompaktní strukturu s viditelnými trichomy (krystalky). Barva by měla být sytá — od zelené přes fialovou po oranžovou. Vyvarujte se hnědých nebo suchých květů.
+
+## 2. Vůně
+
+Silné, výrazné aroma je známka kvalitního terpénového profilu. Každá odrůda by měla mít odlišnou a rozpoznatelnou vůni. Pokud květ nevoní nebo voní senem — není čerstvý.
+
+## 3. Laboratorní rozbor
+
+Seriózní prodejce vždy uvádí výsledky laboratorních testů: obsah THC-X, CBD, terpénů a případné kontaminanty. Na Tajné Botanice jsou všechny produkty testovány.
+
+## 4. Vlhkost
+
+Správně zpracovaný květ by měl být mírně pružný — ne suchý a křehký, ne mokrý a lepkavý. Ideální obsah vlhkosti je 55–62 %.
+
+## 5. Trimming a balení
+
+Profesionální trim (ořez listů) je známka péče o detail. Kvalitní balení chrání produkt před světlem a vlhkostí. Naše produkty balíme do vzduchotěsných sáčků s UV ochranou.
+    `,
+  },
+  {
+    slug: 'thc-x-zkusenosti-co-ocekavat',
+    title: 'THC-X zkušenosti: Co očekávat při prvním použití',
+    excerpt: 'Chystáte se poprvé vyzkoušet THC-X? Přečtěte si, co můžete očekávat — od nástupu účinků po délku trvání. Praktický průvodce pro začátečníky.',
+    category: 'Průvodce',
+    categoryColor: 'from-teal-500 to-emerald-600',
+    readTime: '5 min',
+    date: '1. dubna 2026',
+    gradient: 'from-teal-900/30 to-emerald-900/20',
+    accentColor: '#14b8a6',
+    image: null,
+    content: `
+Vaše první zkušenost s THC-X by měla být příjemná a bezpečná. Tady je vše, co potřebujete vědět.
+
+## Příprava
+
+Zvolte klidné prostředí, kde se cítíte bezpečně. Ideálně doma nebo u přátel. Mějte po ruce vodu a lehké občerstvení. Nekonzumujte nalačno.
+
+## Dávkování
+
+Pro úplné začátečníky doporučujeme 0,05–0,1 g. THC-X je výrazně silnější než standardní konopí. Méně je více — vždy můžete přidat, ale nemůžete ubrat.
+
+## Nástup účinků
+
+Při inhalaci: 5–15 minut. Při orální konzumaci: 30–90 minut. Nezvyšujte dávku, pokud účinky nenastoupí ihned — THC-X může mít opožděný nástup.
+
+## Co očekávat
+
+**Fyzické pocity:** Hluboká relaxace, tělesné teplo, pocit tíhy v končetinách.
+
+**Mentální stav:** Zvýšená kreativita, změněné vnímání času, prohloubené smyslové vjemy.
+
+**Délka:** 2–4 hodiny při inhalaci, 4–8 hodin při orální konzumaci.
+
+## Čemu se vyhnout
+
+Nekombinujte s alkoholem. Neřiďte motorová vozidla. Nekonzumujte, pokud máte závažné zdravotní problémy. Produkt je určen výhradně pro osoby starší 18 let.
+
+## Po zkušenosti
+
+Hydratujte se, odpočiňte si. Příští den byste neměli pociťovat žádný "hangover". Pokud chcete opakovat, počkejte alespoň několik dní.
+    `,
+  },
 ];
 
 export default function BlogSection() {
-  const featured = blogPosts.slice(0, 3);
+  const featured = blogPosts.slice(0, 4);
 
   return (
     <section id="blog" className="relative py-24 px-6 overflow-hidden">
@@ -161,7 +311,7 @@ export default function BlogSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {featured.map((post, i) => (
             <Link
               key={post.slug}
