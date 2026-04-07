@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { LoginForm } from '../components/auth/LoginForm'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../contexts/AuthContext'
 import { LogIn } from 'lucide-react'
 
 export function Login() {
@@ -34,7 +34,7 @@ export function Login() {
             <p className="text-gray-400">
               Nebo{' '}
               <Link
-                to="/signup"
+                to="/register"
                 className="font-medium text-emerald-400 hover:text-emerald-300"
               >
                 vytvořte si nový účet
@@ -44,10 +44,16 @@ export function Login() {
 
           <LoginForm onSuccess={() => navigate('/')} />
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-2">
+            <Link
+              to="/reset-password"
+              className="block text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              Zapomněli jste heslo?
+            </Link>
             <Link
               to="/"
-              className="text-sm text-gray-400 hover:text-gray-300 transition-colors"
+              className="block text-sm text-gray-400 hover:text-gray-300 transition-colors"
             >
               Zpět na hlavní stránku
             </Link>

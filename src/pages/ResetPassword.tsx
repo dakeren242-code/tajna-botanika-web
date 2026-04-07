@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import { Mail, AlertCircle, CheckCircle, KeyRound } from 'lucide-react';
 
 export default function ResetPassword() {
@@ -23,6 +24,12 @@ export default function ResetPassword() {
       setLoading(false);
       return;
     }
+
+    // Save email to contacts for marketing (source: password_reset)
+    await supabase.from('email_contacts').upsert(
+      { email, source: 'password_reset', updated_at: new Date().toISOString() },
+      { onConflict: 'email' }
+    );
 
     setSuccess(true);
     setLoading(false);
