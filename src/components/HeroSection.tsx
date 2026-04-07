@@ -8,10 +8,10 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 md:pt-24 pb-16">
+    <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-28 md:pt-32 pb-16">
       <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
         {/* Limitovaná edice badge — visual glow + particles, GPU-optimized */}
-        <div className="relative inline-flex items-center gap-3 px-8 py-4 mb-10 rounded-2xl animate-levitate">
+        <div className="relative inline-flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 mb-8 md:mb-10 rounded-2xl animate-levitate">
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/30 via-orange-500/40 via-pink-500/30 to-purple-500/30 rounded-2xl backdrop-blur-xl border-2 animate-rainbow-glow" style={{ backgroundSize: '300% 100%' }} />
 
           {/* Orbiting particles — reduced from 20 to 8, GPU only */}
@@ -48,19 +48,19 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <h1 className="text-[2.35rem] md:text-7xl lg:text-8xl font-black mb-8 tracking-tight">
+        <h1 className="text-3xl md:text-7xl lg:text-8xl font-black mb-5 md:mb-8 tracking-tight">
           <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent drop-shadow-2xl whitespace-nowrap" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
             ČISTOTA V
           </span>
           <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent drop-shadow-2xl whitespace-nowrap" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
             KAŽDÉM DETAILU
           </span>
-          <span className="block text-2xl md:text-4xl mt-4 bg-gradient-to-r from-cyan-200 via-blue-200 to-purple-300 bg-clip-text text-transparent font-light tracking-wide">
+          <span className="block text-lg md:text-4xl mt-3 md:mt-4 bg-gradient-to-r from-cyan-200 via-blue-200 to-purple-300 bg-clip-text text-transparent font-light tracking-wide">
             Laboratorní preciznost, přírodní dokonalost
           </span>
         </h1>
 
-        <p className="text-[0.95rem] md:text-xl text-gray-200 mb-12 max-w-3xl mx-auto leading-relaxed font-light px-2 md:px-0">
+        <p className="text-sm md:text-xl text-gray-200 mb-6 md:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-2 md:px-0">
           Exkluzivní kolekce pěstovaná v <span className="text-green-400 font-semibold">kontrolovaném prostředí</span> s péčí o každý detail.
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>

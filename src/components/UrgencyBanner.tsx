@@ -42,8 +42,8 @@ function UrgencyBanner() {
   if (dismissed || !isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 md:bottom-auto md:top-[73px]">
-      <div className="relative bg-gradient-to-r from-emerald-900/95 via-emerald-800/95 to-teal-900/95 backdrop-blur-md border-t md:border-t-0 md:border-b border-emerald-500/20">
+    <div className="hidden md:block fixed z-40 top-[73px] left-0 right-0">
+      <div className="relative bg-gradient-to-r from-emerald-900/95 via-emerald-800/95 to-teal-900/95 backdrop-blur-md border-b border-emerald-500/20">
         <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-center gap-3 text-sm">
           <Truck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
           <span className="text-emerald-100/90 font-medium">
