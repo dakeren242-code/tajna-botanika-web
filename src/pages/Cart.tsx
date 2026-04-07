@@ -1,13 +1,13 @@
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShoppingCart, Minus, Plus, Trash2, ArrowLeft, ShoppingBag, Truck } from 'lucide-react';
+import { ShoppingCart, Minus, Plus, Trash2, ArrowLeft, ShoppingBag, Truck, Zap, TrendingUp } from 'lucide-react';
 
 const FREE_SHIPPING_THRESHOLD = 1000;
 const SHIPPING_COST = 79;
 
 export default function Cart() {
-  const { items, removeFromCart, updateQuantity, totalPrice } = useCart();
+  const { items, removeFromCart, updateQuantity, totalPrice, addToCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -132,6 +132,51 @@ export default function Cart() {
                   );
                 })}
               </div>
+
+              {/* Upsell section */}
+              {items.some(item => item.gramAmount === '1g') && (
+                <div className="mt-6 p-5 bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border border-yellow-500/20 rounded-xl">
+                  <div className="flex items-center gap-2 mb-3">
+                    <TrendingUp className="w-5 h-5 text-yellow-400" />
+                    <h3 className="text-white font-bold">Ušetřete s větším balením!</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {items.filter(item => item.gramAmount === '1g').map(item => {
+                      const savingPer3g = (190 * 3) - 490;
+                      const savingPer5g = (190 * 5) - 690;
+                      return (
+                        <div key={item.product.id} className="text-sm space-y-1.5">
+                          <p className="text-gray-300">
+                            <span className="text-white font-semibold">{item.product.name}</span> — místo 1g zkuste:
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                removeFromCart(item.product.id, '1g');
+                                addToCart(item.product, '3g');
+                              }}
+                              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 border border-yellow-500/30 rounded-lg text-yellow-300 font-bold text-xs transition-all hover:scale-[1.02]"
+                            >
+                              <Zap className="w-3.5 h-3.5" />
+                              3g — ušetříte {savingPer3g} Kč
+                            </button>
+                            <button
+                              onClick={() => {
+                                removeFromCart(item.product.id, '1g');
+                                addToCart(item.product, '5g');
+                              }}
+                              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 rounded-lg text-emerald-300 font-bold text-xs transition-all hover:scale-[1.02]"
+                            >
+                              <Zap className="w-3.5 h-3.5" />
+                              5g — ušetříte {savingPer5g} Kč
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

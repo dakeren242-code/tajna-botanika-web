@@ -104,6 +104,18 @@ export default function ProductsSection() {
             Objevte jedinečné květy s precizně vyvážeými profily.
             Každý produkt je certifikován a testován.
           </p>
+
+          <button
+            onClick={() => {
+              const el = document.querySelector('[class*="SPECIÁLNÍ"]')?.closest('section') ||
+                         document.getElementById('o-nas')?.closest('section')?.nextElementSibling;
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-full text-sm font-bold text-black bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 transition-all hover:scale-105 shadow-lg shadow-yellow-500/20"
+          >
+            <Sparkles className="w-4 h-4" />
+            Ušetřete až 27 % s Bundle balíčky
+          </button>
         </div>
 
         <div className="mb-12 flex flex-col md:flex-row gap-6 items-center justify-between">

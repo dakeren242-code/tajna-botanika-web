@@ -196,22 +196,30 @@ export default function ProductCard({ product, index }: ProductCardProps) {
               {!isBundle && (
                 <div className="w-full">
                   <div className="grid grid-cols-4 gap-2 mb-4" onClick={(e) => e.stopPropagation()}>
-                    {gramOptions.map((option) => (
-                      <button
-                        key={option}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedGrams(option);
-                        }}
-                        className={`px-2 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
-                          selectedGrams === option
-                            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg scale-105'
-                            : 'bg-white/10 text-gray-400 hover:bg-white/20'
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
+                    {gramOptions.map((option) => {
+                      const isBestValue = option === '3g' || option === '5g';
+                      return (
+                        <button
+                          key={option}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedGrams(option);
+                          }}
+                          className={`relative px-2 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
+                            selectedGrams === option
+                              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg scale-105'
+                              : 'bg-white/10 text-gray-400 hover:bg-white/20'
+                          }`}
+                        >
+                          {isBestValue && (
+                            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider bg-gradient-to-r from-yellow-400 to-amber-500 text-black rounded-full whitespace-nowrap leading-none">
+                              {option === '3g' ? 'Oblíbené' : 'Výhodné'}
+                            </span>
+                          )}
+                          {option}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
