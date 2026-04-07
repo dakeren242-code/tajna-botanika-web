@@ -7,7 +7,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 md:pt-24 pb-16">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 md:pt-24 pb-16">
       <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
         {/* Limitovaná edice badge — visual glow + particles, GPU-optimized */}
         <div className="relative inline-flex items-center gap-3 px-8 py-4 mb-10 rounded-2xl animate-levitate">

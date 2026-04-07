@@ -47,6 +47,12 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const BlogSection = lazy(() => import('./components/BlogSection'));
 const SupportChat = lazy(() => import('./components/SupportChat'));
+const UrgencyBanner = lazy(() => import('./components/UrgencyBanner'));
+const ExitIntentPopup = lazy(() => import('./components/ExitIntentPopup'));
+const ProductComparisonSection = lazy(() => import('./components/ProductComparisonSection'));
+const InstagramSection = lazy(() => import('./components/InstagramSection'));
+const SeasonalBanner = lazy(() => import('./components/SeasonalBanner'));
+const ReferralSection = lazy(() => import('./components/ReferralSection'));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen bg-black">
@@ -116,6 +122,12 @@ function Home() {
 
         <Suspense fallback={null}>
           <ScrollReveal direction="fade">
+            <ProductComparisonSection />
+          </ScrollReveal>
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <ScrollReveal direction="fade">
             <ExperienceSection />
           </ScrollReveal>
         </Suspense>
@@ -127,6 +139,10 @@ function Home() {
         </Suspense>
 
         <Suspense fallback={null}>
+          <SeasonalBanner />
+        </Suspense>
+
+        <Suspense fallback={null}>
           <ScrollReveal direction="fade">
             <TestimonialsSection />
           </ScrollReveal>
@@ -134,7 +150,19 @@ function Home() {
 
         <Suspense fallback={null}>
           <ScrollReveal direction="up">
+            <ReferralSection />
+          </ScrollReveal>
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <ScrollReveal direction="up">
             <BlogSection />
+          </ScrollReveal>
+        </Suspense>
+
+        <Suspense fallback={null}>
+          <ScrollReveal direction="fade">
+            <InstagramSection />
           </ScrollReveal>
         </Suspense>
 
@@ -264,6 +292,12 @@ function App() {
                     <Route path="/soukromi" element={<Privacy />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
+                </Suspense>
+                <Suspense fallback={null}>
+                  <UrgencyBanner />
+                </Suspense>
+                <Suspense fallback={null}>
+                  <ExitIntentPopup />
                 </Suspense>
                 <Suspense fallback={null}>
                   <CookieBanner />

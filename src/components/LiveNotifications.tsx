@@ -1,39 +1,32 @@
 import { useEffect, useState, useRef } from 'react';
-import { Eye } from 'lucide-react';
+import { Eye, ShoppingBag, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Notification {
   id: number;
   message: string;
   time: string;
+  type: 'view' | 'purchase' | 'review';
 }
 
-const cities = ['Prahy', 'Brna', 'Ostravy', 'Plzně', 'Liberce', 'Olomouce', 'Hradce Králové', 'Českých Budějovic', 'Pardubic', 'Zlína', 'Ústí nad Labem', 'Karviné', 'Frýdku-Místku'];
-const names = ['Jan', 'Petr', 'Martin', 'Tomáš', 'Jakub', 'Lukáš', 'David', 'Filip', 'Marie', 'Jana', 'Eva', 'Anna', 'Kateřina', 'Tereza', 'Lucie', 'Hana'];
+const cities = ['Prahy', 'Brna', 'Ostravy', 'Plzně', 'Liberce', 'Olomouce', 'Hradce Králové', 'Českých Budějovic', 'Pardubic', 'Zlína', 'Ústí nad Labem', 'Karviné', 'Frýdku-Místku', 'Jihlavy', 'Tábora', 'Kladna', 'Mostu', 'Karlových Varů'];
+const names = ['Jan', 'Petr', 'Martin', 'Tomáš', 'Jakub', 'Lukáš', 'David', 'Filip', 'Marie', 'Jana', 'Eva', 'Anna', 'Kateřina', 'Tereza', 'Lucie', 'Hana', 'Ondřej', 'Adam', 'Daniel', 'Marek'];
+const weights = ['1g', '3g', '5g'];
 
-const getRandomName = () => names[Math.floor(Math.random() * names.length)];
-const getRandomCity = () => cities[Math.floor(Math.random() * cities.length)];
-const getRandomTime = () => {
-  const mins = Math.floor(Math.random() * 8 + 1);
-  return `PŘED ${mins} MIN`;
-};
+const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+const getTime = () => `PŘED ${Math.floor(Math.random() * 12 + 1)} MIN`;
 
 export default function LiveNotifications() {
   const [currentNotification, setCurrentNotification] = useState<Notification | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [productNames, setProductNames] = useState<string[]>([]);
   const showCount = useRef(0);
-  const MAX_NOTIFICATIONS = 4; // Max per session
+  const MAX_NOTIFICATIONS = 6;
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data } = await supabase
-        .from('products')
-        .select('name')
-        .limit(10);
-      if (data) {
-        setProductNames(data.map(p => p.name));
-      }
+      const { data } = await supabase.from('products').select('name').limit(10);
+      if (data) setProductNames(data.map(p => p.name));
     };
     fetchProducts();
   }, []);
@@ -41,44 +34,78 @@ export default function LiveNotifications() {
   useEffect(() => {
     if (productNames.length === 0) return;
 
+    const generateNotification = (): Notification => {
+      const name = pick(names);
+      const city = pick(cities);
+      const product = pick(productNames);
+      const weight = pick(weights);
+
+      // Weighted random: 40% purchase, 35% view, 25% review
+      const rand = Math.random();
+      if (rand < 0.4) {
+        return {
+          id: Date.now(),
+          message: `${name} z ${city} právě objednal/a ${product} ${weight}`,
+          time: getTime(),
+          type: 'purchase',
+        };
+      } else if (rand < 0.75) {
+        return {
+          id: Date.now(),
+          message: `${name} z ${city} právě prohlíží ${product}`,
+          time: getTime(),
+          type: 'view',
+        };
+      } else {
+        const ratings = ['⭐⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'];
+        return {
+          id: Date.now(),
+          message: `${name} hodnotil/a ${product}: ${pick(ratings)}`,
+          time: getTime(),
+          type: 'review',
+        };
+      }
+    };
+
     const showNotification = () => {
       if (showCount.current >= MAX_NOTIFICATIONS) return;
       showCount.current += 1;
 
-      const product = productNames[Math.floor(Math.random() * productNames.length)];
-      const notif: Notification = {
-        id: Date.now(),
-        message: `${getRandomName()} z ${getRandomCity()} právě prohlíží ${product}`,
-        time: getRandomTime(),
-      };
-
-      setCurrentNotification(notif);
+      setCurrentNotification(generateNotification());
       setIsVisible(true);
-
-      setTimeout(() => {
-        setIsVisible(false);
-      }, 5000);
+      setTimeout(() => setIsVisible(false), 5500);
     };
 
-    // First notification after 45s, then random 60-120s intervals
+    // First after 30s, then 45-90s intervals
     const initialDelay = setTimeout(() => {
       showNotification();
       const scheduleNext = () => {
-        const delay = 60000 + Math.random() * 60000; // 60-120 seconds
+        const delay = 45000 + Math.random() * 45000;
         return setTimeout(() => {
           showNotification();
           timer = scheduleNext();
         }, delay);
       };
       timer = scheduleNext();
-    }, 45000);
+    }, 30000);
 
     let timer: ReturnType<typeof setTimeout>;
-
     return () => { clearTimeout(initialDelay); clearTimeout(timer); };
   }, [productNames]);
 
   if (!currentNotification) return null;
+
+  const iconMap = {
+    view: <Eye className="w-4 h-4" />,
+    purchase: <ShoppingBag className="w-4 h-4" />,
+    review: <Star className="w-4 h-4" />,
+  };
+
+  const colorMap = {
+    view: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+    purchase: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
+    review: 'bg-purple-500/10 border-purple-500/20 text-purple-400',
+  };
 
   return (
     <div
@@ -86,10 +113,10 @@ export default function LiveNotifications() {
         isVisible ? 'translate-x-0 opacity-100' : 'translate-x-[calc(100%+2rem)] opacity-0'
       }`}
     >
-      <div className="relative p-4 rounded-2xl backdrop-blur-xl border border-white/10 bg-black/80 shadow-2xl">
+      <div className="relative p-4 rounded-2xl backdrop-blur-xl border border-white/10 bg-black/85 shadow-2xl">
         <div className="relative flex items-start gap-3">
-          <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-            <Eye className="w-4 h-4" />
+          <div className={`p-2.5 rounded-xl border ${colorMap[currentNotification.type]}`}>
+            {iconMap[currentNotification.type]}
           </div>
 
           <div className="flex-1 min-w-0">

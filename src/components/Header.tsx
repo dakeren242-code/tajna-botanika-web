@@ -12,7 +12,7 @@ export default function Header() {
       className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-emerald-500/20"
       style={{ overflow: 'visible' }}
     >
-      <div className="max-w-7xl mx-auto px-4 py-5" style={{ overflow: 'visible' }}>
+      <div className="max-w-7xl mx-auto px-4 py-2.5 md:py-4" style={{ overflow: 'visible' }}>
         <div className="flex items-center justify-between relative" style={{ overflow: 'visible' }}>
           <div className="flex-1" />
 
@@ -25,7 +25,7 @@ export default function Header() {
             <img
               src="/logo_botanika.png"
               alt="Tajná Botanika"
-              className="h-16 w-16 object-cover rounded-full"
+              className="h-10 w-10 md:h-14 md:w-14 object-cover rounded-full"
             />
             <span className="hidden sm:inline text-2xl font-serif font-bold bg-gradient-to-br from-white via-yellow-100 to-yellow-600 bg-clip-text text-transparent tracking-wide">
               Tajná Botanika

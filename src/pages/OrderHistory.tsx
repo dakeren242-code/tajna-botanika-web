@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase, Order } from '../lib/supabase';
-import { Package, ChevronRight, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { Package, ChevronRight, ShoppingBag, ArrowLeft, RotateCcw } from 'lucide-react';
 
 const statusLabels = {
   pending: { label: 'Čeká na zpracování', color: 'text-yellow-400 bg-yellow-500/10' },
@@ -127,7 +127,21 @@ export default function OrderHistory() {
                       </div>
                     </div>
 
-                    <ChevronRight className="w-6 h-6 text-gray-400 group-hover:text-emerald-400 transition-colors" />
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          // Navigate to home with scroll to products
+                          window.location.href = '/#products';
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg hover:bg-emerald-500/20 transition-all"
+                        title="Objednat znovu"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Znovu</span>
+                      </button>
+                      <ChevronRight className="w-6 h-6 text-gray-400 group-hover:text-emerald-400 transition-colors" />
+                    </div>
                   </div>
                 </Link>
               ))}
