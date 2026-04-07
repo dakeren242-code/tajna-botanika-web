@@ -91,13 +91,29 @@ export default function Header() {
 
             {user ? (
               <div className="flex items-center gap-1.5">
-                {points && points.current_points > 0 && (
-                  <Link to="/profile#loyalty"
-                    className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs font-bold hover:bg-yellow-500/15 transition-all">
-                    <Award className="w-3 h-3" />
-                    {points.current_points} b.
-                  </Link>
-                )}
+                <Link to="/profile#loyalty"
+                  className="relative flex items-center gap-1 group"
+                  title="Věrnostní body"
+                >
+                  {/* Coin */}
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-12"
+                    style={{
+                      background: 'linear-gradient(145deg, #fbbf24, #f59e0b, #d97706)',
+                      boxShadow: '0 0 8px rgba(251,191,36,0.3), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.2)',
+                    }}>
+                    <span className="text-[10px] md:text-xs font-black text-yellow-900" style={{ textShadow: '0 1px 0 rgba(255,255,255,0.3)' }}>B</span>
+                  </div>
+                  {/* Count */}
+                  <span className="hidden md:block text-xs font-bold text-yellow-400 group-hover:text-yellow-300 transition-colors">
+                    {points?.current_points ?? 0}
+                  </span>
+                  {/* Mobile: count overlay on coin */}
+                  {(points?.current_points ?? 0) > 0 && (
+                    <span className="md:hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-yellow-500 text-[9px] font-black text-yellow-950">
+                      {(points?.current_points ?? 0) > 999 ? '999+' : points?.current_points}
+                    </span>
+                  )}
+                </Link>
                 <Link
                   to="/profile"
                   className="flex items-center gap-1.5 px-3 md:px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all text-sm font-semibold"
