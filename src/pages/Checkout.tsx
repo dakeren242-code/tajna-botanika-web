@@ -5,6 +5,7 @@ import { useCart } from '../contexts/CartContext';
 import { supabase } from '../lib/supabase';
 import { trackEvent } from '../hooks/useTracking';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
+import { getPrice, FREE_SHIPPING_THRESHOLD, SHIPPING_COST, COD_FEE } from '../lib/prices';
 import PaymentAndShipping from '../components/checkout/PaymentAndShipping';
 
 interface CustomerData {
@@ -75,10 +76,6 @@ export default function Checkout() {
         }
       }
 
-      const FREE_SHIPPING_THRESHOLD = 1000;
-      const SHIPPING_COST = 79;
-      const COD_FEE = 30;
-
       const discountAmount = discountPercent ? Math.round(totalPrice * discountPercent / 100) : 0;
       const discountedPrice = totalPrice - discountAmount;
       const isFreeShipping = discountedPrice >= FREE_SHIPPING_THRESHOLD;
@@ -101,6 +98,14 @@ export default function Checkout() {
           last_name: customerData.lastName,
           email: customerData.email,
           phone: customerData.phone,
+          customer_first_name: customerData.firstName,
+          customer_last_name: customerData.lastName,
+          customer_email: customerData.email,
+          customer_phone: customerData.phone,
+          subtotal: totalPrice,
+          shipping_cost: shippingCost,
+          cod_fee: codFee,
+          discount_amount: discountAmount,
           shipping_address: shippingAddress,
           notes: customerData.notes || null,
           status: 'pending',
@@ -118,13 +123,7 @@ export default function Checkout() {
       }
 
       const orderItems = items.map((item) => {
-        const priceMap: Record<string, number> = {
-          '1g': 190,
-          '3g': 490,
-          '5g': 690,
-          '10g': 1290,
-        };
-        const price = priceMap[item.gramAmount] || 190;
+        const price = getPrice(item.gramAmount);
 
         return {
           order_id: order.id,

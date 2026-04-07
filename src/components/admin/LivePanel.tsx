@@ -35,6 +35,9 @@ interface OrderRow {
   customer_email: string | null;
   customer_first_name: string | null;
   customer_last_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
   payment_method: string | null;
   shipping_method: string | null;
   discount_amount: number | null;
@@ -62,7 +65,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
     const [c, p, o, d, u] = await Promise.all([
       supabase.from('email_contacts').select('*').order('created_at', { ascending: false }),
       supabase.from('products').select('id, name, stock, category').order('stock', { ascending: true }),
-      supabase.from('orders').select('id, order_number, total_amount, payment_status, status, created_at, customer_email, customer_first_name, customer_last_name, payment_method, shipping_method, discount_amount').order('created_at', { ascending: false }),
+      supabase.from('orders').select('id, order_number, total_amount, payment_status, status, created_at, customer_email, customer_first_name, customer_last_name, first_name, last_name, email, payment_method, shipping_method, discount_amount').order('created_at', { ascending: false }),
       supabase.from('discount_codes').select('*').order('created_at', { ascending: false }),
       supabase.from('user_profiles').select('id', { count: 'exact' }),
     ]);
@@ -286,8 +289,8 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
                 {orders.slice(0, 10).map(o => (
                   <tr key={o.id} className="border-b border-white/3 hover:bg-white/3 transition-colors">
                     <td className="px-4 py-2.5">
-                      <p className="text-white font-medium">{o.customer_first_name ? `${o.customer_first_name} ${o.customer_last_name || ''}` : o.customer_email || 'Anonym'}</p>
-                      {o.customer_email && o.customer_first_name && <p className="text-[10px] text-gray-500">{o.customer_email}</p>}
+                      <p className="text-white font-medium">{(o.customer_first_name || o.first_name) ? `${o.customer_first_name || o.first_name} ${o.customer_last_name || o.last_name || ''}` : (o.customer_email || o.email || 'Anonym')}</p>
+                      {(o.customer_email || o.email) && (o.customer_first_name || o.first_name) && <p className="text-[10px] text-gray-500">{o.customer_email || o.email}</p>}
                     </td>
                     <td className="px-4 py-2.5 text-right font-bold text-white">{Number(o.total_amount).toFixed(0)} Kč</td>
                     <td className="px-4 py-2.5 text-center">

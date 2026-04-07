@@ -1,6 +1,8 @@
-import { createContext, useContext, useState, ReactNode, useEffect, useMemo, useCallback } from 'react';
-import { CartItem, Product } from '../lib/supabase';
+import { createContext, useContext, useState, ReactNode, useEffect, useMemo, useCallback, useRef } from 'react';
+import { CartItem, Product, supabase } from '../lib/supabase';
 import { trackEvent } from '../hooks/useTracking';
+import { getPrice } from '../lib/prices';
+import { useAuth } from './AuthContext';
 
 interface CartContextType {
   items: CartItem[];
@@ -23,24 +25,53 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
   const [items, setItems] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem('cart');
     return saved ? JSON.parse(saved) : [];
   });
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
+  // Persist to localStorage (always, as fallback)
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  const addToCart = useCallback((product: Product, gramAmount: string, quantity: number = 1) => {
-    const priceMap: Record<string, number> = {
-      '1g': 190,
-      '3g': 490,
-      '5g': 690,
-      '10g': 1290,
-    };
+  // Sync cart to Supabase for logged-in users (debounced)
+  useEffect(() => {
+    if (!user) return;
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    syncTimeoutRef.current = setTimeout(async () => {
+      try {
+        // Upsert cart
+        const { data: cart } = await supabase
+          .from('carts')
+          .upsert({ user_id: user.id, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+          .select('id')
+          .single();
+        if (!cart) return;
 
-    const itemPrice = priceMap[gramAmount] || 190;
+        // Clear old items and insert current
+        await supabase.from('cart_items').delete().eq('cart_id', cart.id);
+        if (items.length > 0) {
+          await supabase.from('cart_items').insert(
+            items.map(item => ({
+              cart_id: cart.id,
+              product_id: item.product.id,
+              quantity: item.quantity,
+              user_id: user.id,
+              session_id: null,
+              variant_id: null,
+            }))
+          );
+        }
+      } catch { /* silent — localStorage is the primary store */ }
+    }, 2000);
+    return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
+  }, [items, user]);
+
+  const addToCart = useCallback((product: Product, gramAmount: string, quantity: number = 1) => {
+    const itemPrice = getPrice(gramAmount);
     const totalValue = itemPrice * quantity;
 
     trackEvent('AddToCart', {
@@ -98,16 +129,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const totalPrice = useMemo(() =>
-    items.reduce((sum, item) => {
-      const priceMap: Record<string, number> = {
-        '1g': 190,
-        '3g': 490,
-        '5g': 690,
-        '10g': 1290,
-      };
-      const price = priceMap[item.gramAmount] || 190;
-      return sum + price * item.quantity;
-    }, 0),
+    items.reduce((sum, item) => sum + getPrice(item.gramAmount) * item.quantity, 0),
     [items]
   );
 

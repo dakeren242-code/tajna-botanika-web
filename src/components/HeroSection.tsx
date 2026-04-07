@@ -1,4 +1,4 @@
-import { Sparkles, ArrowDown, Instagram, Leaf, ShieldCheck, Truck } from 'lucide-react';
+import { Sparkles, ArrowDown, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function HeroSection() {
@@ -60,55 +60,25 @@ export default function HeroSection() {
           </span>
         </h1>
 
-        <p className="text-sm md:text-xl text-gray-200 mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed font-light px-2 md:px-0">
+        <p className="text-sm md:text-xl text-gray-200 mb-6 md:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-2 md:px-0">
           Exkluzivní kolekce pěstovaná v <span className="text-green-400 font-semibold">kontrolovaném prostředí</span> s péčí o každý detail.
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>
 
-        {/* Trust badges — glassmorphism, each with unique gradient accent */}
-        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mb-8 md:mb-10">
-          {[
-            { icon: ShieldCheck, text: 'Laboratorně testováno', gradient: 'from-emerald-400/20 via-teal-400/10 to-transparent', borderColor: 'rgba(52,211,153,0.25)', iconColor: '#34D399', textColor: '#a7f3d0' },
-            { icon: Leaf, text: '100% přírodní složení', gradient: 'from-green-400/20 via-emerald-500/10 to-transparent', borderColor: 'rgba(16,185,129,0.25)', iconColor: '#10b981', textColor: '#a7f3d0' },
-            { icon: Truck, text: 'Diskrétní doručení 24h', gradient: 'from-cyan-400/20 via-blue-400/10 to-transparent', borderColor: 'rgba(34,211,238,0.25)', iconColor: '#22d3ee', textColor: '#cffafe' },
-          ].map((b, i) => (
-            <div key={i}
-              className={`group flex items-center gap-2.5 px-5 py-2.5 rounded-2xl backdrop-blur-md bg-gradient-to-r ${b.gradient} transition-all duration-500 hover:scale-105`}
-              style={{
-                border: `1px solid ${b.borderColor}`,
-                boxShadow: `0 0 20px ${b.borderColor}40, inset 0 1px 0 rgba(255,255,255,0.05)`,
-              }}>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.06] group-hover:bg-white/[0.1] transition-colors">
-                <b.icon className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" style={{ color: b.iconColor }} />
-              </div>
-              <span className="text-xs font-semibold tracking-wide" style={{ color: b.textColor }}>{b.text}</span>
-            </div>
-          ))}
-        </div>
+        {/* 15% sleva — compact pill, elegant */}
+        <Link
+          to="/register"
+          className="inline-flex items-center gap-2 px-5 py-2.5 mb-6 rounded-full bg-yellow-400/10 border border-yellow-400/25 backdrop-blur-sm hover:bg-yellow-400/15 hover:border-yellow-400/40 hover:scale-105 transition-all duration-300 group"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
+          <span className="text-yellow-200 text-sm font-semibold">
+            <span className="text-yellow-100 font-black">15% sleva</span> za registraci
+          </span>
+          <span className="text-yellow-400/60 text-xs group-hover:text-yellow-400 transition-colors">→</span>
+        </Link>
 
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
-          <button
-            onClick={scrollToProducts}
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold hover:from-emerald-500 hover:to-teal-500 hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] hover:scale-105 transition-all duration-300 cursor-pointer group"
-          >
-            <span>Prohlédnout kolekci</span>
-            <ArrowDown className="w-4 h-4 animate-bounce group-hover:text-yellow-300 transition-colors" style={{ animationDuration: '2s' }} />
-          </button>
-
-          <Link
-            to="/register"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-yellow-400/10 border border-yellow-400/25 backdrop-blur-sm hover:bg-yellow-400/15 hover:border-yellow-400/40 hover:scale-105 transition-all duration-300 group"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
-            <span className="text-yellow-200 text-sm font-semibold">
-              <span className="text-yellow-100 font-black">-15%</span> za registraci
-            </span>
-          </Link>
-        </div>
-
-        {/* Instagram */}
-        <div className="flex items-center justify-center mt-2">
+        {/* Scroll down + Instagram — centered, compact */}
+        <div className="flex items-center justify-center gap-4 mt-4">
           <a
             href="https://www.instagram.com/tajnabotanika"
             target="_blank"
@@ -118,6 +88,15 @@ export default function HeroSection() {
             <Instagram className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
             <span>@tajnabotanika</span>
           </a>
+
+          <button
+            onClick={scrollToProducts}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:border-white/30 hover:scale-105 transition-all duration-300 text-sm font-medium cursor-pointer group"
+            data-cursor-hover
+          >
+            <span>Objevte naši kolekci</span>
+            <ArrowDown className="w-4 h-4 animate-bounce group-hover:text-emerald-400 transition-colors" style={{ animationDuration: '2s' }} />
+          </button>
         </div>
       </div>
 

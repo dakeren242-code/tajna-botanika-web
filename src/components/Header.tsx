@@ -92,27 +92,13 @@ export default function Header() {
             {user ? (
               <div className="flex items-center gap-1.5">
                 <Link to="/profile#loyalty"
-                  className="relative flex items-center gap-1 group"
+                  className="flex items-center gap-1.5 px-2 md:px-2.5 py-1.5 rounded-lg bg-emerald-500/8 border border-emerald-500/15 hover:bg-emerald-500/15 hover:border-emerald-500/30 transition-all duration-300 group"
                   title="Věrnostní body"
                 >
-                  {/* Coin */}
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-12"
-                    style={{
-                      background: 'linear-gradient(145deg, #fbbf24, #f59e0b, #d97706)',
-                      boxShadow: '0 0 8px rgba(251,191,36,0.3), inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.2)',
-                    }}>
-                    <span className="text-[10px] md:text-xs font-black text-yellow-900" style={{ textShadow: '0 1px 0 rgba(255,255,255,0.3)' }}>B</span>
-                  </div>
-                  {/* Count */}
-                  <span className="hidden md:block text-xs font-bold text-yellow-400 group-hover:text-yellow-300 transition-colors">
+                  <Award className="w-3.5 h-3.5 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
+                  <span className="text-xs font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors">
                     {points?.current_points ?? 0}
                   </span>
-                  {/* Mobile: count overlay on coin */}
-                  {(points?.current_points ?? 0) > 0 && (
-                    <span className="md:hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-yellow-500 text-[9px] font-black text-yellow-950">
-                      {(points?.current_points ?? 0) > 999 ? '999+' : points?.current_points}
-                    </span>
-                  )}
                 </Link>
                 <Link
                   to="/profile"
