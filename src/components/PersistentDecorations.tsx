@@ -30,7 +30,7 @@ interface Petal {
   delay: number;
   drift: number;
   rotation: number;
-  color: string;
+  hue: number;
 }
 
 const createInitialLeaves = (): FloatingLeaf[] =>
@@ -55,53 +55,57 @@ const createInitialSpheres = (): FloatingSphere[] =>
     height: 15 + Math.random() * 30,
   }));
 
-// Spring cherry blossom / apricot petals instead of winter snowflakes
-const petalColors = [
-  'rgba(255, 182, 193, 0.7)',   // light pink
-  'rgba(255, 192, 203, 0.6)',   // pink
-  'rgba(255, 160, 180, 0.5)',   // rose
-  'rgba(255, 218, 224, 0.6)',   // pale pink
-  'rgba(255, 200, 210, 0.55)',  // soft pink
-];
-
 const createInitialPetals = (): Petal[] =>
-  Array.from({ length: 6 }, (_, i) => ({
+  Array.from({ length: 9 }, (_, i) => ({
     id: i,
-    x: Math.random() * 100,
-    startY: -5 - Math.random() * 15,
-    size: 8 + Math.random() * 14,
-    duration: 10 + Math.random() * 14,
-    delay: Math.random() * 18,
-    drift: -30 + Math.random() * 60,
-    rotation: Math.random() * 720,
-    color: petalColors[Math.floor(Math.random() * petalColors.length)],
+    x: 5 + Math.random() * 90,
+    startY: -8 - Math.random() * 12,
+    size: 18 + Math.random() * 16,
+    duration: 12 + Math.random() * 12,
+    delay: Math.random() * 14,
+    drift: -40 + Math.random() * 80,
+    rotation: Math.random() * 540,
+    hue: 330 + Math.random() * 30, // pinks from 330-360
   }));
 
 const initialLeaves = createInitialLeaves();
 const initialSpheres = createInitialSpheres();
 const initialPetals = createInitialPetals();
 
-// Cherry blossom petal SVG
-const createPetalSvg = (size: number, color: string) => (
+// Simple cherry blossom petal — single rounded petal shape
+const PetalSvg = ({ size, hue }: { size: number; hue: number }) => (
   <svg
     width={size}
     height={size}
-    viewBox="0 0 24 24"
+    viewBox="0 0 32 32"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    style={{ filter: 'drop-shadow(0 0 3px rgba(255, 182, 193, 0.4))' }}
   >
-    <path
-      d="M12 2C12 2 8 6 8 10C8 12 9.5 14 12 14C14.5 14 16 12 16 10C16 6 12 2 12 2Z"
-      fill={color}
-      opacity="0.8"
+    {/* Main petal — soft rounded shape */}
+    <ellipse
+      cx="16" cy="13" rx="8" ry="11"
+      fill={`hsla(${hue}, 80%, 75%, 0.85)`}
+      transform="rotate(-15 16 13)"
     />
-    <path
-      d="M12 14C12 14 8 16 7 19C6.5 20.5 7.5 22 9 22C10.5 22 12 20 12 20C12 20 13.5 22 15 22C16.5 22 17.5 20.5 17 19C16 16 12 14 12 14Z"
-      fill={color}
-      opacity="0.6"
+    {/* Inner glow */}
+    <ellipse
+      cx="15" cy="11" rx="5" ry="7"
+      fill={`hsla(${hue}, 90%, 85%, 0.5)`}
+      transform="rotate(-15 15 11)"
     />
-    <circle cx="12" cy="10" r="1.5" fill="rgba(255,215,0,0.5)" />
+    {/* Tiny center vein */}
+    <line
+      x1="16" y1="5" x2="16" y2="22"
+      stroke={`hsla(${hue}, 60%, 60%, 0.3)`}
+      strokeWidth="0.8"
+      strokeLinecap="round"
+    />
+    {/* Second smaller petal overlapping */}
+    <ellipse
+      cx="19" cy="16" rx="6" ry="8"
+      fill={`hsla(${hue + 10}, 75%, 78%, 0.6)`}
+      transform="rotate(25 19 16)"
+    />
   </svg>
 );
 
@@ -168,7 +172,7 @@ function PersistentDecorations() {
         </div>
       </div>
 
-      {/* Falling cherry blossom petals */}
+      {/* Falling cherry blossom petals 🌸 */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 3 }}>
         {petalsRef.current.map((petal) => (
           <div
@@ -181,10 +185,12 @@ function PersistentDecorations() {
               '--fall-delay': `${petal.delay}s`,
               '--drift-distance': `${petal.drift}px`,
               '--rotation-amount': `${petal.rotation}deg`,
+              filter: 'drop-shadow(0 2px 6px rgba(255, 150, 180, 0.4))',
+              contain: 'layout style paint',
             } as React.CSSProperties}
           >
             <div className="petal-spin" style={{ '--fall-duration': `${petal.duration}s`, '--fall-delay': `${petal.delay}s` } as React.CSSProperties}>
-              {createPetalSvg(petal.size, petal.color)}
+              <PetalSvg size={petal.size} hue={petal.hue} />
             </div>
           </div>
         ))}
@@ -221,30 +227,35 @@ function PersistentDecorations() {
             transform: translateY(0) translateX(0);
             opacity: 0;
           }
-          5% { opacity: 0.8; }
-          50% {
-            transform: translateY(55vh) translateX(calc(var(--drift-distance, 0) * 0.6));
-            opacity: 0.7;
+          3% { opacity: 0.9; }
+          40% {
+            transform: translateY(45vh) translateX(calc(var(--drift-distance, 0) * 0.5));
+            opacity: 0.85;
           }
-          95% { opacity: 0.5; }
+          70% {
+            transform: translateY(75vh) translateX(calc(var(--drift-distance, 0) * 0.8));
+            opacity: 0.6;
+          }
+          95% { opacity: 0.3; }
           100% {
             transform: translateY(110vh) translateX(var(--drift-distance, 0));
             opacity: 0;
           }
         }
-        @keyframes petal-spin-anim {
-          0% { transform: rotate(0deg) scale(1); }
-          25% { transform: rotate(calc(var(--rotation-amount, 360deg) * 0.25)) scale(0.85); }
-          50% { transform: rotate(calc(var(--rotation-amount, 360deg) * 0.5)) scale(1); }
-          75% { transform: rotate(calc(var(--rotation-amount, 360deg) * 0.75)) scale(0.9); }
-          100% { transform: rotate(var(--rotation-amount, 360deg)) scale(1); }
+        @keyframes petal-sway {
+          0% { transform: rotate(0deg) scaleX(1); }
+          20% { transform: rotate(calc(var(--rotation-amount, 360deg) * 0.2)) scaleX(0.7); }
+          40% { transform: rotate(calc(var(--rotation-amount, 360deg) * 0.4)) scaleX(1); }
+          60% { transform: rotate(calc(var(--rotation-amount, 360deg) * 0.6)) scaleX(0.8); }
+          80% { transform: rotate(calc(var(--rotation-amount, 360deg) * 0.8)) scaleX(1); }
+          100% { transform: rotate(var(--rotation-amount, 360deg)) scaleX(0.75); }
         }
         .petal-fall {
           animation: petal-fall-anim var(--fall-duration) ease-in-out infinite;
           animation-delay: var(--fall-delay);
         }
         .petal-spin {
-          animation: petal-spin-anim var(--fall-duration) ease-in-out infinite;
+          animation: petal-sway var(--fall-duration) ease-in-out infinite;
           animation-delay: var(--fall-delay);
         }
       `}</style>
