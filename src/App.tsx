@@ -223,22 +223,30 @@ export function onVisitorCountChange(cb: (n: number) => void) {
 }
 
 function VisitorPresenceTracker() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
 
   useEffect(() => {
+    // Admin devices don't participate in presence at all — they only listen
+    const isAdminDevice = isAdmin || localStorage.getItem('tb_admin') === '1';
+
+    // Mark device as admin if logged in as admin (persists even after logout)
+    if (isAdmin) {
+      localStorage.setItem('tb_admin', '1');
+    }
+
     let sid = sessionStorage.getItem('vsid');
     if (!sid) {
       sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
       sessionStorage.setItem('vsid', sid);
     }
+
     const ch = supabase.channel('visitors', { config: { presence: { key: sid } } });
     ch.on('presence', { event: 'sync' }, () => {
-      // Count only non-admin visitors
       const state = ch.presenceState();
       let count = 0;
       for (const key of Object.keys(state)) {
         const entries = state[key] as any[];
-        if (entries && entries.length > 0 && !entries[0].isAdmin) {
+        if (entries && entries.length > 0 && !entries[0].adm) {
           count++;
         }
       }
@@ -247,11 +255,13 @@ function VisitorPresenceTracker() {
     });
     ch.subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
-        await ch.track({ t: Date.now(), isAdmin: !!isAdmin });
+        // Admin devices track with adm flag so they're excluded from count
+        // Non-admin devices track normally
+        await ch.track({ t: Date.now(), adm: isAdminDevice });
       }
     });
     return () => { supabase.removeChannel(ch); };
-  }, [isAdmin]);
+  }, [isAdmin, user]);
   return null;
 }
 
