@@ -77,25 +77,25 @@ export default function HeroSection() {
           <span className="text-yellow-400/60 text-xs group-hover:text-yellow-400 transition-colors">→</span>
         </Link>
 
-        {/* Scroll down + Instagram — centered, symmetric, compact on mobile */}
-        <div className="flex items-center justify-center gap-3 mt-4">
+        {/* Scroll down + Instagram — centered, compact */}
+        <div className="flex items-center justify-center gap-4 mt-4">
           <a
             href="https://www.instagram.com/tajnabotanika"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-400/20 text-pink-300 hover:text-pink-200 hover:border-pink-400/40 hover:scale-105 transition-all duration-300 text-xs md:text-sm font-medium group"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-400/20 text-pink-300 hover:text-pink-200 hover:border-pink-400/40 hover:scale-105 transition-all duration-300 text-sm font-medium group"
           >
-            <Instagram className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:rotate-12 transition-transform duration-300" />
+            <Instagram className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
             <span>@tajnabotanika</span>
           </a>
 
           <button
             onClick={scrollToProducts}
-            className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:border-white/30 hover:scale-105 transition-all duration-300 text-xs md:text-sm font-medium cursor-pointer group"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:border-white/30 hover:scale-105 transition-all duration-300 text-sm font-medium cursor-pointer group"
             data-cursor-hover
           >
-            <span>Objevte kolekci</span>
-            <ArrowDown className="w-3.5 h-3.5 md:w-4 md:h-4 animate-bounce group-hover:text-emerald-400 transition-colors" style={{ animationDuration: '2s' }} />
+            <span>Objevte naši kolekci</span>
+            <ArrowDown className="w-4 h-4 animate-bounce group-hover:text-emerald-400 transition-colors" style={{ animationDuration: '2s' }} />
           </button>
         </div>
       </div>
