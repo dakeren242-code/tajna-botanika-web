@@ -163,11 +163,16 @@ Deno.serve(async (req: Request) => {
 
     const eventTime = Math.floor(Date.now() / 1000);
 
-    // Parse first IP from x-forwarded-for (may contain comma-separated list)
+    // Parse client IP — prefer IPv6 headers for better Facebook match quality.
+    // Vercel/Supabase may provide IPv6 via x-forwarded-for or dedicated headers.
     const rawIp = req.headers.get("x-forwarded-for") ||
                   req.headers.get("x-real-ip") ||
-                  req.headers.get("cf-connecting-ip");
-    const clientIp = rawIp ? rawIp.split(",")[0].trim() : undefined;
+                  req.headers.get("cf-connecting-ip") ||
+                  req.headers.get("x-vercel-forwarded-for");
+    // If x-forwarded-for has multiple IPs, take the LAST one (original client IP).
+    // Proxies prepend their IPs, so the rightmost is closest to the real client.
+    const ipList = rawIp ? rawIp.split(",").map((s: string) => s.trim()).filter(Boolean) : [];
+    const clientIp = ipList.length > 0 ? ipList[ipList.length - 1] : undefined;
 
     // Build user_data, stripping undefined/null values so Facebook doesn't reject
     const rawUserData: Record<string, any> = {

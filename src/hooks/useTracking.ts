@@ -317,20 +317,21 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
         order_id: data?.transaction_id,
       },
       user_data: withConsent ? {
-        fbp: getCookie('_fbp'),
-        fbc: getFbc(),
-        em: data?.user_email,
-        ph: data?.user_phone,
-        fn: data?.user_first_name,
-        ln: data?.user_last_name,
-        ct: data?.user_city,
-        zp: data?.user_zip,
-        country: data?.user_country,
-        external_id: data?.user_id,
+        fbp: getCookie('_fbp') || undefined,
+        fbc: getFbc() || undefined,
+        em: data?.user_email || undefined,
+        ph: data?.user_phone || undefined,
+        fn: data?.user_first_name || undefined,
+        ln: data?.user_last_name || undefined,
+        ct: data?.user_city || undefined,
+        zp: data?.user_zip || undefined,
+        country: data?.user_country || 'cz',
+        external_id: data?.user_id || undefined,
       } : {
         // No PII without consent — only anonymous browser signals
-        fbp: getCookie('_fbp'),
-        fbc: getFbc(),
+        fbp: getCookie('_fbp') || undefined,
+        fbc: getFbc() || undefined,
+        country: 'cz',
       },
     };
 
