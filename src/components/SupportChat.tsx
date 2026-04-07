@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, Bot } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { MessageCircle, X, Send, Sparkles, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -10,15 +10,24 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+const QUICK_REPLIES = [
+  { label: '📦 Doručení', keyword: 'doručení' },
+  { label: '💳 Platba', keyword: 'platba' },
+  { label: '🎁 Slevy', keyword: 'sleva' },
+  { label: '🌿 Produkty', keyword: 'thc' },
+];
+
 const AUTO_REPLIES: Record<string, string> = {
-  'doručení': 'Doručení obvykle trvá 1-2 pracovní dny přes Zásilkovnu. Můžete si vybrat výdejní místo při objednávce.',
-  'doprava': 'Doručení obvykle trvá 1-2 pracovní dny přes Zásilkovnu. Nad 1 000 Kč je doprava ZDARMA!',
-  'platba': 'Přijímáme platbu kartou, bankovním převodem i dobírkou. Všechny platby jsou plně zabezpečené.',
-  'vrácení': 'Nabízíme 30denní záruku spokojenosti. Pokud nejste spokojeni, kontaktujte nás a vyřešíme to.',
-  'sleva': 'Při registraci získáte automaticky 15% slevu na první objednávku! Slevový kód najdete ve svém profilu.',
-  'thc': 'THC-X je legální kanabinoid v České republice. Naše produkty splňují všechny zákonné požadavky a jsou laboratorně testovány.',
-  'kontakt': 'Můžete nás kontaktovat na info@tajnabotanika.online nebo přímo přes tento chat. Odpovídáme obvykle do 2 hodin.',
-  'legální': 'Ano, THC-X je plně legální v ČR. Jedná se o synteticky odvozený kanabinoid, který nespadá pod kontrolované látky.',
+  'doručení': '📦 Doručení zvládneme do 1 2 pracovních dnů přes Zásilkovnu! Vyberete si výdejní místo přímo při objednávce. Nad 1 000 Kč máte dopravu ZDARMA 🎉',
+  'doprava': '🚚 Posíláme přes Zásilkovnu a doručíme do 1 2 pracovních dnů. Nad 1 000 Kč je doprava zdarma! Výdejní místo si vyberete pohodlně při objednávce 📍',
+  'platba': '💳 Platit můžete kartou, převodem i dobírkou. Všechny platby jsou plně zabezpečené šifrováním SSL 🔒',
+  'vrácení': '✅ Máme 30denní záruku spokojenosti! Pokud vám cokoliv nevyhovuje, napište nám a najdeme řešení. Vaše spokojenost je pro nás priorita 💚',
+  'sleva': '🎁 Super tip: při registraci dostanete automaticky 15% slevu na první objednávku! Slevový kód najdete ve svém profilu hned po přihlášení ✨',
+  'thc': '🌿 THC-X je plně legální kanabinoid v České republice. Všechny naše produkty jsou laboratorně testované a splňují veškeré zákonné požadavky 🔬',
+  'kontakt': '📧 Můžete nám napsat na info@tajnabotanika.online nebo přímo sem do chatu. Obvykle odpovíme do 5 minut! ⚡',
+  'legální': '✅ Ano, THC-X je plně legální v ČR. Jedná se o synteticky odvozený kanabinoid, který nespadá pod kontrolované látky. Naše produkty mají laboratorní certifikáty 📋',
+  'objednávka': '🛒 Stačí vybrat produkt, přidat do košíku a dokončit objednávku. Celý proces zabere asi 2 minuty! Pokud potřebujete pomoct, jsme tu pro vás 😊',
+  'kvalita': '🔬 Každý náš produkt prochází laboratorním testováním. Garantujeme prémiovou kvalitu a čistotu. Certifikáty najdete u každého produktu na stránce ✅',
 };
 
 function getAutoReply(message: string): string | null {
@@ -34,11 +43,14 @@ export default function SupportChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [showQuickReplies, setShowQuickReplies] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const [conversationId, setConversationId] = useState<string | null>(null);
 
-  // Load conversation from localStorage or create new
+  // Load conversation from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('tb_chat_messages');
     const savedConvId = localStorage.getItem('tb_chat_conversation_id');
@@ -46,32 +58,35 @@ export default function SupportChat() {
       try {
         const parsed = JSON.parse(saved);
         setMessages(parsed.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })));
+        if (parsed.length > 1) setShowQuickReplies(false);
       } catch {}
     }
     if (savedConvId) {
       setConversationId(savedConvId);
     }
 
-    // Show welcome message after 30s if no interaction
+    // Gentle notification after 25s
     const timer = setTimeout(() => {
       if (!saved || JSON.parse(saved).length === 0) {
         setHasNewMessage(true);
       }
-    }, 30000);
+    }, 25000);
     return () => clearTimeout(timer);
   }, []);
 
-  // Save messages to localStorage
+  // Save messages
   useEffect(() => {
     if (messages.length > 0) {
       localStorage.setItem('tb_chat_messages', JSON.stringify(messages));
     }
   }, [messages]);
 
-  // Scroll to bottom on new messages
+  // Smooth scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isTyping]);
 
   // Poll for admin replies
   useEffect(() => {
@@ -106,32 +121,31 @@ export default function SupportChat() {
     return () => clearInterval(interval);
   }, [conversationId, messages, isOpen]);
 
-  const handleOpen = () => {
+  const handleOpen = useCallback(() => {
     setIsOpen(true);
     setHasNewMessage(false);
     if (messages.length === 0) {
       setMessages([{
         id: 'welcome',
-        text: 'Ahoj! 👋 Jsem tu pro vás. Zeptejte se na cokoliv — doručení, platby, produkty nebo slevy.',
+        text: 'Ahoj! 👋 Vítejte v Tajné Botanice!\n\nJsem tu pro vás a rád pomohu s čímkoliv. Zeptejte se na produkty, doručení, platby nebo slevy 💚\n\nObvykle odpovíme do 5 minut ⚡',
         sender: 'bot',
         timestamp: new Date(),
       }]);
     }
-  };
+    setTimeout(() => inputRef.current?.focus(), 300);
+  }, [messages.length]);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+  const processMessage = useCallback(async (text: string) => {
     const userMsg: ChatMessage = {
       id: `user_${Date.now()}`,
-      text: input.trim(),
+      text: text.trim(),
       sender: 'user',
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, userMsg]);
-    const currentInput = input.trim();
-    setInput('');
+    setShowQuickReplies(false);
 
-    // Save to Supabase for admin view
+    // Save to Supabase
     let convId = conversationId;
     if (!convId) {
       convId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -143,127 +157,228 @@ export default function SupportChat() {
       await supabase.from('support_messages').insert({
         conversation_id: convId,
         sender: 'user',
-        message: currentInput,
+        message: text.trim(),
         user_email: user?.email || null,
         user_id: user?.id || null,
       });
     } catch {}
 
-    // Auto-reply after short delay
-    const autoReply = getAutoReply(currentInput);
+    // Show typing indicator
+    setIsTyping(true);
+
+    const autoReply = getAutoReply(text);
+    const delay = autoReply ? 600 + Math.random() * 400 : 800 + Math.random() * 600;
+
     setTimeout(() => {
+      setIsTyping(false);
       const botMsg: ChatMessage = {
         id: `bot_${Date.now()}`,
-        text: autoReply || 'Děkujeme za zprávu! Náš tým vám odpoví co nejdříve. Obvykle odpovídáme do 2 hodin v pracovní době.',
+        text: autoReply || 'Děkujeme za zprávu! 😊 Náš tým se na to hned podívá. Obvykle odpovíme do 5 minut ⚡\n\nMůžete zatím pokračovat v prohlížení, jakmile odpovíme, dáme vám vědět!',
         sender: 'bot',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, botMsg]);
 
-      // Save bot reply to Supabase too
       supabase.from('support_messages').insert({
         conversation_id: convId,
         sender: 'bot',
         message: botMsg.text,
       }).then(() => {});
-    }, 800);
-  };
+    }, delay);
+  }, [conversationId, user]);
+
+  const sendMessage = useCallback(async () => {
+    if (!input.trim()) return;
+    const text = input;
+    setInput('');
+    await processMessage(text);
+  }, [input, processMessage]);
+
+  const handleQuickReply = useCallback((keyword: string) => {
+    processMessage(keyword);
+  }, [processMessage]);
 
   return (
     <>
-      {/* Chat bubble */}
-      {!isOpen && (
+      {/* Chat bubble button */}
+      <div className={`fixed bottom-6 right-6 z-[9999] transition-all duration-500 ${isOpen ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100'}`}>
         <button
           onClick={handleOpen}
-          className="fixed bottom-6 right-6 z-[9999] w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center group"
-          style={{ boxShadow: '0 8px 32px rgba(16, 185, 129, 0.4)' }}
+          className="group relative flex items-center"
+          aria-label="Otevřít chat podpory"
         >
-          <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
+          {/* Pulse ring */}
+          <span className="absolute inset-0 w-14 h-14 rounded-full bg-emerald-400/30 animate-ping" style={{ animationDuration: '3s' }} />
+
+          {/* Main button */}
+          <span className="relative w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-lg flex items-center justify-center group-hover:scale-110 group-hover:shadow-emerald-500/40 group-hover:shadow-xl transition-all duration-300">
+            <MessageCircle className="w-6 h-6" />
+          </span>
+
+          {/* Notification badge */}
           {hasNewMessage && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse">
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center text-white shadow-lg animate-bounce" style={{ animationDuration: '2s' }}>
               1
             </span>
           )}
+
+          {/* Tooltip */}
+          <span className="absolute right-16 top-1/2 -translate-y-1/2 whitespace-nowrap bg-white text-gray-800 text-sm font-semibold px-3 py-2 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
+            Potřebujete pomoct? 💬
+            <span className="absolute right-[-6px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white rotate-45 shadow-sm" />
+          </span>
         </button>
-      )}
+      </div>
 
       {/* Chat window */}
-      {isOpen && (
-        <div className="fixed bottom-6 right-6 z-[9999] w-[360px] max-h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-white/10"
-          style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.5)' }}
-        >
+      <div
+        className={`fixed bottom-6 right-6 z-[9999] w-[380px] max-w-[calc(100vw-2rem)] transition-all duration-500 ease-out origin-bottom-right ${
+          isOpen
+            ? 'opacity-100 scale-100 translate-y-0'
+            : 'opacity-0 scale-90 translate-y-4 pointer-events-none'
+        }`}
+      >
+        <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/10 backdrop-blur-sm" style={{ boxShadow: '0 25px 80px rgba(0,0,0,0.5), 0 0 40px rgba(16,185,129,0.1)' }}>
+
           {/* Header */}
-          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                <Bot className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <h4 className="text-white font-bold text-sm">Tajná Botanika</h4>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
-                  <span className="text-emerald-100 text-xs">Online</span>
+          <div className="relative bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 px-5 py-4">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h4 className="text-white font-bold text-[15px] leading-tight">Tajná Botanika</h4>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="w-2 h-2 rounded-full bg-green-300 shadow-sm shadow-green-300/50" />
+                    <span className="text-white/80 text-xs font-medium">Online · odpovíme do 5 min ⚡</span>
+                  </div>
                 </div>
               </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all duration-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-white/80 hover:text-white transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
 
-          {/* Messages */}
-          <div className="bg-zinc-900 h-[340px] overflow-y-auto p-4 space-y-3">
+          {/* Messages area */}
+          <div className="bg-gradient-to-b from-zinc-900 to-zinc-950 h-[360px] overflow-y-auto px-4 py-4 space-y-3 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-chat`}
               >
+                {msg.sender !== 'user' && (
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                  </div>
+                )}
                 <div
-                  className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
+                  className={`max-w-[78%] px-4 py-2.5 text-[14px] leading-relaxed whitespace-pre-line ${
                     msg.sender === 'user'
-                      ? 'bg-emerald-600 text-white rounded-br-sm'
+                      ? 'bg-gradient-to-br from-emerald-500 to-teal-500 text-white rounded-2xl rounded-br-md shadow-lg shadow-emerald-500/10'
                       : msg.sender === 'admin'
-                      ? 'bg-purple-600/30 border border-purple-500/30 text-white rounded-bl-sm'
-                      : 'bg-white/10 text-gray-200 rounded-bl-sm'
+                      ? 'bg-gradient-to-br from-purple-500/15 to-violet-500/15 border border-purple-500/20 text-gray-100 rounded-2xl rounded-bl-md'
+                      : 'bg-white/[0.07] text-gray-200 rounded-2xl rounded-bl-md border border-white/5'
                   }`}
                 >
                   {msg.sender === 'admin' && (
-                    <span className="text-[10px] text-purple-300 font-bold block mb-1">Zákaznická podpora</span>
+                    <span className="text-[11px] text-purple-300 font-semibold flex items-center gap-1 mb-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                      Zákaznická podpora
+                    </span>
                   )}
                   {msg.text}
                 </div>
               </div>
             ))}
+
+            {/* Typing indicator */}
+            {isTyping && (
+              <div className="flex justify-start animate-fade-in-chat">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20 flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                </div>
+                <div className="bg-white/[0.07] border border-white/5 rounded-2xl rounded-bl-md px-4 py-3">
+                  <div className="flex gap-1.5">
+                    <span className="w-2 h-2 bg-emerald-400/60 rounded-full animate-bounce" style={{ animationDelay: '0ms', animationDuration: '1.2s' }} />
+                    <span className="w-2 h-2 bg-emerald-400/60 rounded-full animate-bounce" style={{ animationDelay: '200ms', animationDuration: '1.2s' }} />
+                    <span className="w-2 h-2 bg-emerald-400/60 rounded-full animate-bounce" style={{ animationDelay: '400ms', animationDuration: '1.2s' }} />
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="bg-zinc-800 px-3 py-3 border-t border-white/10">
+          {/* Quick replies */}
+          {showQuickReplies && messages.length <= 1 && (
+            <div className="bg-zinc-950 px-4 pb-2 pt-1">
+              <p className="text-[11px] text-gray-500 font-medium mb-2">Rychlé dotazy</p>
+              <div className="flex flex-wrap gap-1.5">
+                {QUICK_REPLIES.map((qr) => (
+                  <button
+                    key={qr.keyword}
+                    onClick={() => handleQuickReply(qr.keyword)}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-white/[0.05] hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/30 rounded-full text-[13px] text-gray-300 hover:text-emerald-300 transition-all duration-200"
+                  >
+                    {qr.label}
+                    <ChevronRight className="w-3 h-3 opacity-50" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Input area */}
+          <div className="bg-zinc-900/80 backdrop-blur-sm px-4 py-3 border-t border-white/5">
             <form
               onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
-              className="flex gap-2"
+              className="flex gap-2 items-center"
             >
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Napište zprávu..."
-                className="flex-1 bg-white/10 border border-white/10 rounded-full px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                placeholder="Napište zprávu... 💬"
+                className="flex-1 bg-white/[0.06] border border-white/10 rounded-2xl px-4 py-2.5 text-[14px] text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.08] focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200"
               />
               <button
                 type="submit"
                 disabled={!input.trim()}
-                className="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-400 transition-colors disabled:opacity-50"
+                className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center hover:shadow-lg hover:shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:hover:scale-100 disabled:hover:shadow-none"
               >
                 <Send className="w-4 h-4" />
               </button>
             </form>
+            <p className="text-center text-[10px] text-gray-600 mt-2">
+              Chráněno šifrováním 🔒 · tajnabotanika.online
+            </p>
           </div>
         </div>
-      )}
+      </div>
+
+      <style>{`
+        @keyframes fade-in-chat {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in-chat {
+          animation: fade-in-chat 0.3s ease-out forwards;
+        }
+      `}</style>
     </>
   );
 }

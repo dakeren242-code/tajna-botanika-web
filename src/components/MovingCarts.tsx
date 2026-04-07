@@ -166,7 +166,7 @@ export default function MovingCarts() {
           }
         }
         .animate-cart-bounce {
-          animation: cart-bounce 0.6s ease-in-out infinite;
+          animation: cart-bounce 1.2s ease-in-out infinite;
           transform: translateZ(0);
         }
         @keyframes package-wobble {
@@ -196,7 +196,7 @@ export default function MovingCarts() {
           }
         }
         .animate-wheel-spin {
-          animation: wheel-spin 1s linear infinite;
+          animation: wheel-spin 2.5s linear infinite;
           transform: translateZ(0);
         }
       `}</style>
