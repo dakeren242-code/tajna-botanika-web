@@ -47,13 +47,21 @@ export default function Header() {
             </Link>
 
             {isAdmin && (
-              <Link
-                to="/admin"
-                className="hidden md:flex items-center gap-1.5 px-3 py-2 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 rounded-lg transition-all text-sm"
-              >
-                <Shield className="w-4 h-4" />
-                <span>Admin</span>
-              </Link>
+              <>
+                <Link
+                  to="/admin"
+                  className="hidden md:flex items-center gap-1.5 px-3 py-2 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 rounded-lg transition-all text-sm"
+                >
+                  <Shield className="w-4 h-4" />
+                  <span>Admin</span>
+                </Link>
+                <Link
+                  to="/admin"
+                  className="flex md:hidden items-center px-2.5 py-2 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 rounded-lg transition-all"
+                >
+                  <Shield className="w-4 h-4" />
+                </Link>
+              </>
             )}
           </nav>
 
