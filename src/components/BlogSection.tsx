@@ -282,7 +282,7 @@ Produkty jsou prodávány výhradně jako sběratelské předměty pro osoby sta
     gradient: 'from-green-900/30 to-emerald-900/20',
     accentColor: '#22c55e',
     image: null,
-    content: \`
+    content: `
 CBD (kanabidiol) je jeden z nejvíce zkoumaných kanabinoidů na světě. Na rozdíl od THC nemá psychoaktivní účinky a je plně legální v České republice i celé EU.
 
 ## Co je CBD?
