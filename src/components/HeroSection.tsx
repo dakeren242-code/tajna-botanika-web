@@ -65,24 +65,16 @@ export default function HeroSection() {
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>
 
-        {/* 15% sleva banner — clickable, links to registration */}
+        {/* 15% sleva — compact pill, elegant */}
         <Link
           to="/register"
-          className="relative inline-flex items-center justify-center gap-2 md:gap-3 px-4 md:px-8 py-3 md:py-4 mb-4 md:mb-6 rounded-xl md:rounded-2xl backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 max-w-[320px] md:max-w-none mx-auto cursor-pointer"
+          className="inline-flex items-center gap-2 px-5 py-2.5 mb-6 rounded-full bg-yellow-400/10 border border-yellow-400/25 backdrop-blur-sm hover:bg-yellow-400/15 hover:border-yellow-400/40 hover:scale-105 transition-all duration-300 group"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-yellow-500/20 rounded-xl md:rounded-2xl border-2 border-yellow-400/40 group-hover:border-yellow-400/70 group-hover:shadow-[0_0_30px_rgba(250,204,21,0.3)] transition-all duration-500" />
-
-          <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 animate-pulse relative z-10" />
-          <div className="relative z-10 text-center">
-            <span className="block text-yellow-300 font-bold text-sm md:text-lg">
-              Zaregistrujte se a získejte{' '}
-              <span className="text-yellow-100 text-lg md:text-2xl font-black">15% slevu</span>
-            </span>
-            <span className="block text-yellow-200/80 text-xs md:text-sm mt-0.5 md:mt-1">
-              Klikněte a získejte kód na email →
-            </span>
-          </div>
-          <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 animate-pulse relative z-10" style={{ animationDelay: '0.5s' }} />
+          <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
+          <span className="text-yellow-200 text-sm font-semibold">
+            <span className="text-yellow-100 font-black">15% sleva</span> za registraci
+          </span>
+          <span className="text-yellow-400/60 text-xs group-hover:text-yellow-400 transition-colors">→</span>
         </Link>
 
         {/* Scroll down + Instagram — centered, compact */}
