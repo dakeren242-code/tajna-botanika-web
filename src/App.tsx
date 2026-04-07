@@ -40,6 +40,9 @@ const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const CookieBanner = lazy(() => import('./components/CookieBanner'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
+const BlogSection = lazy(() => import('./components/BlogSection'));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center min-h-screen bg-black">
@@ -141,6 +144,14 @@ function Home() {
           <div className="relative">
             <ScrollReveal direction="up">
               <FAQSection />
+            </ScrollReveal>
+          </div>
+        </Suspense>
+
+        <Suspense fallback={<div className="h-64" />}>
+          <div className="relative">
+            <ScrollReveal direction="up">
+              <BlogSection />
             </ScrollReveal>
           </div>
         </Suspense>
@@ -250,6 +261,8 @@ function App() {
                     <Route path="/orders/:orderId" element={<OrderDetail />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPost />} />
                   </Routes>
                 </Suspense>
                 <Suspense fallback={null}>
