@@ -55,7 +55,7 @@ export default function TestimonialsSection() {
             </span>
           </h2>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-            Přidejte se k tisícům spokojených zákazníků, kteří již objevili
+            Přidejte se ke stovkám spokojených zákazníků, kteří již objevili
             prémiovou kvalitu našich produktů.
           </p>
         </div>
@@ -117,7 +117,7 @@ export default function TestimonialsSection() {
             </div>
             <div className="text-left">
               <div className="text-white font-bold text-sm">
-                2,500+ spokojených zákazníků
+                250+ spokojených zákazníků
               </div>
               <div className="flex items-center gap-1 text-xs text-gray-400">
                 <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />

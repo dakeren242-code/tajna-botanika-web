@@ -1,4 +1,5 @@
 import { Sparkles, Instagram, Twitter, Mail, ShieldCheck, Truck, CreditCard, Lock, FlaskConical } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useConsent } from '../contexts/ConsentContext';
 
 export default function Footer() {
@@ -117,7 +118,7 @@ export default function Footer() {
             ))}
           </div>
           <p className="text-center text-gray-600 text-xs">
-            Přijímáme všechny hlavní platební metody • 30 dní záruka spokojenosti • 2 500+ spokojených zákazníků
+            Přijímáme všechny hlavní platební metody • 30 dní záruka spokojenosti • 250+ spokojených zákazníků
           </p>
         </div>
 
@@ -127,20 +128,20 @@ export default function Footer() {
               &copy; {currentYear} THC-X Květy. Všechna práva vyhrazena.
             </p>
             <div className="flex gap-6">
-              <a
-                href="/soukromi"
+              <Link
+                to="/soukromi"
                 data-cursor-hover
                 className="text-gray-500 hover:text-yellow-400 text-sm transition-colors duration-300"
               >
                 Ochrana soukromí
-              </a>
-              <a
-                href="/podminky"
+              </Link>
+              <Link
+                to="/podminky"
                 data-cursor-hover
                 className="text-gray-500 hover:text-yellow-400 text-sm transition-colors duration-300"
               >
                 Obchodní podmínky
-              </a>
+              </Link>
               <button
                 onClick={resetConsent}
                 data-cursor-hover
