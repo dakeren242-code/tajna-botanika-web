@@ -44,6 +44,7 @@ const Deals = lazy(() => import('./pages/Deals'));
 const BundleBuilder = lazy(() => import('./pages/BundleBuilder'));
 const CookieBanner = lazy(() => import('./components/CookieBanner'));
 const Blog = lazy(() => import('./pages/Blog'));
+const Academy = lazy(() => import('./pages/Academy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -303,6 +304,7 @@ function App() {
                     <Route path="/auth/callback" element={<AuthCallback />} />
                     <Route path="/akce" element={<Deals />} />
                     <Route path="/balicek" element={<BundleBuilder />} />
+                    <Route path="/akademie" element={<Academy />} />
                     <Route path="/blog" element={<Blog />} />
                     <Route path="/blog/:slug" element={<BlogPost />} />
                     <Route path="/podminky" element={<Terms />} />

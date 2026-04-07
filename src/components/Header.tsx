@@ -19,7 +19,7 @@ export default function Header() {
           <nav className="flex items-center gap-1 md:gap-3 flex-1">
             {/* Desktop: Akademie + Akce side by side */}
             <Link
-              to="/blog"
+              to="/akademie"
               className="hidden md:flex items-center gap-1.5 px-3 py-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all text-sm"
             >
               <BookOpen className="w-4 h-4" />
@@ -38,7 +38,7 @@ export default function Header() {
 
             {/* Mobile: Akademie icon-only */}
             <Link
-              to="/blog"
+              to="/akademie"
               className="flex md:hidden items-center px-2.5 py-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all"
             >
               <BookOpen className="w-4 h-4" />
