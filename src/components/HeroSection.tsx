@@ -1,7 +1,18 @@
+import { useState, useEffect } from 'react';
 import { Sparkles, ArrowDown, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function HeroSection() {
+  const [badgeVisible, setBadgeVisible] = useState(false);
+
+  useEffect(() => {
+    // Show after 5s, hide after 10s, show again after 3min
+    const showTimer = setTimeout(() => setBadgeVisible(true), 5000);
+    const hideTimer = setTimeout(() => setBadgeVisible(false), 15000);
+    const reshowTimer = setTimeout(() => setBadgeVisible(true), 180000);
+    return () => { clearTimeout(showTimer); clearTimeout(hideTimer); clearTimeout(reshowTimer); };
+  }, []);
+
   const scrollToProducts = () => {
     const productsSection = document.getElementById('products');
     productsSection?.scrollIntoView({ behavior: 'smooth' });
@@ -10,8 +21,8 @@ export default function HeroSection() {
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-28 md:pt-32 pb-16">
       <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
-        {/* Limitovaná edice badge — visual glow + particles, GPU-optimized */}
-        <div className="relative inline-flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 mb-8 md:mb-10 rounded-2xl animate-levitate">
+        {/* Limitovaná edice badge — appears 5s, hides 10s, reappears 3min */}
+        <div className={`relative inline-flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 mb-8 md:mb-10 rounded-2xl animate-levitate transition-all duration-700 ${badgeVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/30 via-orange-500/40 via-pink-500/30 to-purple-500/30 rounded-2xl backdrop-blur-xl border-2 animate-rainbow-glow" style={{ backgroundSize: '300% 100%' }} />
 
           {/* Orbiting particles — reduced from 20 to 8, GPU only */}
