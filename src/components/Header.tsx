@@ -14,8 +14,29 @@ export default function Header() {
     >
       <div className="max-w-7xl mx-auto px-4 py-2.5 md:py-4" style={{ overflow: 'visible' }}>
         <div className="flex items-center justify-between relative" style={{ overflow: 'visible' }}>
-          <div className="flex-1" />
 
+          {/* ───── LEFT SIDE ───── */}
+          <nav className="flex items-center gap-2 md:gap-3 flex-1">
+            <Link
+              to="/blog"
+              className="flex items-center gap-1.5 px-3 py-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all text-sm"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline font-medium">Akademie</span>
+            </Link>
+
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="flex items-center gap-1.5 px-3 py-2 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 rounded-lg transition-all text-sm"
+              >
+                <Shield className="w-4 h-4" />
+                <span className="hidden sm:inline">Admin</span>
+              </Link>
+            )}
+          </nav>
+
+          {/* ───── CENTER: Logo ───── */}
           <Link
             to="/"
             className="logo-link absolute flex items-center gap-3"
@@ -32,29 +53,11 @@ export default function Header() {
             </span>
           </Link>
 
+          {/* ───── RIGHT SIDE ───── */}
           <nav className="flex items-center gap-2 md:gap-3 flex-1 justify-end" style={{ overflow: 'visible' }}>
             <Link
-              to="/blog"
-              className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-400/20 text-emerald-400 hover:from-emerald-500/20 hover:to-teal-500/20 hover:border-emerald-400/40 hover:text-emerald-300 hover:scale-105 transition-all duration-300 text-sm font-semibold group"
-            >
-              <BookOpen className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-              <span>Akademie</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            </Link>
-
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="flex items-center gap-2 px-3 py-2 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 rounded-lg transition-all"
-              >
-                <Shield className="w-5 h-5" />
-                <span className="hidden sm:inline text-sm">Admin</span>
-              </Link>
-            )}
-
-            <Link
               to="/cart"
-              className="relative flex items-center gap-2 px-3 py-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all"
+              className="relative flex items-center gap-1.5 px-3 py-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all text-sm"
             >
               <ShoppingCart className="w-5 h-5" />
               {totalItems > 0 && (
@@ -62,20 +65,19 @@ export default function Header() {
                   {totalItems}
                 </span>
               )}
-              <span className="hidden sm:inline text-sm">Košík</span>
+              <span className="hidden sm:inline">Košík</span>
             </Link>
 
             {user ? (
               <Link
                 to="/profile"
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all text-sm font-semibold"
+                className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all text-sm font-semibold"
               >
                 <User className="w-4 h-4" />
                 <span className="hidden sm:inline">Profil</span>
               </Link>
             ) : (
               <>
-                {/* Login — compact */}
                 <Link
                   to="/login"
                   className="flex items-center gap-1.5 px-3 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all text-sm"
@@ -84,14 +86,12 @@ export default function Header() {
                   <span className="hidden md:inline">Přihlásit</span>
                 </Link>
 
-                {/* Register — prominent CTA with glow */}
                 <Link
                   to="/register"
                   className="relative flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-400 hover:to-teal-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] hover:scale-105 transition-all duration-300 text-sm font-bold group"
                 >
                   <UserPlus className="w-4 h-4" />
                   <span className="hidden sm:inline">Registrace</span>
-                  {/* Discount badge */}
                   <span className="absolute -top-2 -right-2 flex items-center gap-0.5 px-1.5 py-0.5 bg-yellow-500 text-black text-[10px] font-black rounded-full shadow-lg animate-bounce-gentle">
                     <Sparkles className="w-2.5 h-2.5" />
                     -15%
