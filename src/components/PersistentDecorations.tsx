@@ -72,41 +72,17 @@ const initialLeaves = createInitialLeaves();
 const initialSpheres = createInitialSpheres();
 const initialPetals = createInitialPetals();
 
-// Simple cherry blossom petal — single rounded petal shape
-const PetalSvg = ({ size, hue }: { size: number; hue: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 32 32"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    {/* Main petal — soft rounded shape */}
-    <ellipse
-      cx="16" cy="13" rx="8" ry="11"
-      fill={`hsla(${hue}, 80%, 75%, 0.85)`}
-      transform="rotate(-15 16 13)"
-    />
-    {/* Inner glow */}
-    <ellipse
-      cx="15" cy="11" rx="5" ry="7"
-      fill={`hsla(${hue}, 90%, 85%, 0.5)`}
-      transform="rotate(-15 15 11)"
-    />
-    {/* Tiny center vein */}
-    <line
-      x1="16" y1="5" x2="16" y2="22"
-      stroke={`hsla(${hue}, 60%, 60%, 0.3)`}
-      strokeWidth="0.8"
-      strokeLinecap="round"
-    />
-    {/* Second smaller petal overlapping */}
-    <ellipse
-      cx="19" cy="16" rx="6" ry="8"
-      fill={`hsla(${hue + 10}, 75%, 78%, 0.6)`}
-      transform="rotate(25 19 16)"
-    />
-  </svg>
+// Cherry blossom petal — simple CSS div, no SVG needed
+const PetalDiv = ({ size, hue }: { size: number; hue: number }) => (
+  <div
+    style={{
+      width: `${size}px`,
+      height: `${size * 1.3}px`,
+      background: `radial-gradient(ellipse at 40% 30%, hsla(${hue}, 90%, 88%, 0.9), hsla(${hue}, 80%, 72%, 0.7) 60%, hsla(${hue}, 70%, 65%, 0.3))`,
+      borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+      transform: 'rotate(-15deg)',
+    }}
+  />
 );
 
 function PersistentDecorations() {
@@ -185,12 +161,12 @@ function PersistentDecorations() {
               '--fall-delay': `${petal.delay}s`,
               '--drift-distance': `${petal.drift}px`,
               '--rotation-amount': `${petal.rotation}deg`,
-              filter: 'drop-shadow(0 2px 6px rgba(255, 150, 180, 0.4))',
+              filter: 'blur(0.5px) drop-shadow(0 2px 4px rgba(255, 150, 180, 0.3))',
               contain: 'layout style paint',
             } as React.CSSProperties}
           >
             <div className="petal-spin" style={{ '--fall-duration': `${petal.duration}s`, '--fall-delay': `${petal.delay}s` } as React.CSSProperties}>
-              <PetalSvg size={petal.size} hue={petal.hue} />
+              <PetalDiv size={petal.size} hue={petal.hue} />
             </div>
           </div>
         ))}

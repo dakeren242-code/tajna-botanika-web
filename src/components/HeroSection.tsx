@@ -97,7 +97,7 @@ export default function HeroSection() {
           </button>
 
           <a
-            href="https://www.instagram.com/tajna_botanika/"
+            href="https://www.instagram.com/tajnabotanika"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-400/20 text-pink-300 hover:text-pink-200 hover:border-pink-400/40 hover:scale-105 transition-all duration-300 text-sm font-medium group"
