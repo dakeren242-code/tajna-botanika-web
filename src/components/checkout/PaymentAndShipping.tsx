@@ -333,37 +333,70 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               />
             </label>
 
-            <label className="group relative block cursor-not-allowed">
-              <div className="p-4 rounded-xl border bg-white/5 border-emerald-500/10 opacity-60">
+            <label
+              className={`group relative block cursor-pointer transition-all duration-300 ${
+                paymentMethod === 'card'
+                  ? 'ring-2 ring-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                  : ''
+              }`}
+              style={{ borderRadius: '12px' }}
+            >
+              <div
+                className={`p-4 rounded-xl border transition-all duration-300 ${
+                  paymentMethod === 'card'
+                    ? 'bg-emerald-500/10 border-emerald-500/40'
+                    : 'bg-white/5 border-emerald-500/20 hover:border-emerald-500/30'
+                }`}
+              >
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 pt-1">
-                    <div className="w-5 h-5 rounded-full border-2 border-gray-700 bg-transparent"></div>
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                        paymentMethod === 'card'
+                          ? 'border-emerald-500 bg-emerald-500'
+                          : 'border-gray-600 bg-transparent'
+                      }`}
+                    >
+                      {paymentMethod === 'card' && (
+                        <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
+                      )}
+                    </div>
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <CreditCard className="w-5 h-5 text-gray-600" />
-                      <h3 className="text-gray-500 font-bold">Platba kartou</h3>
+                      <CreditCard className="w-5 h-5 text-emerald-400" />
+                      <h3 className="text-white font-bold">Platba kartou</h3>
                       <div className="ml-auto flex items-center gap-1.5">
                         <img
                           src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
                           alt="Visa"
-                          className="h-4 opacity-30"
+                          className="h-4 opacity-70"
                         />
                         <img
                           src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
                           alt="Mastercard"
-                          className="h-4 opacity-30"
+                          className="h-4 opacity-70"
                         />
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">Dočasně nedostupná</p>
-                    <div className="flex items-start gap-2 text-xs text-gray-600">
-                      <span>Tuto možnost momentálně nelze zvolit</span>
+                    <p className="text-sm text-gray-400 mb-2">
+                      Rychlá a bezpečná platba online kartou
+                    </p>
+                    <div className="flex items-start gap-2 text-xs text-gray-500">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Přes zabezpečenou platební bránu Comgate</span>
                     </div>
                   </div>
                 </div>
               </div>
-              <input type="radio" disabled className="sr-only" />
+              <input
+                type="radio"
+                name="payment"
+                value="card"
+                checked={paymentMethod === 'card'}
+                onChange={() => setPaymentMethod('card')}
+                className="sr-only"
+              />
             </label>
 
             <label

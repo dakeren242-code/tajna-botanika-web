@@ -194,6 +194,37 @@ export default function Checkout() {
       });
 
       clearCart();
+
+      // Card payment → redirect to Comgate payment gateway
+      if (paymentMethod === 'card') {
+        try {
+          const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+          const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+          const response = await fetch(`${supabaseUrl}/functions/v1/comgate-create`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${supabaseKey}`,
+            },
+            body: JSON.stringify({
+              orderId: order.id,
+              amount: finalTotal,
+              email: customerData.email,
+              label: `Objednávka ${order.order_number}`,
+            }),
+          });
+          const result = await response.json();
+          if (result.redirect) {
+            window.location.href = result.redirect;
+            return;
+          }
+          // If Comgate fails, fall back to success page with bank transfer info
+          console.error('Comgate redirect failed:', result);
+        } catch (e) {
+          console.error('Comgate error:', e);
+        }
+      }
+
       navigate(`/success?order=${order.order_number}&payment=${paymentMethod}&amount=${finalTotal}&shipping=${shippingCost}&cod=${codFee}&phone=${encodeURIComponent(customerData.phone)}&shippingMethod=${shippingMethod}`);
     } catch (err: any) {
       console.error('Checkout error:', err);
