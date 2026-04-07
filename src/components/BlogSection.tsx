@@ -376,13 +376,17 @@ export default function BlogSection() {
               <div className="relative p-6 flex flex-col h-full min-h-[280px]">
                 <div className="flex items-center justify-between mb-4">
                   <span
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${post.categoryColor}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold tracking-wide uppercase"
+                    style={{
+                      color: post.accentColor,
+                      background: `${post.accentColor}10`,
+                      border: `1px solid ${post.accentColor}20`,
+                    }}
                   >
-                    <Tag className="w-3 h-3" />
                     {post.category}
                   </span>
-                  <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                    <Clock className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-1.5 text-gray-600 text-xs">
+                    <Clock className="w-3 h-3" />
                     {post.readTime}
                   </div>
                 </div>

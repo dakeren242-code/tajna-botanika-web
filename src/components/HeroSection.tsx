@@ -65,17 +65,23 @@ export default function HeroSection() {
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>
 
-        {/* Trust badges — subtle, botanical, semi-transparent */}
-        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-5 mb-8 md:mb-10">
+        {/* Trust badges — glassmorphism, each with unique gradient accent */}
+        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mb-8 md:mb-10">
           {[
-            { icon: ShieldCheck, text: 'Laboratorně testováno', color: '#34D399' },
-            { icon: Leaf, text: '100% přírodní složení', color: '#10b981' },
-            { icon: Truck, text: 'Diskrétní doručení 24h', color: '#3B82F6' },
+            { icon: ShieldCheck, text: 'Laboratorně testováno', gradient: 'from-emerald-400/20 via-teal-400/10 to-transparent', borderColor: 'rgba(52,211,153,0.25)', iconColor: '#34D399', textColor: '#a7f3d0' },
+            { icon: Leaf, text: '100% přírodní složení', gradient: 'from-green-400/20 via-emerald-500/10 to-transparent', borderColor: 'rgba(16,185,129,0.25)', iconColor: '#10b981', textColor: '#a7f3d0' },
+            { icon: Truck, text: 'Diskrétní doručení 24h', gradient: 'from-cyan-400/20 via-blue-400/10 to-transparent', borderColor: 'rgba(34,211,238,0.25)', iconColor: '#22d3ee', textColor: '#cffafe' },
           ].map((b, i) => (
-            <div key={i} className="flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-sm"
-              style={{ background: `${b.color}08`, border: `1px solid ${b.color}18` }}>
-              <b.icon className="w-3.5 h-3.5" style={{ color: b.color }} />
-              <span className="text-xs font-medium" style={{ color: `${b.color}cc` }}>{b.text}</span>
+            <div key={i}
+              className={`group flex items-center gap-2.5 px-5 py-2.5 rounded-2xl backdrop-blur-md bg-gradient-to-r ${b.gradient} transition-all duration-500 hover:scale-105`}
+              style={{
+                border: `1px solid ${b.borderColor}`,
+                boxShadow: `0 0 20px ${b.borderColor}40, inset 0 1px 0 rgba(255,255,255,0.05)`,
+              }}>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.06] group-hover:bg-white/[0.1] transition-colors">
+                <b.icon className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" style={{ color: b.iconColor }} />
+              </div>
+              <span className="text-xs font-semibold tracking-wide" style={{ color: b.textColor }}>{b.text}</span>
             </div>
           ))}
         </div>

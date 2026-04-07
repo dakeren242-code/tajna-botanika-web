@@ -151,16 +151,16 @@ export default function AdminDashboard() {
           </Link>
         </div>
 
-        <div className="bg-black/50 backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-8">
-          <div className="flex items-center gap-3 mb-8">
-            <Shield className="w-8 h-8 text-emerald-400" />
-            <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+        <div className="bg-black/50 backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-4 md:p-8">
+          <div className="flex items-center gap-3 mb-6 md:mb-8">
+            <Shield className="w-6 h-6 md:w-8 md:h-8 text-emerald-400" />
+            <h1 className="text-xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
           </div>
 
-          <div className="flex gap-4 mb-8 border-b border-emerald-500/20 overflow-x-auto">
+          <div className="flex gap-2 md:gap-4 mb-6 md:mb-8 border-b border-emerald-500/20 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`flex items-center gap-2 px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
+              className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'overview'
                   ? 'text-emerald-400 border-emerald-400'
                   : 'text-gray-400 border-transparent hover:text-white'
@@ -171,7 +171,7 @@ export default function AdminDashboard() {
             </button>
             <button
               onClick={() => setActiveTab('orders')}
-              className={`flex items-center gap-2 px-4 py-3 font-semibold transition-colors border-b-2 whitespace-nowrap ${
+              className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'orders'
                   ? 'text-emerald-400 border-emerald-400'
                   : 'text-gray-400 border-transparent hover:text-white'
@@ -182,7 +182,7 @@ export default function AdminDashboard() {
             </button>
             <button
               onClick={() => setActiveTab('products')}
-              className={`flex items-center gap-2 px-4 py-3 font-semibold transition-colors border-b-2 ${
+              className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'products'
                   ? 'text-emerald-400 border-emerald-400'
                   : 'text-gray-400 border-transparent hover:text-white'
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
             </button>
             <button
               onClick={() => setActiveTab('catalog')}
-              className={`flex items-center gap-2 px-4 py-3 font-semibold transition-colors border-b-2 ${
+              className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'catalog'
                   ? 'text-emerald-400 border-emerald-400'
                   : 'text-gray-400 border-transparent hover:text-white'
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
             </button>
             <button
               onClick={() => setActiveTab('support')}
-              className={`flex items-center gap-2 px-4 py-3 font-semibold transition-colors border-b-2 ${
+              className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'support'
                   ? 'text-emerald-400 border-emerald-400'
                   : 'text-gray-400 border-transparent hover:text-white'
