@@ -77,26 +77,43 @@ export default function HeroSection() {
           <span className="text-yellow-400/60 text-xs group-hover:text-yellow-400 transition-colors">→</span>
         </Link>
 
-        {/* Scroll down + Instagram — centered, compact */}
-        <div className="flex items-center justify-center gap-4 mt-4">
+        {/* Tags — Instagram (IG colors) + 9 odrůd (deep red) */}
+        <div className="flex items-center justify-center gap-3 mt-4">
           <a
             href="https://www.instagram.com/tajnabotanika"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-400/20 text-pink-300 hover:text-pink-200 hover:border-pink-400/40 hover:scale-105 transition-all duration-300 text-sm font-medium group"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border hover:scale-105 transition-all duration-300 text-sm font-medium group"
+            style={{
+              background: 'linear-gradient(135deg, rgba(131,58,180,0.15), rgba(253,29,29,0.15), rgba(252,176,69,0.1))',
+              borderColor: 'rgba(225,48,108,0.3)',
+            }}
           >
-            <Instagram className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-            <span>@tajnabotanika</span>
+            <Instagram className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" style={{ color: '#E1306C' }} />
+            <span style={{ color: '#E1306C' }}>@tajnabotanika</span>
           </a>
 
           <button
             onClick={scrollToProducts}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-rose-500/10 to-red-500/10 border border-rose-400/20 text-rose-300 hover:text-rose-200 hover:border-rose-400/40 hover:scale-105 transition-all duration-300 text-sm font-medium cursor-pointer group"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border hover:scale-105 transition-all duration-300 text-sm font-medium cursor-pointer group"
+            style={{
+              background: 'rgba(220,38,38,0.12)',
+              borderColor: 'rgba(220,38,38,0.35)',
+            }}
           >
-            <ShieldCheck className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-            <span>9 odrůd skladem</span>
+            <ShieldCheck className="w-4 h-4 text-red-500 group-hover:scale-110 transition-transform duration-300" />
+            <span className="text-red-400 font-semibold">9 odrůd skladem</span>
           </button>
         </div>
+
+        {/* Scroll arrow — fixed at bottom of hero */}
+        <button
+          onClick={scrollToProducts}
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/30 hover:text-emerald-400 transition-all duration-300 cursor-pointer group"
+        >
+          <span className="text-[10px] tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">kolekce</span>
+          <ArrowDown className="w-5 h-5 animate-bounce" style={{ animationDuration: '2s' }} />
+        </button>
       </div>
 
       <style>{`
