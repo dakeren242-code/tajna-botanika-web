@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { ShoppingCart, User, LogIn, Shield, BookOpen, UserPlus, Sparkles, Flame } from 'lucide-react';
+import { ShoppingCart, User, LogIn, Shield, BookOpen, UserPlus, Sparkles, Flame, Award } from 'lucide-react';
+import { useLoyalty } from '../contexts/LoyaltyContext';
 
 export default function Header() {
   const { user, isAdmin } = useAuth();
   const { totalItems } = useCart();
+  const { points } = useLoyalty();
 
   return (
     <header
@@ -88,13 +90,22 @@ export default function Header() {
             </Link>
 
             {user ? (
-              <Link
-                to="/profile"
-                className="flex items-center gap-1.5 px-3 md:px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all text-sm font-semibold"
-              >
-                <User className="w-4 h-4" />
-                <span className="hidden sm:inline">Profil</span>
-              </Link>
+              <div className="flex items-center gap-1.5">
+                {points && points.current_points > 0 && (
+                  <Link to="/profile#loyalty"
+                    className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs font-bold hover:bg-yellow-500/15 transition-all">
+                    <Award className="w-3 h-3" />
+                    {points.current_points} b.
+                  </Link>
+                )}
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-1.5 px-3 md:px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all text-sm font-semibold"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">Profil</span>
+                </Link>
+              </div>
             ) : (
               <>
                 <Link

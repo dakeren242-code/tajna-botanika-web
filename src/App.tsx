@@ -2,6 +2,7 @@ import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
+import { LoyaltyProvider } from './contexts/LoyaltyContext';
 import { PerformanceProvider } from './contexts/PerformanceContext';
 import { ConsentProvider } from './contexts/ConsentContext';
 import { useTracking, trackPageView } from './hooks/useTracking';
@@ -272,6 +273,7 @@ function App() {
       <ConsentProvider>
         <AuthProvider>
           <CartProvider>
+            <LoyaltyProvider>
             <Router>
               <TrackingWrapper>
                 <ScrollToTop />
@@ -329,6 +331,7 @@ function App() {
                 </Suspense>
               </TrackingWrapper>
             </Router>
+          </LoyaltyProvider>
           </CartProvider>
         </AuthProvider>
       </ConsentProvider>
