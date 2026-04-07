@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://tajnabotanika.online",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
@@ -107,6 +107,17 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    // Block events from non-production domains
+    const body = await req.clone().json();
+    const sourceUrl = body?.event_source_url || '';
+    const ALLOWED_DOMAIN = 'tajnabotanika.online';
+    if (sourceUrl && !sourceUrl.includes(ALLOWED_DOMAIN)) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Non-production domain blocked' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const FB_PIXEL_ID = Deno.env.get("FACEBOOK_PIXEL_ID");
     const FB_ACCESS_TOKEN = Deno.env.get("FACEBOOK_ACCESS_TOKEN");
 
