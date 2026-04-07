@@ -56,7 +56,7 @@ const createInitialSpheres = (): FloatingSphere[] =>
   }));
 
 const createInitialPetals = (): Petal[] =>
-  Array.from({ length: 9 }, (_, i) => ({
+  Array.from({ length: 14 }, (_, i) => ({
     id: i,
     x: 5 + Math.random() * 90,
     startY: -8 - Math.random() * 12,
