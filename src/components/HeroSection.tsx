@@ -40,7 +40,7 @@ export default function HeroSection() {
         </p>
 
         {/* 15% sleva banner */}
-        <div className="relative inline-flex items-center gap-2 md:gap-3 px-3 md:px-8 py-2.5 md:py-4 mb-14 mt-[-6px] md:mt-0 rounded-xl md:rounded-2xl backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 max-w-[280px] md:max-w-none">
+        <div className="relative inline-flex items-center justify-center gap-2 md:gap-3 px-3 md:px-8 py-2.5 md:py-4 mb-8 md:mb-10 rounded-xl md:rounded-2xl backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 max-w-[280px] md:max-w-none mx-auto">
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-yellow-500/20 rounded-xl md:rounded-2xl border-2 border-yellow-400/40" />
 
           <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 animate-pulse relative z-10" />
@@ -55,24 +55,21 @@ export default function HeroSection() {
           </div>
           <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 animate-pulse relative z-10" style={{ animationDelay: '0.5s' }} />
         </div>
-      </div>
 
-      {/* Scroll down button */}
-      <button
-        onClick={scrollToProducts}
-        className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer group z-20"
-        data-cursor-hover
-        style={{ animationDuration: '2.5s' }}
-      >
-        <div className="flex flex-col items-center gap-2">
+        {/* Scroll down button — inside the centered container */}
+        <button
+          onClick={scrollToProducts}
+          className="flex flex-col items-center gap-2 mx-auto cursor-pointer group mt-4 md:mt-6"
+          data-cursor-hover
+        >
           <span className="text-white/80 text-sm font-semibold group-hover:text-white transition-colors tracking-wide">
             Objevte naši kolekci
           </span>
-          <div className="w-8 h-8 rounded-full border-2 border-white/40 flex items-center justify-center group-hover:border-white/70 transition-all bg-white/5 backdrop-blur-sm">
+          <div className="w-8 h-8 rounded-full border-2 border-white/40 flex items-center justify-center group-hover:border-white/70 transition-all bg-white/5 backdrop-blur-sm animate-bounce" style={{ animationDuration: '2.5s' }}>
             <ArrowDown className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
           </div>
-        </div>
-      </button>
+        </button>
+      </div>
 
       <style>{`
         @keyframes levitate {
