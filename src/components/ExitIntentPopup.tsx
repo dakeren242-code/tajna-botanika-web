@@ -70,7 +70,7 @@ function ExitIntentPopup() {
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-yellow-400 rounded-full" />
         </div>
         <div className="text-left">
-          <span className="block text-xs font-black leading-none">SLEVA 10%</span>
+          <span className="block text-xs font-black leading-none">SLEVA 15%</span>
           <span className="block text-[10px] text-emerald-200/70 leading-none mt-0.5">Klikněte pro nabídku</span>
         </div>
         <Sparkles className="w-3.5 h-3.5 text-yellow-300 group-hover:rotate-12 transition-transform" />
@@ -125,7 +125,7 @@ function ExitIntentPopup() {
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/30 mb-6 relative">
               <div className="text-center">
                 <Percent className="w-6 h-6 text-emerald-400 mx-auto mb-0.5" />
-                <span className="text-3xl font-black text-white leading-none">10</span>
+                <span className="text-3xl font-black text-white leading-none">15</span>
               </div>
               {/* Pulse ring */}
               <div className="absolute inset-0 rounded-3xl border-2 border-emerald-400/30 animate-ping-slow" />
@@ -136,7 +136,7 @@ function ExitIntentPopup() {
             </h3>
             <p className="text-lg text-gray-300 mb-2">
               Zaregistrujte se a získejte{' '}
-              <span className="text-emerald-400 font-black">slevu 10%</span>
+              <span className="text-emerald-400 font-black">slevu 15%</span>
             </p>
             <p className="text-gray-500 text-sm mb-8 max-w-sm mx-auto">
               Slevový kód vám pošleme ihned na email. Platí na celý sortiment bez omezení.
