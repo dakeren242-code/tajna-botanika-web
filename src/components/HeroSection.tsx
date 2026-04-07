@@ -65,20 +65,28 @@ export default function HeroSection() {
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>
 
-        {/* 15% sleva — compact pill, elegant */}
+        {/* 15% sleva — big yellow-green box like tajnabotanika.com */}
         <Link
           to="/register"
-          className="inline-flex items-center gap-2 px-5 py-2.5 mb-6 rounded-full bg-yellow-400/10 border border-yellow-400/25 backdrop-blur-sm hover:bg-yellow-400/15 hover:border-yellow-400/40 hover:scale-105 transition-all duration-300 group"
+          className="flex flex-col items-center gap-1 px-8 md:px-12 py-4 md:py-5 mb-6 rounded-2xl border-2 hover:scale-[1.02] transition-all duration-300 group"
+          style={{
+            background: 'linear-gradient(135deg, rgba(202,138,4,0.15), rgba(34,197,94,0.1))',
+            borderColor: 'rgba(202,138,4,0.35)',
+            boxShadow: '0 0 30px rgba(202,138,4,0.1)',
+          }}
         >
-          <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
-          <span className="text-yellow-200 text-sm font-semibold">
-            <span className="text-yellow-100 font-black">15% sleva</span> za registraci
-          </span>
-          <span className="text-yellow-400/60 text-xs group-hover:text-yellow-400 transition-colors">→</span>
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-yellow-400" />
+            <span className="text-base md:text-lg font-medium text-yellow-100">
+              Zaregistrujte se a získejte <span className="font-black text-white">15% slevu</span>
+            </span>
+            <Sparkles className="w-5 h-5 text-yellow-400" />
+          </div>
+          <span className="text-xs text-yellow-300/60">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
         </Link>
 
-        {/* Tags */}
-        <div className="flex items-center justify-center gap-3 mt-4">
+        {/* Tags — IG + 9 odrůd */}
+        <div className="flex items-center justify-center gap-3">
           <a
             href="https://www.instagram.com/tajnabotanika"
             target="_blank"
@@ -92,10 +100,7 @@ export default function HeroSection() {
           <button
             onClick={scrollToProducts}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full border hover:scale-105 transition-all duration-300 text-sm font-semibold cursor-pointer group"
-            style={{
-              background: 'rgba(153,27,27,0.2)',
-              borderColor: 'rgba(185,28,28,0.4)',
-            }}
+            style={{ background: 'rgba(153,27,27,0.2)', borderColor: 'rgba(185,28,28,0.4)' }}
           >
             <Leaf className="w-4 h-4 text-red-500 group-hover:rotate-12 transition-transform duration-300" />
             <span className="text-red-400">9 odrůd skladem</span>
@@ -103,12 +108,12 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Scroll arrow — bottom edge of hero, centered */}
+      {/* Scroll arrow — absolute bottom center of hero */}
       <button
         onClick={scrollToProducts}
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-white/25 hover:text-emerald-400 transition-all duration-300 cursor-pointer group"
+        className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-0.5 text-white/20 hover:text-emerald-400 transition-all duration-300 cursor-pointer group"
       >
-        <span className="text-[10px] tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">kolekce</span>
+        <span className="text-[10px] tracking-[0.2em] uppercase font-medium">Objevte naši kolekci</span>
         <ArrowDown className="w-5 h-5 animate-bounce" style={{ animationDuration: '2s' }} />
       </button>
       </div>

@@ -23,6 +23,14 @@ function GlobalBackground() {
       </div>
       <div className="fixed inset-0 z-0 bg-gradient-to-br from-white/[0.03] via-transparent to-white/[0.02] pointer-events-none" />
 
+      {/* Floating blurred orbs — like tajnabotanika.com */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute w-72 h-72 rounded-full blur-3xl opacity-[0.07] bg-emerald-500" style={{ top: '15%', left: '10%', animation: 'bgOrb 25s ease-in-out infinite' }} />
+        <div className="absolute w-96 h-96 rounded-full blur-3xl opacity-[0.05] bg-purple-600" style={{ top: '50%', right: '5%', animation: 'bgOrb 30s ease-in-out infinite 5s' }} />
+        <div className="absolute w-64 h-64 rounded-full blur-3xl opacity-[0.06] bg-cyan-500" style={{ bottom: '20%', left: '30%', animation: 'bgOrb 22s ease-in-out infinite 10s' }} />
+        <div className="absolute w-80 h-80 rounded-full blur-3xl opacity-[0.04] bg-amber-500" style={{ top: '30%', right: '25%', animation: 'bgOrb 28s ease-in-out infinite 8s' }} />
+      </div>
+
       {/* Shooting stars ✨ */}
       <div className="fixed inset-0 z-[1] pointer-events-none overflow-hidden">
         {shootingStars.map((star) => (
@@ -102,7 +110,14 @@ function GlobalBackground() {
             opacity: 0;
           }
         }
-      `}</style>
+      `}
+
+        @keyframes bgOrb {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(30px, -20px) scale(1.1); }
+          66% { transform: translate(-20px, 15px) scale(0.95); }
+        }
+      </style>
     </>
   );
 }
