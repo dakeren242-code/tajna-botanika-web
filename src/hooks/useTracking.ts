@@ -330,7 +330,10 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
         country: data?.user_country || cachedUserCountry || 'cz',
         external_id: data?.user_id || cachedUserId || undefined,
       } : {
+        // LDU mode: no PII (email, phone, name) but browser signals + country OK
         fbp: getCookie('_fbp') || undefined,
+        fbc: getFbc() || undefined,
+        external_id: data?.user_id || cachedUserId || undefined,
         country: 'cz',
       },
     };
@@ -409,7 +412,8 @@ export function trackEvent(eventName: string, data?: TrackingEvent) {
   if (!enrichedData.user_last_name && cachedUserLastName) enrichedData.user_last_name = cachedUserLastName;
   if (!enrichedData.user_city && cachedUserCity) enrichedData.user_city = cachedUserCity;
   if (!enrichedData.user_zip && cachedUserZip) enrichedData.user_zip = cachedUserZip;
-  if (!enrichedData.user_country && cachedUserCountry) enrichedData.user_country = cachedUserCountry;
+  // Always send country - it's not PII and boosts EMQ for ALL events
+  if (!enrichedData.user_country) enrichedData.user_country = cachedUserCountry || 'cz';
 
   const eventId = generateEventId(eventName);
 
