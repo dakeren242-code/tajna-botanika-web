@@ -68,24 +68,24 @@ export default function HeroSection() {
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>
 
-        {/* 15% sleva — golden CTA */}
+        {/* 15% sleva — exact copy from tajnabotanika.com */}
         <Link
           to="/register"
-          className="inline-flex flex-col items-center gap-1.5 px-6 md:px-10 py-3.5 md:py-4 mb-6 rounded-xl border-2 hover:scale-[1.03] transition-all duration-300 group cursor-pointer"
+          className="relative inline-flex flex-col items-center gap-1 px-8 py-4 mb-6 rounded-2xl border-2 hover:scale-[1.02] transition-transform duration-300 group cursor-pointer overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(202,138,4,0.25), rgba(234,179,8,0.2), rgba(202,138,4,0.15))',
-            borderColor: 'rgba(234,179,8,0.5)',
-            boxShadow: '0 0 30px rgba(234,179,8,0.12), 0 0 60px rgba(202,138,4,0.06)',
+            background: 'linear-gradient(to right, rgba(234,179,8,0.2), rgba(249,115,22,0.2), rgba(234,179,8,0.2))',
+            borderColor: 'rgba(250,204,21,0.4)',
           }}
         >
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 group-hover:rotate-12 transition-transform" />
-            <span className="text-sm md:text-lg font-semibold text-yellow-100">
-              Zaregistrujte se a získejte <span className="font-black text-white text-base md:text-xl">15% slevu</span>
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'linear-gradient(to right, transparent, rgba(250,204,21,0.3), transparent)' }} />
+          <div className="relative flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-yellow-400" />
+            <span className="text-base font-medium text-white">
+              Zaregistrujte se a získejte <span className="font-black text-lg">15% slevu</span>
             </span>
-            <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 group-hover:-rotate-12 transition-transform" />
+            <Sparkles className="w-5 h-5 text-yellow-400" />
           </div>
-          <span className="text-xs md:text-sm text-yellow-300/70 font-light">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
+          <span className="relative text-sm text-yellow-200/60">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
         </Link>
 
         {/* Tags — IG + 9 odrůd */}
