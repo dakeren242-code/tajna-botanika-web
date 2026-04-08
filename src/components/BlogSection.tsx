@@ -76,19 +76,19 @@ Terpény jsou aromatické uhlovodíky přítomné v pryskyřici konopí. Existuj
 
 ## Nejdůležitější terpény
 
-**Myrcen** — zemitá, muškátová vůně. Relaxační efekt, zvyšuje propustnost hematoencefalické bariéry.
+**Myrcen** — zemitá, muškátová vůně. Jeden z nejrozšířenějších terpenů v přírodě, hojně se vyskytuje i v chmelu a mangách.
 
-**Limonen** — citrusová vůně. Povzbuzující, snižuje stres a úzkost.
+**Limonen** — citrusová vůně. Dominantní terpen citrusových plodů, dodává svěží a energický aromatický profil.
 
-**Karyofylen** — kořeněná, pepřová vůně. Jediný terpén, který se přímo váže na CB2 receptory. Protizánětlivý.
+**Karyofylen** — kořeněná, pepřová vůně. Unikátní terpen přítomný i v černém pepři a hřebíčku.
 
-**Linalool** — květinová, levandulová vůně. Sedativní, anxiolytický efekt.
+**Linalool** — květinová, levandulová vůně. Terpen typický pro levanduli, dodává jemný květinový charakter.
 
-**α-Pinen** — borovicová vůně. Zlepšuje paměť a soustředění, bronchodilatátor.
+**α-Pinen** — borovicová vůně. Nejrozšířenější terpen v přírodě, dominantní v jehličnatých stromech.
 
-## Entourage effect
+## Terpenový profil
 
-Terpény a kanabinoidy nepůsobí izolovaně — vzájemně se potencují v tzv. "entourage effect". Proto jsou full-spectrum extrakty efektivnější než izolované sloučeniny.
+Každá odrůda má unikátní kombinaci terpenů, která určuje její aromatický charakter. Právě terpeny jsou zodpovědné za rozdíly ve vůni a komplexitu jednotlivých odrůd.
     `,
   },
   {
@@ -163,7 +163,7 @@ Záleží na vaší strategii. HHC je vhodné pro budování základní kolekce.
     `,
   },
   {
-    slug: 'nejlepsi-thc-x-pro-relaxaci',
+    slug: 'nejlepsi-thc-x-odrudy-2026',
     title: 'Nejcennější THC-X odrůdy pro sběratele v roce 2026',
     excerpt: 'Které THC-X odrůdy mají největší sběratelskou hodnotu? Představujeme top výběr prémiových květů s unikátním aromatickým profilem.',
     category: 'Průvodce',
@@ -283,33 +283,29 @@ Produkty jsou prodávány výhradně jako sběratelské předměty pro osoby sta
     accentColor: '#22c55e',
     image: null,
     content: `
-CBD (kanabidiol) je jeden z nejvíce zkoumaných kanabinoidů na světě. Na rozdíl od THC nemá psychoaktivní účinky a je plně legální v České republice i celé EU.
+CBD (kanabidiol) je jeden z nejvíce zkoumaných kanabinoidů na světě. Je plně legální v České republice i celé EU a těší se rostoucímu zájmu vědců i veřejnosti.
 
 ## Co je CBD?
 
-CBD je přírodní sloučenina obsažená v konopí (Cannabis sativa). Interaguje s endokanabinoidním systémem těla, který reguluje bolest, náladu, spánek a imunitní odpověď. CBD NEMÁ psychoaktivní účinky — nenavozuje „high" pocit.
+CBD je přírodní sloučenina obsažená v konopí (Cannabis sativa). Je předmětem intenzivního vědeckého výzkumu po celém světě. Jedná se o jeden z více než 100 identifikovaných kanabinoidů v rostlině konopí.
 
 ## Legální status v ČR
 
-CBD květy s obsahem delta-9-THC pod 1 % jsou v České republice plně legální. Můžete je volně nakupovat, přechovávat a využívat. Spadají pod nařízení o konopí pro průmyslové účely.
+CBD květy s obsahem delta-9-THC pod 1 % jsou v České republice plně legální. Spadají pod nařízení o konopí pro průmyslové účely. Naše produkty jsou prodávány výhradně jako sběratelské předměty.
 
-## Prokázané benefity CBD
+## Proč je CBD tak populární?
 
-**Úleva od stresu a úzkosti** — Studie publikované v Journal of Clinical Psychology potvrzují anxiolytické vlastnosti CBD.
+**Vědecký zájem** — CBD je předmětem tisíců vědeckých studií po celém světě. Počet publikací roste každým rokem.
 
-**Podpora kvalitního spánku** — CBD pomáhá regulovat cirkadiánní rytmus a zlepšuje kvalitu spánku bez návyku.
+**Přírodní složení** — Jedná se o přírodní látku obsaženou v konopí, bez syntetických příměsí.
 
-**Protizánětlivé vlastnosti** — CBD prokázalo protizánětlivé účinky srovnatelné s některými nesteroidními léky.
+**Bohatý kanabinoidní profil** — CBD květy obsahují nejen CBD, ale i další kanabinoidy a terpeny, které tvoří komplexní chemický profil.
 
-**Úleva od bolesti** — Interakcí s CB2 receptory může CBD zmírnit chronickou bolest a zánět.
-
-## Jak používat CBD květy
-
-CBD květy lze využít několika způsoby — od vaporizace, přes přípravu čajů, až po aromaterapii. Každá metoda nabízí jiný profil vstřebávání a délku účinku.
+**Laboratorní testování** — Prémiové CBD produkty procházejí laboratorním testováním na obsah kanabinoidů, těžkých kovů a pesticidů.
 
 ## Kvalita je klíčová
 
-Vždy vybírejte CBD květy od ověřených prodejců s laboratorními certifikáty. Klíčové parametry jsou obsah CBD (ideálně nad 10 %), obsah THC (pod zákonným limitem) a čistý terpénový profil bez pesticidů.
+Vždy vybírejte CBD květy od ověřených prodejců s laboratorními certifikáty. Klíčové parametry jsou obsah CBD, obsah THC (pod zákonným limitem) a čistý terpénový profil bez pesticidů.
     `,
   },
 ];

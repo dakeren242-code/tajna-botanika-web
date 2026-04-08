@@ -17,7 +17,7 @@ const productProfiles: Record<string, {
     thcx: '< 0.3%',
     dominantTerpene: 'Myrcen, Limonen',
     flavor: 'Citrusová, zemitá',
-    effect: 'Energizující, kreativní',
+    effect: 'Výrazné aroma, svěží profil',
     intensity: 4,
   },
   'bubble-gum': {
@@ -25,7 +25,7 @@ const productProfiles: Record<string, {
     thcx: '< 0.3%',
     dominantTerpene: 'Karyofylen, Linalool',
     flavor: 'Sladká, ovocná',
-    effect: 'Relaxační, uklidňující',
+    effect: 'Jemné květinové tóny',
     intensity: 3,
   },
   'forbidden-fruit': {
@@ -33,7 +33,7 @@ const productProfiles: Record<string, {
     thcx: '< 0.3%',
     dominantTerpene: 'Myrcen, Karyofylen',
     flavor: 'Tropická, exotická',
-    effect: 'Hluboký relax',
+    effect: 'Bohatý terpenový profil',
     intensity: 5,
   },
   'gelato': {
@@ -41,7 +41,7 @@ const productProfiles: Record<string, {
     thcx: '< 0.3%',
     dominantTerpene: 'Limonen, Karyofylen',
     flavor: 'Sladká, krémová',
-    effect: 'Vyvážený, euforický',
+    effect: 'Komplexní, vrstevnatý',
     intensity: 4,
   },
   'golden-nugget': {
@@ -49,7 +49,7 @@ const productProfiles: Record<string, {
     thcx: '< 0.3%',
     dominantTerpene: 'Terpinolen, Myrcen',
     flavor: 'Kořenitá, bylinková',
-    effect: 'Stimulující, zaměřený',
+    effect: 'Intenzivní, zemitý charakter',
     intensity: 4,
   },
   'lemon-cherry-gelato': {
@@ -57,7 +57,7 @@ const productProfiles: Record<string, {
     thcx: '< 0.3%',
     dominantTerpene: 'Limonen, Linalool',
     flavor: 'Citronová, višňová',
-    effect: 'Povznášející, radostný',
+    effect: 'Svěží, ovocný charakter',
     intensity: 5,
   },
   'pineapple-zkittlez': {
@@ -65,7 +65,7 @@ const productProfiles: Record<string, {
     thcx: '< 0.3%',
     dominantTerpene: 'Karyofylen, Humulen',
     flavor: 'Ananasová, sladká',
-    effect: 'Klidný, meditativní',
+    effect: 'Jemný, tropický profil',
     intensity: 3,
   },
   'blue-dream': { // tropical zushi slug
@@ -73,7 +73,7 @@ const productProfiles: Record<string, {
     thcx: '< 0.3%',
     dominantTerpene: 'Myrcen, Pinen',
     flavor: 'Tropická, svěží',
-    effect: 'Kreativní, motivující',
+    effect: 'Výrazný, aromatický',
     intensity: 4,
   },
   'wedding-cake': {
@@ -81,7 +81,7 @@ const productProfiles: Record<string, {
     thcx: '< 0.3%',
     dominantTerpene: 'Linalool, Karyofylen',
     flavor: 'Vanilková, sladká',
-    effect: 'Relaxační, euforický',
+    effect: 'Prémiový, plný profil',
     intensity: 5,
   },
 };

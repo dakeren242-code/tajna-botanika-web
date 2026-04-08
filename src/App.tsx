@@ -61,8 +61,11 @@ const ReferralSection = lazy(() => import('./components/ReferralSection'));
 const FloatingRegisterCTA = lazy(() => import('./components/FloatingRegisterCTA'));
 
 const LoadingSpinner = () => (
-  <div className="flex items-center justify-center min-h-screen bg-black">
-    <Loader2 className="w-12 h-12 text-emerald-400 animate-spin" />
+  <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-black via-emerald-950 to-black">
+    <div className="text-center">
+      <Loader2 className="w-10 h-10 text-emerald-400 animate-spin mx-auto mb-3" />
+      <p className="text-emerald-400/60 text-sm">Načítání...</p>
+    </div>
   </div>
 );
 
