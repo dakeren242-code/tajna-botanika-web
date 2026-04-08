@@ -78,6 +78,7 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [orderItems, setOrderItems] = useState<Record<string, any[]>>({});
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -129,6 +130,26 @@ export default function AdminDashboard() {
     }
 
     setLoading(false);
+  };
+
+  const loadOrderItems = async (orderId: string) => {
+    if (orderItems[orderId]) return; // already loaded
+    const { data } = await supabase
+      .from('order_items')
+      .select('*')
+      .eq('order_id', orderId);
+    if (data) {
+      setOrderItems(prev => ({ ...prev, [orderId]: data }));
+    }
+  };
+
+  const handleExpandOrder = (orderId: string) => {
+    if (expandedOrder === orderId) {
+      setExpandedOrder(null);
+    } else {
+      setExpandedOrder(orderId);
+      loadOrderItems(orderId);
+    }
   };
 
   const updateOrderStatus = async (orderId: string, status: Order['status']) => {
@@ -337,7 +358,7 @@ export default function AdminDashboard() {
                           {/* Order row */}
                           <div
                             className="flex items-center gap-4 p-4 cursor-pointer hover:bg-white/[0.03] transition-colors"
-                            onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
+                            onClick={() => handleExpandOrder(order.id)}
                           >
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-3 mb-1">
@@ -398,6 +419,34 @@ export default function AdminDashboard() {
                                     {o.discount_amount > 0 && <p className="text-emerald-400">Sleva: -{formatAmount(o.discount_amount)} Kč</p>}
                                   </div>
                                 </div>
+                              </div>
+
+                              {/* Order items */}
+                              <div className="bg-white/[0.04] rounded-lg p-3">
+                                <p className="text-xs text-gray-500 mb-2 flex items-center gap-1"><Package className="w-3 h-3" /> Položky objednávky</p>
+                                {orderItems[order.id] ? (
+                                  <div className="space-y-2">
+                                    {orderItems[order.id].map((item: any, idx: number) => (
+                                      <div key={idx} className="flex items-center justify-between py-1.5 px-2 bg-white/[0.03] rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                          <span className="text-white font-semibold text-sm">{item.product_name}</span>
+                                          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full">{item.gram_amount || item.variant_name}</span>
+                                          {item.quantity > 1 && <span className="text-gray-400 text-xs">x{item.quantity}</span>}
+                                        </div>
+                                        <span className="text-white font-semibold text-sm">{formatAmount(item.total_price)} Kč</span>
+                                      </div>
+                                    ))}
+                                    <div className="flex justify-between pt-2 border-t border-white/10 mt-1">
+                                      <span className="text-gray-400 text-xs">Celkem gramů: {orderItems[order.id].reduce((sum: number, item: any) => {
+                                        const g = parseInt((item.gram_amount || '0').replace('g', '')) || 0;
+                                        return sum + g * (item.quantity || 1);
+                                      }, 0)}g</span>
+                                      <span className="text-emerald-400 font-bold text-sm">{formatAmount(order.total_amount)} Kč</span>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="text-gray-500 text-xs">Načítání...</p>
+                                )}
                               </div>
 
                               {o.notes && (
