@@ -346,14 +346,30 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
     }
 
     const capiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/facebook-capi`;
-    await fetch(capiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-      },
-      body: JSON.stringify(payload),
-    });
+    const body = JSON.stringify(payload);
+
+    // Use sendBeacon for reliability (survives page navigation)
+    // Falls back to fetch if sendBeacon unavailable
+    if (navigator.sendBeacon) {
+      const blob = new Blob([body], { type: 'application/json' });
+      const sent = navigator.sendBeacon(capiUrl, blob);
+      if (!sent) {
+        // sendBeacon failed (queue full), fallback to fetch
+        fetch(capiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` },
+          body,
+          keepalive: true,
+        }).catch(() => {});
+      }
+    } else {
+      await fetch(capiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` },
+        body,
+        keepalive: true,
+      });
+    }
   } catch (error) {
     console.error('Failed to send Facebook CAPI event:', error);
   }
@@ -367,11 +383,14 @@ function getCookie(name: string): string | undefined {
 }
 
 function getFbc(): string | undefined {
-  // Only use the pixel's _fbc cookie — it's the canonical value the pixel
-  // sends with its own events. Never construct fbc manually: a manually built
-  // value (e.g. fb.1.{timestamp}.{fbclid}) uses a different timestamp than the
-  // pixel, which triggers Meta's "modified fbclid" CAPI diagnostic error.
-  return getCookie('_fbc');
+  const fbc = getCookie('_fbc');
+  if (!fbc) return undefined;
+  // Validate fbc format: fb.{subdomainIndex}.{creationTime}.{fbclid}
+  // Only send if it matches expected pattern - prevents modified/truncated values
+  // that trigger Meta's "modified fbclid" diagnostic error
+  if (!/^fb\.\d+\.\d+\..+$/.test(fbc)) return undefined;
+  // Ensure fbclid portion preserves original case (no toLowerCase)
+  return fbc;
 }
 
 export function trackEvent(eventName: string, data?: TrackingEvent) {
@@ -429,7 +448,7 @@ export function trackPageView(pagePath?: string) {
 
   if (import.meta.env.VITE_FB_PIXEL_ID && isProduction) {
     // Delay CAPI PageView slightly so _fbp cookie is set by Pixel first.
-    // This improves fbp coverage from ~43% to ~100%.
+    // Reduced from 1500ms to 500ms for better coverage (user may navigate away).
     setTimeout(() => {
       const enriched: TrackingEvent = {};
       if (cachedUserId) enriched.user_id = cachedUserId;
@@ -438,7 +457,7 @@ export function trackPageView(pagePath?: string) {
       if (cachedUserFirstName) enriched.user_first_name = cachedUserFirstName;
       if (cachedUserLastName) enriched.user_last_name = cachedUserLastName;
       sendToFacebookCAPI('PageView', enriched, eventId, consent.marketing);
-    }, 1500);
+    }, 500);
   }
 
   if (consent.analytics && window.gtag && pagePath) {
