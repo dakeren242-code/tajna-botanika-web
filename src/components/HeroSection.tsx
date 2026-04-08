@@ -68,24 +68,22 @@ export default function HeroSection() {
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>
 
-        {/* 15% sleva — exact copy from tajnabotanika.com */}
+        {/* 15% sleva — identical copy from tajnabotanika.com */}
         <Link
           to="/register"
-          className="relative inline-flex flex-col items-center gap-1 px-8 py-4 mb-6 rounded-2xl border-2 hover:scale-[1.02] transition-transform duration-300 group cursor-pointer overflow-hidden"
-          style={{
-            background: 'linear-gradient(to right, rgba(234,179,8,0.2), rgba(249,115,22,0.2), rgba(234,179,8,0.2))',
-            borderColor: 'rgba(250,204,21,0.4)',
-          }}
+          className="relative inline-flex items-center gap-3 px-8 py-4 mb-14 rounded-2xl backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 cursor-pointer"
         >
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'linear-gradient(to right, transparent, rgba(250,204,21,0.3), transparent)' }} />
-          <div className="relative flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-yellow-400" />
-            <span className="text-base font-medium text-white">
-              Zaregistrujte se a získejte <span className="font-black text-lg">15% slevu</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-yellow-500/20 rounded-2xl animate-cta-gradient border-2 border-yellow-400/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent animate-cta-shimmer" />
+          <Sparkles className="relative z-10 w-5 h-5 text-yellow-400" />
+          <div className="relative z-10 text-center">
+            <span className="block text-yellow-300 font-bold text-base md:text-lg">
+              Zaregistrujte se a získejte{' '}
+              <span className="text-yellow-100 text-xl md:text-2xl font-black">15% slevu</span>
             </span>
-            <Sparkles className="w-5 h-5 text-yellow-400" />
+            <span className="block text-yellow-200/80 text-sm mt-1">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
           </div>
-          <span className="relative text-sm text-yellow-200/60">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
+          <Sparkles className="relative z-10 w-5 h-5 text-yellow-400" />
         </Link>
 
         {/* Tags — IG + 9 odrůd */}
@@ -176,6 +174,21 @@ export default function HeroSection() {
         }
         .animate-gradient-text {
           animation: gradient-text 6s ease infinite;
+        }
+        @keyframes cta-gradient {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        .animate-cta-gradient {
+          background-size: 200% 200%;
+          animation: cta-gradient 8s ease infinite;
+        }
+        @keyframes cta-shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .animate-cta-shimmer {
+          animation: cta-shimmer 3s ease-in-out infinite;
         }
       `}</style>
     </section>
