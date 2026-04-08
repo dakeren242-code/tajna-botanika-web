@@ -15,18 +15,18 @@ export default function HeroSection() {
       {/* Ambient orange particles — limited edition vibe, GPU-only */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         {[
-          { size: 80, x: '8%', y: '12%', delay: '0s', dur: '20s', opacity: 0.3 },
-          { size: 60, x: '25%', y: '30%', delay: '2s', dur: '26s', opacity: 0.25 },
-          { size: 100, x: '78%', y: '8%', delay: '4s', dur: '24s', opacity: 0.28 },
-          { size: 70, x: '65%', y: '35%', delay: '6s', dur: '30s', opacity: 0.2 },
-          { size: 90, x: '90%', y: '55%', delay: '1s', dur: '22s', opacity: 0.25 },
-          { size: 55, x: '40%', y: '60%', delay: '8s', dur: '28s', opacity: 0.22 },
-          { size: 75, x: '15%', y: '72%', delay: '10s', dur: '25s', opacity: 0.3 },
-          { size: 65, x: '55%', y: '80%', delay: '3s', dur: '32s', opacity: 0.2 },
-          { size: 85, x: '70%', y: '65%', delay: '12s', dur: '27s', opacity: 0.25 },
-          { size: 50, x: '35%', y: '15%', delay: '5s', dur: '23s', opacity: 0.18 },
-          { size: 95, x: '50%', y: '45%', delay: '7s', dur: '29s', opacity: 0.22 },
-          { size: 60, x: '85%', y: '25%', delay: '9s', dur: '21s', opacity: 0.28 },
+          { size: 100, x: '8%', y: '12%', delay: '0s', dur: '20s', opacity: 0.5 },
+          { size: 80, x: '25%', y: '30%', delay: '2s', dur: '26s', opacity: 0.4 },
+          { size: 120, x: '78%', y: '8%', delay: '4s', dur: '24s', opacity: 0.45 },
+          { size: 90, x: '65%', y: '35%', delay: '6s', dur: '30s', opacity: 0.35 },
+          { size: 110, x: '90%', y: '55%', delay: '1s', dur: '22s', opacity: 0.4 },
+          { size: 70, x: '40%', y: '60%', delay: '8s', dur: '28s', opacity: 0.35 },
+          { size: 95, x: '15%', y: '72%', delay: '10s', dur: '25s', opacity: 0.5 },
+          { size: 85, x: '55%', y: '80%', delay: '3s', dur: '32s', opacity: 0.35 },
+          { size: 105, x: '70%', y: '65%', delay: '12s', dur: '27s', opacity: 0.4 },
+          { size: 65, x: '35%', y: '15%', delay: '5s', dur: '23s', opacity: 0.3 },
+          { size: 115, x: '50%', y: '45%', delay: '7s', dur: '29s', opacity: 0.38 },
+          { size: 75, x: '85%', y: '25%', delay: '9s', dur: '21s', opacity: 0.45 },
         ].map((p, i) => (
           <div
             key={`ambient-${i}`}
