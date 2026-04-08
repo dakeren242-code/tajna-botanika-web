@@ -260,6 +260,64 @@ export default function AdminDashboard() {
     }
   };
 
+  const exportZasilkovnaCSV = () => {
+    // Filter orders for Zásilkovna shipping that are pending/processing
+    const zasilkovnaOrders = orders.filter(o => {
+      const om = o as any;
+      return om.shipping_method === 'zasilkovna' && ['pending', 'processing'].includes(o.status);
+    });
+
+    if (zasilkovnaOrders.length === 0) {
+      alert('Žádné objednávky k odeslání přes Zásilkovnu');
+      return;
+    }
+
+    // Zásilkovna CSV v8 format
+    const header1 = '"version 8"';
+    const header2 = ',"Order number","Name","Surname","Company","Email","Phone","COD","Currency","Value","Weight","Pick-up point or carrier","Sender indication","Adult content"';
+
+    const rows = zasilkovnaOrders.map(order => {
+      const o = order as any;
+      const isCOD = o.payment_method === 'cash_on_delivery';
+      const codAmount = isCOD ? Number(order.total_amount || 0) : 0;
+      const totalGrams = orderItems[order.id]
+        ? orderItems[order.id].reduce((sum: number, item: any) => {
+            const g = parseInt((item.gram_amount || '0').replace('g', '')) || 0;
+            return sum + g * (item.quantity || 1);
+          }, 0)
+        : 50; // default 50g if items not loaded
+      const weightKg = Math.max(0.1, totalGrams / 1000); // min 0.1 kg
+
+      return [
+        '', // reserved column
+        `"${order.order_number}"`,
+        `"${(o.first_name || o.customer_first_name || '').trim()}"`,
+        `"${(o.last_name || o.customer_last_name || '').trim()}"`,
+        '""', // company
+        `"${o.email || o.customer_email || ''}"`,
+        `"${(o.phone || o.customer_phone || '').replace(/\s/g, '')}"`,
+        `"${codAmount}"`,
+        '"CZK"',
+        `"${Number(order.total_amount || 0)}"`,
+        `"${weightKg}"`,
+        '"95"', // default pickup point - user changes in Zásilkovna UI
+        '"tajnabotanika.online"',
+        '"0"', // not adult content
+      ].join(',');
+    });
+
+    const csv = [header1, header2, ...rows].join('\n');
+
+    // Download CSV
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `zasilkovna_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleExpandOrder = (orderId: string) => {
     if (expandedOrder === orderId) {
       setExpandedOrder(null);
@@ -455,7 +513,17 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold text-white mb-6">Všechny objednávky</h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-white">Všechny objednávky</h2>
+                  <button
+                    onClick={exportZasilkovnaCSV}
+                    className="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold rounded-xl transition-all flex items-center gap-2 text-sm shadow-lg"
+                    title="Stáhni CSV → nahraj na client.packeta.com → vytiskni štítky"
+                  >
+                    <Truck className="w-4 h-4" />
+                    Export pro Zásilkovnu
+                  </button>
+                </div>
 
                 {orders.length === 0 ? (
                   <div className="text-center py-12">
