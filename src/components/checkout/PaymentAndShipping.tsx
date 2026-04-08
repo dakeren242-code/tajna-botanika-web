@@ -144,7 +144,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !firstName ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                 placeholder="Vaše jméno"
               />
-              {submitted && !firstName && <p className="mt-1 text-xs text-red-400">Vyplnte jmeno</p>}
+              {submitted && !firstName && <p className="mt-1 text-xs text-red-400">Vyplňte jméno</p>}
             </div>
 
             <div id="field-lastname">
@@ -159,7 +159,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !lastName ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                 placeholder="Vaše příjmení"
               />
-              {submitted && !lastName && <p className="mt-1 text-xs text-red-400">Vyplnte prijmeni</p>}
+              {submitted && !lastName && <p className="mt-1 text-xs text-red-400">Vyplňte příjmení</p>}
             </div>
 
             <div id="field-email">
@@ -177,7 +177,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                   placeholder="vas@email.cz"
                 />
               </div>
-              {submitted && !email && <p className="mt-1 text-xs text-red-400">Vyplnte emailovou adresu</p>}
+              {submitted && !email && <p className="mt-1 text-xs text-red-400">Vyplňte e-mailovou adresu</p>}
             </div>
 
             <div id="field-phone">
@@ -195,7 +195,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                   placeholder="+420 123 456 789"
                 />
               </div>
-              {submitted && !phone && <p className="mt-1 text-xs text-red-400">Vyplnte telefonni cislo</p>}
+              {submitted && !phone && <p className="mt-1 text-xs text-red-400">Vyplňte telefonní číslo</p>}
             </div>
           </div>
 
@@ -216,7 +216,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                       className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && isZasilkovna && !address ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                       placeholder="např. Hlavní 123"
                     />
-                    {submitted && isZasilkovna && !address && <p className="mt-1 text-xs text-red-400">Vyplnte ulici a cislo</p>}
+                    {submitted && isZasilkovna && !address && <p className="mt-1 text-xs text-red-400">Vyplňte ulici a číslo</p>}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -232,7 +232,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                         className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && isZasilkovna && !city ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                         placeholder="Praha"
                       />
-                      {submitted && isZasilkovna && !city && <p className="mt-1 text-xs text-red-400">Vyplnte mesto</p>}
+                      {submitted && isZasilkovna && !city && <p className="mt-1 text-xs text-red-400">Vyplňte město</p>}
                     </div>
 
                     <div>
@@ -247,7 +247,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                         className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && isZasilkovna && !zip ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                         placeholder="120 00"
                       />
-                      {submitted && isZasilkovna && !zip && <p className="mt-1 text-xs text-red-400">Vyplnte PSC</p>}
+                      {submitted && isZasilkovna && !zip && <p className="mt-1 text-xs text-red-400">Vyplňte PSČ</p>}
                     </div>
                   </div>
                 </div>
@@ -576,7 +576,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
           <div className={`grid transition-all duration-300 ease-in-out ${submitted && !shippingMethod ? 'grid-rows-[1fr] mt-3' : 'grid-rows-[0fr]'}`}>
             <div className="overflow-hidden">
               <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                <p className="text-sm text-red-400 text-center">Vyberte zpusob dopravy pro pokracovani</p>
+                <p className="text-sm text-red-400 text-center">Vyberte způsob dopravy pro pokračování</p>
               </div>
             </div>
           </div>
@@ -695,7 +695,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                   </a>
                 </p>
                 {submitted && !termsAccepted && (
-                  <p className="mt-1 text-xs text-red-400">Muste souhlasit s obchodnimi podminkami</p>
+                  <p className="mt-1 text-xs text-red-400">Musíte souhlasit s obchodními podmínkami</p>
                 )}
               </div>
             </label>
