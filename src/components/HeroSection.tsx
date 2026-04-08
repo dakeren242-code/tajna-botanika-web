@@ -15,11 +15,11 @@ export default function HeroSection() {
       {/* Ambient orange particles — limited edition vibe, GPU-only */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         {[
-          { size: 180, x: '10%', y: '20%', delay: '0s', dur: '25s' },
-          { size: 120, x: '80%', y: '15%', delay: '4s', dur: '30s' },
-          { size: 200, x: '70%', y: '70%', delay: '8s', dur: '22s' },
-          { size: 90, x: '20%', y: '75%', delay: '12s', dur: '28s' },
-          { size: 150, x: '50%', y: '45%', delay: '6s', dur: '35s' },
+          { size: 250, x: '5%', y: '15%', delay: '0s', dur: '25s', opacity: 0.35 },
+          { size: 180, x: '75%', y: '10%', delay: '4s', dur: '30s', opacity: 0.25 },
+          { size: 300, x: '65%', y: '65%', delay: '8s', dur: '22s', opacity: 0.3 },
+          { size: 140, x: '15%', y: '70%', delay: '12s', dur: '28s', opacity: 0.2 },
+          { size: 220, x: '45%', y: '40%', delay: '6s', dur: '35s', opacity: 0.15 },
         ].map((p, i) => (
           <div
             key={`ambient-${i}`}
@@ -29,11 +29,10 @@ export default function HeroSection() {
               height: p.size,
               left: p.x,
               top: p.y,
-              background: `radial-gradient(circle, rgba(251,146,60,0.08) 0%, rgba(249,115,22,0.04) 40%, transparent 70%)`,
-              filter: 'blur(40px)',
+              background: `radial-gradient(circle, rgba(251,146,60,${p.opacity}) 0%, rgba(249,115,22,${p.opacity * 0.5}) 40%, transparent 70%)`,
+              filter: 'blur(60px)',
               animationDelay: p.delay,
               animationDuration: p.dur,
-              contain: 'layout style paint',
               willChange: 'transform',
             }}
           />
@@ -86,7 +85,7 @@ export default function HeroSection() {
           <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent drop-shadow-2xl whitespace-nowrap" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
             KAŽDÉM DETAILU
           </span>
-          <span className="block text-[13px] md:text-4xl mt-3 md:mt-4 bg-gradient-to-r from-cyan-200 via-blue-200 to-purple-300 bg-clip-text text-transparent font-light tracking-wide whitespace-nowrap">
+          <span className="block text-lg md:text-4xl mt-3 md:mt-4 bg-gradient-to-r from-cyan-200 via-blue-200 to-purple-300 bg-clip-text text-transparent font-light tracking-wide">
             Laboratorní preciznost, přírodní dokonalost
           </span>
         </h1>
