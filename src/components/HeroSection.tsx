@@ -12,9 +12,37 @@ export default function HeroSection() {
 
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-28 md:pt-32 pb-16">
+      {/* Ambient orange particles — limited edition vibe, GPU-only */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        {[
+          { size: 180, x: '10%', y: '20%', delay: '0s', dur: '25s' },
+          { size: 120, x: '80%', y: '15%', delay: '4s', dur: '30s' },
+          { size: 200, x: '70%', y: '70%', delay: '8s', dur: '22s' },
+          { size: 90, x: '20%', y: '75%', delay: '12s', dur: '28s' },
+          { size: 150, x: '50%', y: '45%', delay: '6s', dur: '35s' },
+        ].map((p, i) => (
+          <div
+            key={`ambient-${i}`}
+            className="absolute rounded-full animate-ambient-float"
+            style={{
+              width: p.size,
+              height: p.size,
+              left: p.x,
+              top: p.y,
+              background: `radial-gradient(circle, rgba(251,146,60,0.08) 0%, rgba(249,115,22,0.04) 40%, transparent 70%)`,
+              filter: 'blur(40px)',
+              animationDelay: p.delay,
+              animationDuration: p.dur,
+              contain: 'layout style paint',
+              willChange: 'transform',
+            }}
+          />
+        ))}
+      </div>
+
       <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
         {/* Limitovaná edice badge — visual glow + particles, GPU-optimized */}
-        <div className="relative inline-flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 mb-8 md:mb-10 rounded-2xl animate-levitate">
+        <div className="relative inline-flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 mb-8 md:mb-10 rounded-2xl animate-levitate hero-fade-in" style={{ animationDelay: '0.1s' }}>
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/30 via-orange-500/40 via-pink-500/30 to-purple-500/30 rounded-2xl backdrop-blur-xl border-2 animate-rainbow-glow" style={{ backgroundSize: '300% 100%' }} />
 
           {/* Orbiting particles — reduced from 20 to 8, GPU only */}
@@ -51,7 +79,7 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <h1 className="text-3xl md:text-7xl lg:text-8xl font-black mb-5 md:mb-8 tracking-tight">
+        <h1 className="text-3xl md:text-7xl lg:text-8xl font-black mb-5 md:mb-8 tracking-tight hero-fade-in" style={{ animationDelay: '0.3s' }}>
           <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent drop-shadow-2xl whitespace-nowrap" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
             ČISTOTA V
           </span>
@@ -63,7 +91,7 @@ export default function HeroSection() {
           </span>
         </h1>
 
-        <p className="text-sm md:text-xl text-gray-200 mb-6 md:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-2 md:px-0">
+        <p className="text-sm md:text-xl text-gray-200 mb-6 md:mb-12 max-w-3xl mx-auto leading-relaxed font-light px-2 md:px-0 hero-fade-in" style={{ animationDelay: '0.5s' }}>
           Exkluzivní kolekce pěstovaná v <span className="text-green-400 font-semibold">kontrolovaném prostředí</span> s péčí o každý detail.
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>
@@ -71,39 +99,40 @@ export default function HeroSection() {
         {/* 15% sleva — identical copy from tajnabotanika.com */}
         <Link
           to="/register"
-          className="relative inline-flex items-center gap-2 md:gap-3 px-5 md:px-8 py-3 md:py-4 mb-14 rounded-2xl backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 cursor-pointer"
+          className="relative inline-flex items-center gap-2 md:gap-3 px-5 md:px-8 py-3 md:py-4 mb-14 rounded-2xl backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 cursor-pointer max-w-md md:max-w-none mx-auto hero-fade-in"
+          style={{ animationDelay: '0.7s' }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-yellow-500/20 rounded-2xl animate-cta-gradient border-2 border-yellow-400/40" />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent animate-cta-shimmer" />
-          <Sparkles className="relative z-10 w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
+          <Sparkles className="relative z-10 w-4 h-4 md:w-5 md:h-5 text-yellow-400 shrink-0" />
           <div className="relative z-10 text-center">
-            <span className="block text-yellow-300 font-bold text-sm md:text-lg">
-              Zaregistrujte se a získejte{' '}
-              <span className="text-yellow-100 text-base md:text-2xl font-black">15% slevu</span>
+            <span className="block text-yellow-300 font-bold text-xs md:text-lg leading-tight">
+              Registrujte se a získejte{' '}
+              <span className="text-yellow-100 text-sm md:text-2xl font-black">15% slevu</span>
             </span>
-            <span className="block text-yellow-200/80 text-xs md:text-sm mt-0.5 md:mt-1">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
+            <span className="block text-yellow-200/80 text-[10px] md:text-sm mt-0.5 md:mt-1 leading-tight">Slevový kód na jakoukoliv objednávku</span>
           </div>
-          <Sparkles className="relative z-10 w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
+          <Sparkles className="relative z-10 w-4 h-4 md:w-5 md:h-5 text-yellow-400 shrink-0" />
         </Link>
 
         {/* Tags — IG + 9 odrůd */}
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-2 md:gap-3 flex-nowrap hero-fade-in" style={{ animationDelay: '0.9s' }}>
           <a
             href="https://www.instagram.com/tajnabotanika"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-400/20 text-pink-300 hover:text-pink-200 hover:border-pink-400/40 hover:scale-105 transition-all duration-300 text-sm font-medium group"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-3.5 md:py-2 rounded-full bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-400/20 text-pink-300 hover:text-pink-200 hover:border-pink-400/40 hover:scale-105 transition-all duration-300 text-xs md:text-sm font-medium group whitespace-nowrap"
           >
-            <Instagram className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+            <Instagram className="w-3 h-3 md:w-3.5 md:h-3.5 group-hover:rotate-12 transition-transform duration-300" />
             <span>@tajnabotanika</span>
           </a>
 
           <button
             onClick={scrollToProducts}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border hover:scale-105 transition-all duration-300 text-sm font-semibold cursor-pointer group"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 md:px-3.5 md:py-2 rounded-full border hover:scale-105 transition-all duration-300 text-xs md:text-sm font-semibold cursor-pointer group whitespace-nowrap"
             style={{ background: 'rgba(153,27,27,0.2)', borderColor: 'rgba(185,28,28,0.4)' }}
           >
-            <Leaf className="w-4 h-4 text-red-500 group-hover:rotate-12 transition-transform duration-300" />
+            <Leaf className="w-3 h-3 md:w-3.5 md:h-3.5 text-red-500 group-hover:rotate-12 transition-transform duration-300" />
             <span className="text-red-400">9 odrůd skladem</span>
           </button>
         </div>
@@ -190,6 +219,38 @@ export default function HeroSection() {
         }
         .animate-cta-shimmer {
           animation: cta-shimmer 3s ease-in-out infinite;
+        }
+        @keyframes hero-fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(16px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .hero-fade-in {
+          opacity: 0;
+          animation: hero-fade-in 0.8s ease-out forwards;
+        }
+        @keyframes ambient-float {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+          25% {
+            transform: translate3d(30px, -20px, 0) scale(1.1);
+          }
+          50% {
+            transform: translate3d(-20px, -40px, 0) scale(0.95);
+          }
+          75% {
+            transform: translate3d(15px, -15px, 0) scale(1.05);
+          }
+        }
+        .animate-ambient-float {
+          animation: ambient-float ease-in-out infinite;
+          transform: translateZ(0);
         }
       `}</style>
     </section>
