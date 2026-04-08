@@ -14,12 +14,14 @@
   html {
     scroll-behavior: smooth;
     overflow-x: hidden;
+    overscroll-behavior-x: none;
     background-color: #0a0a14;
   }
 
   body {
     @apply font-sans;
     overflow-x: hidden;
+    overscroll-behavior-x: none;
     background-color: transparent;
   }
 

@@ -4,7 +4,7 @@ import { memo } from 'react';
 const shootingStars = Array.from({ length: 6 }, (_, i) => ({
   id: i,
   top: 5 + Math.random() * 50, // upper half of screen
-  left: Math.random() * 80,
+  left: Math.random() * 60, // max 60% to prevent overflow on animate
   delay: Math.random() * 20,
   duration: 0.6 + Math.random() * 0.8, // very fast: 0.6-1.4s
   angle: 15 + Math.random() * 30, // 15-45 degree angle
@@ -32,7 +32,7 @@ function GlobalBackground() {
       </div>
 
       {/* Shooting stars ✨ */}
-      <div className="fixed inset-0 z-[1] pointer-events-none overflow-hidden">
+      <div className="fixed inset-0 z-[1] pointer-events-none overflow-hidden" style={{ clipPath: 'inset(0)' }}>
         {shootingStars.map((star) => (
           <div
             key={star.id}
