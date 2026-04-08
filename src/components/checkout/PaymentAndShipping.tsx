@@ -114,7 +114,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
     (!isZasilkovna || (address && city && zip));
 
   return (
-    <div className="animate-fadeSlideIn">
+    <div className="animate-fadeSlideIn" style={{ overflowAnchor: 'none' }}>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Způsob platby a doručení</h1>
         <p className="text-gray-400 mb-3">Vyplňte kontaktní údaje a vyberte způsob platby a dopravy</p>
@@ -199,8 +199,8 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
             </div>
           </div>
 
-          <div className={`grid transition-all duration-300 ease-in-out ${isZasilkovna ? 'grid-rows-[1fr] mt-6' : 'grid-rows-[0fr]'}`}>
-            <div className="overflow-hidden">
+          <div className={`grid transition-all duration-300 ease-in-out ${isZasilkovna ? 'grid-rows-[1fr] mt-6' : 'grid-rows-[0fr]'}`} style={{ overflowAnchor: 'none' }}>
+            <div className="overflow-hidden" aria-hidden={!isZasilkovna}>
               <div className="pt-6 border-t border-emerald-500/20">
                 <h3 className="text-lg font-bold text-white mb-4">Dodací adresa</h3>
                 <div className="grid grid-cols-1 gap-4">
@@ -212,6 +212,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                       type="text"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
+                      tabIndex={isZasilkovna ? 0 : -1}
                       className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && isZasilkovna && !address ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                       placeholder="např. Hlavní 123"
                     />
@@ -227,6 +228,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                         type="text"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
+                        tabIndex={isZasilkovna ? 0 : -1}
                         className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && isZasilkovna && !city ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                         placeholder="Praha"
                       />
@@ -241,6 +243,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                         type="text"
                         value={zip}
                         onChange={(e) => setZip(e.target.value)}
+                        tabIndex={isZasilkovna ? 0 : -1}
                         className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && isZasilkovna && !zip ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                         placeholder="120 00"
                       />
