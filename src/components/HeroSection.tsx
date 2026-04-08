@@ -4,7 +4,10 @@ import { Link } from 'react-router-dom';
 export default function HeroSection() {
   const scrollToProducts = () => {
     const productsSection = document.getElementById('products');
-    productsSection?.scrollIntoView({ behavior: 'smooth' });
+    if (productsSection) {
+      const top = productsSection.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -65,24 +68,24 @@ export default function HeroSection() {
           Každá odrůda s <span className="text-cyan-400 font-semibold">jedinečným charakterem</span> a příběhem.
         </p>
 
-        {/* 15% sleva — big golden CTA like tajnabotanika.com */}
+        {/* 15% sleva — golden CTA */}
         <Link
           to="/register"
-          className="inline-flex flex-col items-center gap-2 px-10 md:px-16 py-5 md:py-6 mb-6 rounded-2xl border-2 hover:scale-[1.03] transition-all duration-300 group cursor-pointer"
+          className="inline-flex flex-col items-center gap-1.5 px-6 md:px-10 py-3.5 md:py-4 mb-6 rounded-xl border-2 hover:scale-[1.03] transition-all duration-300 group cursor-pointer"
           style={{
             background: 'linear-gradient(135deg, rgba(202,138,4,0.25), rgba(234,179,8,0.2), rgba(202,138,4,0.15))',
             borderColor: 'rgba(234,179,8,0.5)',
-            boxShadow: '0 0 40px rgba(234,179,8,0.15), 0 0 80px rgba(202,138,4,0.08)',
+            boxShadow: '0 0 30px rgba(234,179,8,0.12), 0 0 60px rgba(202,138,4,0.06)',
           }}
         >
-          <div className="flex items-center gap-3">
-            <Sparkles className="w-6 h-6 text-yellow-400 group-hover:rotate-12 transition-transform" />
-            <span className="text-lg md:text-2xl font-semibold text-yellow-100">
-              Zaregistrujte se a získejte <span className="font-black text-white text-xl md:text-3xl">15% slevu</span>
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 group-hover:rotate-12 transition-transform" />
+            <span className="text-sm md:text-lg font-semibold text-yellow-100">
+              Zaregistrujte se a získejte <span className="font-black text-white text-base md:text-xl">15% slevu</span>
             </span>
-            <Sparkles className="w-6 h-6 text-yellow-400 group-hover:-rotate-12 transition-transform" />
+            <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 group-hover:-rotate-12 transition-transform" />
           </div>
-          <span className="text-sm md:text-base text-yellow-300/70 font-light">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
+          <span className="text-xs md:text-sm text-yellow-300/70 font-light">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
         </Link>
 
         {/* Tags — IG + 9 odrůd */}
