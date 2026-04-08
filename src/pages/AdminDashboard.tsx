@@ -80,6 +80,7 @@ export default function AdminDashboard() {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [orderItems, setOrderItems] = useState<Record<string, any[]>>({});
   const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -545,8 +546,38 @@ export default function AdminDashboard() {
               </div>
 
               <div>
+                {/* Status filter tabs */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {[
+                    { key: 'all', label: 'Všechny', count: orders.length },
+                    { key: 'pending', label: 'Čeká na zpracování', count: orders.filter(o => o.status === 'pending').length, color: 'yellow' },
+                    { key: 'processing', label: 'Zpracovává se', count: orders.filter(o => o.status === 'processing').length, color: 'blue' },
+                    { key: 'shipped', label: 'Odesláno', count: orders.filter(o => o.status === 'shipped').length, color: 'purple' },
+                    { key: 'delivered', label: 'Doručeno', count: orders.filter(o => o.status === 'delivered').length, color: 'emerald' },
+                    { key: 'unpaid', label: 'Nezaplaceno', count: orders.filter(o => o.payment_status === 'pending').length, color: 'red' },
+                    { key: 'paid', label: 'Zaplaceno', count: orders.filter(o => o.payment_status === 'paid').length, color: 'emerald' },
+                  ].map(f => (
+                    <button
+                      key={f.key}
+                      onClick={() => setStatusFilter(f.key)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        statusFilter === f.key
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                          : 'bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10'
+                      }`}
+                    >
+                      {f.label} {f.count > 0 && <span className="ml-1 opacity-70">({f.count})</span>}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-white">Všechny objednávky</h2>
+                  <h2 className="text-lg font-bold text-white">
+                    {statusFilter === 'all' ? 'Všechny objednávky' :
+                     statusFilter === 'unpaid' ? 'Nezaplacené objednávky' :
+                     statusFilter === 'paid' ? 'Zaplacené objednávky' :
+                     `${(statusLabels as any)[statusFilter]?.label || statusFilter}`}
+                  </h2>
                   <div className="flex items-center gap-2">
                     {selectedOrders.size > 0 && (
                       <span className="text-xs text-emerald-400 font-semibold">{selectedOrders.size} vybráno</span>
@@ -574,7 +605,12 @@ export default function AdminDashboard() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {orders.map((order) => {
+                    {orders.filter(o => {
+                      if (statusFilter === 'all') return true;
+                      if (statusFilter === 'unpaid') return o.payment_status === 'pending';
+                      if (statusFilter === 'paid') return o.payment_status === 'paid';
+                      return o.status === statusFilter;
+                    }).map((order) => {
                       const sl = statusLabels[order.status] || { label: order.status, color: 'text-gray-400 bg-gray-500/10' };
                       const psl = paymentStatusLabels[order.payment_status] || { label: order.payment_status, color: 'text-gray-400 bg-gray-500/10' };
                       const o = order as any;
