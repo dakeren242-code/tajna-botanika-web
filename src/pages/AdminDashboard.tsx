@@ -251,13 +251,20 @@ export default function AdminDashboard() {
 
       <div class="no-print" style="margin-top:24px;text-align:center;">
         <button onclick="window.print()" style="padding:12px 32px;background:#059669;color:white;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;">Tisknout</button>
+        <button onclick="window.close();history.back();" style="padding:12px 32px;background:#374151;color:white;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;margin-left:12px;">Zpět</button>
       </div>
     </body></html>`;
 
+    // Try window.open first, fallback to data URI for mobile
     const printWindow = window.open('', '_blank');
-    if (printWindow) {
+    if (printWindow && !printWindow.closed) {
       printWindow.document.write(html);
       printWindow.document.close();
+    } else {
+      // Mobile fallback - open as blob URL in same tab
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank') || (window.location.href = url);
     }
   };
 
