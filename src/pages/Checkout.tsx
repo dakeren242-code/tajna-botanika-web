@@ -132,6 +132,7 @@ export default function Checkout() {
           quantity: item.quantity,
           unit_price: price,
           total_price: price * item.quantity,
+          gram_amount: item.gramAmount,
           variant_name: item.gramAmount,
         };
       });
