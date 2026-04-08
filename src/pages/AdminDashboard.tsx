@@ -79,6 +79,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [orderItems, setOrderItems] = useState<Record<string, any[]>>({});
+  const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -260,15 +261,39 @@ export default function AdminDashboard() {
     }
   };
 
-  const exportZasilkovnaCSV = () => {
-    // Filter orders for Zásilkovna shipping that are pending/processing
-    const zasilkovnaOrders = orders.filter(o => {
-      const om = o as any;
-      return om.shipping_method === 'zasilkovna' && ['pending', 'processing'].includes(o.status);
+  const toggleOrderSelection = (orderId: string) => {
+    setSelectedOrders(prev => {
+      const next = new Set(prev);
+      if (next.has(orderId)) next.delete(orderId);
+      else next.add(orderId);
+      return next;
     });
+  };
+
+  const selectAllZasilkovna = () => {
+    const zasilkovnaIds = orders
+      .filter(o => (o as any).shipping_method === 'zasilkovna' && ['pending', 'processing'].includes(o.status))
+      .map(o => o.id);
+    setSelectedOrders(prev => {
+      if (zasilkovnaIds.every(id => prev.has(id))) return new Set(); // deselect all
+      return new Set(zasilkovnaIds);
+    });
+  };
+
+  const exportZasilkovnaCSV = () => {
+    // Use selected orders, or all Zásilkovna pending/processing if none selected
+    let zasilkovnaOrders: Order[];
+    if (selectedOrders.size > 0) {
+      zasilkovnaOrders = orders.filter(o => selectedOrders.has(o.id) && (o as any).shipping_method === 'zasilkovna');
+    } else {
+      zasilkovnaOrders = orders.filter(o => {
+        const om = o as any;
+        return om.shipping_method === 'zasilkovna' && ['pending', 'processing'].includes(o.status);
+      });
+    }
 
     if (zasilkovnaOrders.length === 0) {
-      alert('Žádné objednávky k odeslání přes Zásilkovnu');
+      alert('Vyber objednávky k odeslání (checkbox vlevo) nebo žádné nejsou pro Zásilkovnu');
       return;
     }
 
@@ -515,14 +540,24 @@ export default function AdminDashboard() {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-white">Všechny objednávky</h2>
-                  <button
-                    onClick={exportZasilkovnaCSV}
-                    className="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold rounded-xl transition-all flex items-center gap-2 text-sm shadow-lg"
-                    title="Stáhni CSV → nahraj na client.packeta.com → vytiskni štítky"
-                  >
-                    <Truck className="w-4 h-4" />
-                    Export pro Zásilkovnu
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {selectedOrders.size > 0 && (
+                      <span className="text-xs text-emerald-400 font-semibold">{selectedOrders.size} vybráno</span>
+                    )}
+                    <button
+                      onClick={selectAllZasilkovna}
+                      className="px-3 py-2 bg-white/5 hover:bg-white/10 text-gray-300 font-semibold rounded-lg transition-all text-xs border border-white/10"
+                    >
+                      {orders.filter(o => (o as any).shipping_method === 'zasilkovna' && ['pending', 'processing'].includes(o.status)).every(o => selectedOrders.has(o.id)) && selectedOrders.size > 0 ? 'Odznačit vše' : 'Vybrat vše'}
+                    </button>
+                    <button
+                      onClick={exportZasilkovnaCSV}
+                      className="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold rounded-xl transition-all flex items-center gap-2 text-sm shadow-lg"
+                    >
+                      <Truck className="w-4 h-4" />
+                      Export pro Zásilkovnu {selectedOrders.size > 0 ? `(${selectedOrders.size})` : ''}
+                    </button>
+                  </div>
                 </div>
 
                 {orders.length === 0 ? (
@@ -541,8 +576,17 @@ export default function AdminDashboard() {
                       return (
                         <div key={order.id} className="bg-white/[0.03] border border-emerald-500/10 rounded-xl overflow-hidden hover:border-emerald-500/20 transition-all">
                           {/* Order row */}
+                          <div className="flex items-center gap-3 p-4 cursor-pointer hover:bg-white/[0.03] transition-colors">
+                            {/* Checkbox for Zásilkovna export */}
+                            <input
+                              type="checkbox"
+                              checked={selectedOrders.has(order.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={() => toggleOrderSelection(order.id)}
+                              className="w-4 h-4 rounded border-2 border-emerald-500/30 bg-black/30 text-emerald-500 focus:ring-emerald-500/50 cursor-pointer flex-shrink-0"
+                            />
                           <div
-                            className="flex items-center gap-4 p-4 cursor-pointer hover:bg-white/[0.03] transition-colors"
+                            className="flex items-center gap-4 flex-1"
                             onClick={() => handleExpandOrder(order.id)}
                           >
                             <div className="flex-1 min-w-0">
@@ -576,6 +620,7 @@ export default function AdminDashboard() {
                               </button>
                               {isExpanded ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
                             </div>
+                          </div>
                           </div>
 
                           {/* Expanded detail */}
