@@ -33,29 +33,25 @@ export default function ScrollReveal({
         });
       },
       {
-        threshold: isMobile ? 0 : 0.1,
-        rootMargin: isMobile ? '100px 0px 100px 0px' : '0px 0px -100px 0px',
+        threshold: 0,
+        rootMargin: '200px 0px 200px 0px',
       }
     );
 
     observer.observe(element);
 
-    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
-    if (isMobile) {
-      fallbackTimer = setTimeout(() => {
-        if (!element.classList.contains('revealed')) {
-          element.classList.add('revealed');
-        }
-      }, 500 + delay);
-    }
+    // Fallback: always reveal after timeout (prevents black screen)
+    const fallbackTimer = setTimeout(() => {
+      if (!element.classList.contains('revealed')) {
+        element.classList.add('revealed');
+      }
+    }, isMobile ? 500 + delay : 2000 + delay);
 
     return () => {
       if (element) {
         observer.unobserve(element);
       }
-      if (fallbackTimer) {
-        clearTimeout(fallbackTimer);
-      }
+      clearTimeout(fallbackTimer);
     };
   }, [delay]);
 
