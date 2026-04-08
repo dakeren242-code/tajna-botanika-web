@@ -71,19 +71,19 @@ export default function HeroSection() {
         {/* 15% sleva — identical copy from tajnabotanika.com */}
         <Link
           to="/register"
-          className="relative inline-flex items-center gap-3 px-8 py-4 mb-14 rounded-2xl backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 cursor-pointer"
+          className="relative inline-flex items-center gap-2 md:gap-3 px-5 md:px-8 py-3 md:py-4 mb-14 rounded-2xl backdrop-blur-xl overflow-hidden group hover:scale-105 transition-all duration-500 cursor-pointer"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-yellow-500/20 rounded-2xl animate-cta-gradient border-2 border-yellow-400/40" />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent animate-cta-shimmer" />
-          <Sparkles className="relative z-10 w-5 h-5 text-yellow-400" />
+          <Sparkles className="relative z-10 w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
           <div className="relative z-10 text-center">
-            <span className="block text-yellow-300 font-bold text-base md:text-lg">
+            <span className="block text-yellow-300 font-bold text-sm md:text-lg">
               Zaregistrujte se a získejte{' '}
-              <span className="text-yellow-100 text-xl md:text-2xl font-black">15% slevu</span>
+              <span className="text-yellow-100 text-lg md:text-2xl font-black">15% slevu</span>
             </span>
-            <span className="block text-yellow-200/80 text-sm mt-1">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
+            <span className="block text-yellow-200/80 text-xs md:text-sm mt-0.5 md:mt-1">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
           </div>
-          <Sparkles className="relative z-10 w-5 h-5 text-yellow-400" />
+          <Sparkles className="relative z-10 w-4 h-4 md:w-5 md:h-5 text-yellow-400" />
         </Link>
 
         {/* Tags — IG + 9 odrůd */}
