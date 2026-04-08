@@ -199,59 +199,58 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
             </div>
           </div>
 
-          {shippingMethod === 'zasilkovna' && (
-            <div className="mt-6 pt-6 border-t border-emerald-500/20">
-              <h3 className="text-lg font-bold text-white mb-4">Dodací adresa</h3>
-              <div className="grid grid-cols-1 gap-4">
-                <div id="field-address">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Ulice a číslo popisné <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    required
-                    className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !address ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
-                    placeholder="např. Hlavní 123"
-                  />
-                  {submitted && !address && <p className="mt-1 text-xs text-red-400">Vyplnte ulici a cislo</p>}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div id="field-city">
+          <div className={`grid transition-all duration-300 ease-in-out ${isZasilkovna ? 'grid-rows-[1fr] mt-6' : 'grid-rows-[0fr]'}`}>
+            <div className="overflow-hidden">
+              <div className="pt-6 border-t border-emerald-500/20">
+                <h3 className="text-lg font-bold text-white mb-4">Dodací adresa</h3>
+                <div className="grid grid-cols-1 gap-4">
+                  <div id="field-address">
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Město <span className="text-red-400">*</span>
+                      Ulice a číslo popisné <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="text"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      required
-                      className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !city ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
-                      placeholder="Praha"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && isZasilkovna && !address ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
+                      placeholder="např. Hlavní 123"
                     />
-                    {submitted && !city && <p className="mt-1 text-xs text-red-400">Vyplnte mesto</p>}
+                    {submitted && isZasilkovna && !address && <p className="mt-1 text-xs text-red-400">Vyplnte ulici a cislo</p>}
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      PSČ <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={zip}
-                      onChange={(e) => setZip(e.target.value)}
-                      required
-                      className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !zip ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
-                      placeholder="120 00"
-                    />
-                    {submitted && !zip && <p className="mt-1 text-xs text-red-400">Vyplnte PSC</p>}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div id="field-city">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Město <span className="text-red-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && isZasilkovna && !city ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
+                        placeholder="Praha"
+                      />
+                      {submitted && isZasilkovna && !city && <p className="mt-1 text-xs text-red-400">Vyplnte mesto</p>}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        PSČ <span className="text-red-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={zip}
+                        onChange={(e) => setZip(e.target.value)}
+                        className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && isZasilkovna && !zip ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
+                        placeholder="120 00"
+                      />
+                      {submitted && isZasilkovna && !zip && <p className="mt-1 text-xs text-red-400">Vyplnte PSC</p>}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
           <div className="mt-6 pt-6 border-t border-emerald-500/20">
             <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -490,7 +489,6 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 />
               </label>
             )}
-            </label>
 
             {/* Zasilkovna */}
             <label
@@ -554,27 +552,31 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
             </label>
           </div>
 
-          {isPersonal && (
-            <div className="mt-4 p-4 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 rounded-xl">
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-white font-semibold mb-1">Jak to funguje</h4>
-                  <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
-                    <li>Zaplaťte převodem (QR kód obdržíte po dokončení)</li>
-                    <li>Pošlete nám screenshot platby do chatu</li>
-                    <li>Domluvíme místo předání (Praha - Beroun, 24/7)</li>
-                  </ol>
+          <div className={`grid transition-all duration-300 ease-in-out ${isPersonal ? 'grid-rows-[1fr] mt-4' : 'grid-rows-[0fr]'}`}>
+            <div className="overflow-hidden">
+              <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-white font-semibold mb-1">Jak to funguje</h4>
+                    <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
+                      <li>Zaplaťte převodem (QR kód obdržíte po dokončení)</li>
+                      <li>Pošlete nám screenshot platby do chatu</li>
+                      <li>Domluvíme místo předání (Praha - Beroun, 24/7)</li>
+                    </ol>
+                  </div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
-          {submitted && !shippingMethod && (
-            <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-              <p className="text-sm text-red-400 text-center">Vyberte zpusob dopravy pro pokracovani</p>
+          <div className={`grid transition-all duration-300 ease-in-out ${submitted && !shippingMethod ? 'grid-rows-[1fr] mt-3' : 'grid-rows-[0fr]'}`}>
+            <div className="overflow-hidden">
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <p className="text-sm text-red-400 text-center">Vyberte zpusob dopravy pro pokracovani</p>
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
         <div className="bg-white/5 rounded-xl p-6 border border-emerald-500/20">
