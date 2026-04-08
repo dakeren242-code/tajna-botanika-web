@@ -88,6 +88,44 @@ export default function SupportChat() {
     }
   }, [messages, isTyping]);
 
+  // Track user presence (invisible to user, visible to admin)
+  useEffect(() => {
+    if (!conversationId) return;
+    const updatePresence = () => {
+      supabase.from('chat_presence').upsert({
+        conversation_id: conversationId,
+        user_email: user?.email || null,
+        user_id: user?.id || null,
+        is_online: true,
+        last_seen_at: new Date().toISOString(),
+        last_read_at: isOpen ? new Date().toISOString() : undefined,
+      }, { onConflict: 'conversation_id' }).then(() => {});
+    };
+    updatePresence();
+    const interval = setInterval(updatePresence, 30000);
+
+    // Mark offline on unmount
+    return () => {
+      clearInterval(interval);
+      supabase.from('chat_presence').upsert({
+        conversation_id: conversationId,
+        is_online: false,
+        last_seen_at: new Date().toISOString(),
+      }, { onConflict: 'conversation_id' }).then(() => {});
+    };
+  }, [conversationId, isOpen, user]);
+
+  // Mark messages as read when chat is open
+  useEffect(() => {
+    if (!isOpen || !conversationId) return;
+    supabase.from('support_messages')
+      .update({ read_by_user: true, read_at: new Date().toISOString() })
+      .eq('conversation_id', conversationId)
+      .eq('sender', 'admin')
+      .eq('read_by_user', false)
+      .then(() => {});
+  }, [isOpen, conversationId, messages]);
+
   // Poll for admin replies
   useEffect(() => {
     if (!conversationId) return;

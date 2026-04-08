@@ -245,9 +245,42 @@ export function Success() {
                 </div>
               </div>
 
-              <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                <p className="text-yellow-300 text-sm font-medium">
-                  Po uhrazení objednávku ihned zpracujeme a odešleme. Potvrďte platbu zasláním screenshotu na náš kontakt pro rychlejší vyřízení.
+              {/* Priority banner */}
+              <div className="mt-6 p-5 bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-amber-500/15 border border-amber-400/30 rounded-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-amber-400/10 to-transparent rounded-bl-full" />
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-amber-400/20 to-yellow-500/20 rounded-full flex items-center justify-center border border-amber-400/30">
+                    <span className="text-2xl">⚡</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="text-amber-200 font-bold text-sm">PRIORITNÍ ZPRACOVÁNÍ</h4>
+                      <span className="px-2 py-0.5 bg-amber-400/20 text-amber-300 text-[10px] font-bold rounded-full border border-amber-400/30">VIP</span>
+                    </div>
+                    <p className="text-amber-300/80 text-sm leading-relaxed">
+                      Platby převodem zpracováváme <span className="text-amber-200 font-semibold">přednostně</span>. Po připsání částky vaši objednávku ihned připravíme k odeslání.
+                    </p>
+                    <div className="mt-3 flex items-center gap-3 text-xs">
+                      <span className="flex items-center gap-1 text-amber-300/70">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                        Rychlejší vyřízení
+                      </span>
+                      <span className="flex items-center gap-1 text-amber-300/70">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                        Přednostní odeslání
+                      </span>
+                      <span className="flex items-center gap-1 text-amber-300/70">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                        Žádné poplatky
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                <p className="text-emerald-300 text-sm font-medium">
+                  💡 Po uhrazení pošlete screenshot platby na náš kontakt pro ještě rychlejší vyřízení.
                 </p>
               </div>
             </div>

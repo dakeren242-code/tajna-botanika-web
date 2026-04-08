@@ -320,6 +320,18 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                       <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
                       <span>Platba probíhá převodem na účet po dokončení objednávky</span>
                     </div>
+                    {paymentMethod === 'bank_transfer' && (
+                      <div className="mt-3 p-3 bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/10 border border-amber-400/30 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">⚡</span>
+                          <div>
+                            <p className="text-amber-200 text-xs font-bold">PRIORITNÍ ZPRACOVÁNÍ</p>
+                            <p className="text-amber-300/80 text-[11px]">Objednávky s převodem zpracováváme přednostně</p>
+                          </div>
+                          <span className="ml-auto text-lg">🏆</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

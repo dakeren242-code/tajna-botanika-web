@@ -103,11 +103,11 @@ export default function OrderHistory() {
                         <h3 className="text-xl font-bold text-white">
                           {order.order_number}
                         </h3>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusLabels[order.status].color}`}>
-                          {statusLabels[order.status].label}
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${(statusLabels[order.status] || statusLabels.pending).color}`}>
+                          {(statusLabels[order.status] || statusLabels.pending).label}
                         </span>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${paymentStatusLabels[order.payment_status].color}`}>
-                          {paymentStatusLabels[order.payment_status].label}
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${(paymentStatusLabels[order.payment_status] || paymentStatusLabels.pending).color}`}>
+                          {(paymentStatusLabels[order.payment_status] || paymentStatusLabels.pending).label}
                         </span>
                       </div>
 
@@ -121,7 +121,7 @@ export default function OrderHistory() {
                         <div>
                           <p className="text-gray-400">Celková cena</p>
                           <p className="text-emerald-400 font-bold">
-                            {order.total_amount.toFixed(2)} {order.currency}
+                            {(order.total_amount ?? 0).toFixed(0)} Kč
                           </p>
                         </div>
                       </div>

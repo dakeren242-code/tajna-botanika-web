@@ -130,11 +130,11 @@ export default function OrderDetail() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <span className={`px-4 py-2 rounded-lg text-sm font-medium ${statusLabels[order.status].color}`}>
-                  {statusLabels[order.status].label}
+                <span className={`px-4 py-2 rounded-lg text-sm font-medium ${(statusLabels[order.status] || statusLabels.pending).color}`}>
+                  {(statusLabels[order.status] || statusLabels.pending).label}
                 </span>
-                <span className={`px-4 py-2 rounded-lg text-sm font-medium ${paymentStatusLabels[order.payment_status].color}`}>
-                  {paymentStatusLabels[order.payment_status].label}
+                <span className={`px-4 py-2 rounded-lg text-sm font-medium ${(paymentStatusLabels[order.payment_status] || paymentStatusLabels.pending).color}`}>
+                  {(paymentStatusLabels[order.payment_status] || paymentStatusLabels.pending).label}
                 </span>
               </div>
             </div>
@@ -180,8 +180,8 @@ export default function OrderDetail() {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Stav platby</span>
-                    <span className={`px-3 py-1 rounded-lg text-sm font-medium ${paymentStatusLabels[order.payment_status].color}`}>
-                      {paymentStatusLabels[order.payment_status].label}
+                    <span className={`px-3 py-1 rounded-lg text-sm font-medium ${(paymentStatusLabels[order.payment_status] || paymentStatusLabels.pending).color}`}>
+                      {(paymentStatusLabels[order.payment_status] || paymentStatusLabels.pending).label}
                     </span>
                   </div>
                   {order.paid_at && (
@@ -195,7 +195,7 @@ export default function OrderDetail() {
                   <div className="flex justify-between pt-3 border-t border-emerald-500/20">
                     <span className="text-white font-semibold">Celková částka</span>
                     <span className="text-emerald-400 font-bold text-lg">
-                      {order.total_amount.toFixed(2)} {order.currency}
+                      {(order.total_amount ?? 0).toFixed(0)} Kč
                     </span>
                   </div>
                 </div>
@@ -218,12 +218,12 @@ export default function OrderDetail() {
                   <div className="flex-1">
                     <h3 className="text-white font-semibold mb-1">{item.product_name}</h3>
                     <p className="text-sm text-gray-400">
-                      Množství: {item.quantity} × {item.unit_price.toFixed(2)} {order.currency}
+                      Množství: {item.quantity} × {(item.unit_price ?? 0).toFixed(0)} Kč
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-emerald-400 font-bold">
-                      {item.total_price.toFixed(2)} {order.currency}
+                      {(item.total_price ?? 0).toFixed(0)} Kč
                     </p>
                   </div>
                 </div>
@@ -234,7 +234,7 @@ export default function OrderDetail() {
               <div className="flex justify-between text-lg">
                 <span className="text-white font-semibold">Celkem</span>
                 <span className="text-emerald-400 font-bold">
-                  {order.total_amount.toFixed(2)} {order.currency}
+                  {(order.total_amount ?? 0).toFixed(0)} Kč
                 </span>
               </div>
             </div>

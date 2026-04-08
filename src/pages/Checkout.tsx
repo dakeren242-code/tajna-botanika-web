@@ -193,6 +193,33 @@ export default function Checkout() {
         user_id: user?.id,
       });
 
+      // Send admin notification (fire-and-forget, don't block checkout)
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      fetch(`${supabaseUrl}/functions/v1/order-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({
+          orderId: order.id,
+          orderNumber: order.order_number,
+          customerName: `${customerData.firstName} ${customerData.lastName}`,
+          customerEmail: customerData.email,
+          customerPhone: customerData.phone,
+          totalAmount: finalTotal,
+          paymentMethod,
+          shippingMethod,
+          items: items.map(item => ({
+            name: item.product.name,
+            quantity: item.quantity,
+            gramAmount: item.gramAmount,
+            price: getPrice(item.gramAmount) * item.quantity,
+          })),
+        }),
+      }).catch(() => {}); // Silent fail - notification is not critical
+
       clearCart();
 
       // Card payment → redirect to Comgate payment gateway
