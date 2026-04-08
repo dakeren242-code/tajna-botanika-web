@@ -127,6 +127,23 @@ export default function AdminDashboard() {
         pendingOrders: data.filter((o) => o.status === 'pending').length,
         deliveredOrders: data.filter((o) => o.status === 'delivered').length,
       });
+
+      // Pre-load all order items for gram totals in preview
+      const orderIds = data.map(o => o.id);
+      if (orderIds.length > 0) {
+        const { data: allItems } = await supabase
+          .from('order_items')
+          .select('*')
+          .in('order_id', orderIds);
+        if (allItems) {
+          const grouped: Record<string, any[]> = {};
+          for (const item of allItems) {
+            if (!grouped[item.order_id]) grouped[item.order_id] = [];
+            grouped[item.order_id].push(item);
+          }
+          setOrderItems(grouped);
+        }
+      }
     }
 
     setLoading(false);
@@ -369,6 +386,14 @@ export default function AdminDashboard() {
                               <div className="flex items-center gap-4 text-sm text-gray-400">
                                 <span>{new Date(order.created_at).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                                 <span className="text-white font-bold">{formatAmount(order.total_amount)} Kč</span>
+                                {orderItems[order.id] && (
+                                  <span className="text-xs px-2 py-0.5 bg-emerald-500/20 text-emerald-400 font-bold rounded-full">
+                                    {orderItems[order.id].reduce((sum: number, item: any) => {
+                                      const g = parseInt((item.gram_amount || '0').replace('g', '')) || 0;
+                                      return sum + g * (item.quantity || 1);
+                                    }, 0)}g
+                                  </span>
+                                )}
                                 {o.first_name && <span>{o.first_name} {o.last_name}</span>}
                                 {o.payment_method && <span className="text-xs px-2 py-0.5 bg-white/5 rounded">{paymentMethodLabels[o.payment_method] || o.payment_method}</span>}
                               </div>
