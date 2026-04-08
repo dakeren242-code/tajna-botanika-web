@@ -86,7 +86,7 @@ export default function HeroSection() {
           <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent drop-shadow-2xl whitespace-nowrap" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
             KAŽDÉM DETAILU
           </span>
-          <span className="block text-lg md:text-4xl mt-3 md:mt-4 bg-gradient-to-r from-cyan-200 via-blue-200 to-purple-300 bg-clip-text text-transparent font-light tracking-wide">
+          <span className="block text-[13px] md:text-4xl mt-3 md:mt-4 bg-gradient-to-r from-cyan-200 via-blue-200 to-purple-300 bg-clip-text text-transparent font-light tracking-wide whitespace-nowrap">
             Laboratorní preciznost, přírodní dokonalost
           </span>
         </h1>
