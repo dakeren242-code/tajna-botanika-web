@@ -321,20 +321,16 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
       user_data: withConsent ? {
         fbp: getCookie('_fbp') || undefined,
         fbc: getFbc() || undefined,
-        em: data?.user_email || undefined,
-        ph: data?.user_phone || undefined,
-        fn: data?.user_first_name || undefined,
-        ln: data?.user_last_name || undefined,
-        ct: data?.user_city || undefined,
-        zp: data?.user_zip || undefined,
-        country: data?.user_country || 'cz',
-        external_id: data?.user_id || undefined,
+        em: data?.user_email || cachedUserEmail || undefined,
+        ph: data?.user_phone || cachedUserPhone || undefined,
+        fn: data?.user_first_name || cachedUserFirstName || undefined,
+        ln: data?.user_last_name || cachedUserLastName || undefined,
+        ct: data?.user_city || cachedUserCity || undefined,
+        zp: data?.user_zip || cachedUserZip || undefined,
+        country: data?.user_country || cachedUserCountry || 'cz',
+        external_id: data?.user_id || cachedUserId || undefined,
       } : {
-        // No PII without consent — only anonymous browser signals
         fbp: getCookie('_fbp') || undefined,
-        // fbc intentionally omitted in LDU mode: pixel doesn't set _fbc cookie
-        // in LDU mode, so any value we send would mismatch the pixel's fbc and
-        // trigger Meta's "modified fbclid" CAPI diagnostic error.
         country: 'cz',
       },
     };
@@ -456,6 +452,9 @@ export function trackPageView(pagePath?: string) {
       if (cachedUserPhone) enriched.user_phone = cachedUserPhone;
       if (cachedUserFirstName) enriched.user_first_name = cachedUserFirstName;
       if (cachedUserLastName) enriched.user_last_name = cachedUserLastName;
+      if (cachedUserCity) enriched.user_city = cachedUserCity;
+      if (cachedUserZip) enriched.user_zip = cachedUserZip;
+      enriched.user_country = cachedUserCountry || 'cz';
       sendToFacebookCAPI('PageView', enriched, eventId, consent.marketing);
     }, 500);
   }
