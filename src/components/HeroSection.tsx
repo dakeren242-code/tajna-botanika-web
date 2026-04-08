@@ -79,7 +79,7 @@ export default function HeroSection() {
           <div className="relative z-10 text-center">
             <span className="block text-yellow-300 font-bold text-sm md:text-lg">
               Zaregistrujte se a získejte{' '}
-              <span className="text-yellow-100 text-lg md:text-2xl font-black">15% slevu</span>
+              <span className="text-yellow-100 text-base md:text-2xl font-black">15% slevu</span>
             </span>
             <span className="block text-yellow-200/80 text-xs md:text-sm mt-0.5 md:mt-1">Slevový kód můžete uplatnit při jakékoliv objednávce</span>
           </div>
