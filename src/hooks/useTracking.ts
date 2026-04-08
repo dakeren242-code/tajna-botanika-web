@@ -332,15 +332,17 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
       } : {
         // No PII without consent — only anonymous browser signals
         fbp: getCookie('_fbp') || undefined,
-        fbc: getFbc() || undefined,
+        // fbc intentionally omitted in LDU mode: pixel doesn't set _fbc cookie
+        // in LDU mode, so any value we send would mismatch the pixel's fbc and
+        // trigger Meta's "modified fbclid" CAPI diagnostic error.
         country: 'cz',
       },
     };
 
     if (!withConsent) {
       payload.data_processing_options = ['LDU'];
-      payload.data_processing_options_country = 1; // EU
-      payload.data_processing_options_state = 1000; // EU (all states)
+      payload.data_processing_options_country = 0; // 0 = use geolocation (1 = US, wrong for CZ/EU)
+      payload.data_processing_options_state = 0;    // 0 = use geolocation
     }
 
     const capiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/facebook-capi`;
@@ -364,30 +366,12 @@ function getCookie(name: string): string | undefined {
   return undefined;
 }
 
-// Capture fbclid from the landing URL as a fallback for when the Meta Pixel
-// hasn't initialized yet (no consent). Stored in memory only — we do NOT write
-// to the _fbc cookie here, because the pixel will set its own _fbc with its own
-// timestamp when it initializes. Overwriting it would cause the "modified fbclid"
-// CAPI diagnostic error (pixel sends its fbc, CAPI sends ours with different timestamp).
-let cachedFbc: string | undefined;
-
-(function captureFbclid() {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const fbclid = params.get('fbclid');
-    if (fbclid) {
-      cachedFbc = `fb.1.${Date.now()}.${fbclid}`;
-    }
-  } catch {
-    // Non-browser environment, ignore
-  }
-})();
-
 function getFbc(): string | undefined {
-  // Always prefer the pixel's _fbc cookie — it's the canonical value the pixel
-  // sends with its own events. Using this prevents the "modified fbclid" CAPI error.
-  // Fall back to cachedFbc only for LDU events where the pixel hasn't loaded.
-  return getCookie('_fbc') || cachedFbc;
+  // Only use the pixel's _fbc cookie — it's the canonical value the pixel
+  // sends with its own events. Never construct fbc manually: a manually built
+  // value (e.g. fb.1.{timestamp}.{fbclid}) uses a different timestamp than the
+  // pixel, which triggers Meta's "modified fbclid" CAPI diagnostic error.
+  return getCookie('_fbc');
 }
 
 export function trackEvent(eventName: string, data?: TrackingEvent) {
