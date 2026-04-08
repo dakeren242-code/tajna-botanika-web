@@ -160,6 +160,106 @@ export default function AdminDashboard() {
     }
   };
 
+  const printDeliveryNote = async (order: any) => {
+    const items = orderItems[order.id] || [];
+    // Fetch product details for cannabinoid profiles
+    const productIds = items.map((i: any) => i.product_id).filter(Boolean);
+    let products: Record<string, any> = {};
+    if (productIds.length > 0) {
+      const { data } = await supabase.from('products').select('id, name, thc_x_percent, thc_percent, cbd_percent, cbg_percent').in('id', productIds);
+      if (data) {
+        for (const p of data) products[p.id] = p;
+      }
+    }
+
+    const itemsHtml = items.map((item: any) => {
+      const p = products[item.product_id] || {};
+      return `
+        <tr>
+          <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-weight:600;">${item.product_name}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center;">${item.gram_amount || '—'}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center;">${item.quantity || 1}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:11px;">
+            <span style="color:#059669;font-weight:700;">THC-X: ${p.thc_x_percent || '—'}%</span> &nbsp;
+            <span style="color:#6b7280;">THC: ${p.thc_percent || '—'}%</span> &nbsp;
+            <span style="color:#2563eb;">CBD: ${p.cbd_percent || '—'}%</span> &nbsp;
+            <span style="color:#7c3aed;">CBG: ${p.cbg_percent || '—'}%</span>
+          </td>
+        </tr>`;
+    }).join('');
+
+    const totalGrams = items.reduce((sum: number, item: any) => {
+      const g = parseInt((item.gram_amount || '0').replace('g', '')) || 0;
+      return sum + g * (item.quantity || 1);
+    }, 0);
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Dodaci list #${order.order_number}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 32px; color: #1f2937; max-width: 800px; margin: 0 auto; }
+        @media print { body { padding: 16px; } .no-print { display: none !important; } }
+      </style></head><body>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #059669;">
+        <div>
+          <h1 style="font-size:28px;color:#059669;margin-bottom:4px;">Tajna Botanika</h1>
+          <p style="color:#6b7280;font-size:13px;">tajnabotanika.online</p>
+        </div>
+        <div style="text-align:right;">
+          <h2 style="font-size:18px;color:#374151;">DODACI LIST</h2>
+          <p style="color:#6b7280;font-size:13px;">#${order.order_number}</p>
+          <p style="color:#6b7280;font-size:13px;">${new Date(order.created_at).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+        </div>
+      </div>
+
+      <div style="background:#f9fafb;padding:16px;border-radius:8px;margin-bottom:20px;">
+        <p style="font-size:12px;color:#6b7280;margin-bottom:4px;">Zakaznik</p>
+        <p style="font-weight:600;font-size:16px;">${order.first_name || order.customer_first_name || ''} ${order.last_name || order.customer_last_name || ''}</p>
+        ${order.email || order.customer_email ? `<p style="color:#6b7280;font-size:13px;">${order.email || order.customer_email}</p>` : ''}
+        ${order.phone || order.customer_phone ? `<p style="color:#6b7280;font-size:13px;">${order.phone || order.customer_phone}</p>` : ''}
+      </div>
+
+      <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+        <thead>
+          <tr style="background:#f3f4f6;">
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#6b7280;text-transform:uppercase;">Produkt</th>
+            <th style="padding:8px 12px;text-align:center;font-size:12px;color:#6b7280;text-transform:uppercase;">Gramaz</th>
+            <th style="padding:8px 12px;text-align:center;font-size:12px;color:#6b7280;text-transform:uppercase;">Ks</th>
+            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#6b7280;text-transform:uppercase;">Cannabinoidni profil</th>
+          </tr>
+        </thead>
+        <tbody>${itemsHtml}</tbody>
+        <tfoot>
+          <tr style="background:#ecfdf5;">
+            <td style="padding:10px 12px;font-weight:700;">Celkem</td>
+            <td style="padding:10px 12px;text-align:center;font-weight:700;color:#059669;">${totalGrams}g</td>
+            <td style="padding:10px 12px;text-align:center;font-weight:700;">${items.reduce((s: number, i: any) => s + (i.quantity || 1), 0)}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px 16px;margin-bottom:20px;">
+        <p style="font-weight:700;font-size:13px;color:#92400e;margin-bottom:4px;">DULEZITE UPOZORNENI</p>
+        <p style="font-size:12px;color:#78350f;">Sberatelsky predmet - NENI urceno ke konzumaci, koureni ani jinemu pouziti. Skladujte na suchem a tmavem miste mimo dosah deti.</p>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#9ca3af;padding-top:16px;border-top:1px solid #e5e7eb;">
+        <span>tajnabotanika.online</span>
+        <span>Dekujeme za Vasi objednavku!</span>
+      </div>
+
+      <div class="no-print" style="margin-top:24px;text-align:center;">
+        <button onclick="window.print()" style="padding:12px 32px;background:#059669;color:white;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;">Tisknout</button>
+      </div>
+    </body></html>`;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+    }
+  };
+
   const handleExpandOrder = (orderId: string) => {
     if (expandedOrder === orderId) {
       setExpandedOrder(null);
@@ -510,6 +610,13 @@ export default function AdminDashboard() {
                                     <option value="refunded">Vráceno</option>
                                   </select>
                                 </div>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); printDeliveryNote(order); }}
+                                  className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors flex items-center gap-2"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                                  Dodací list
+                                </button>
                                 <div className="ml-auto flex items-center gap-2 text-xs text-gray-500">
                                   {o.paid_at && <span>Zaplaceno: {new Date(o.paid_at).toLocaleDateString('cs-CZ')}</span>}
                                   {o.shipped_at && <span>Odesláno: {new Date(o.shipped_at).toLocaleDateString('cs-CZ')}</span>}
