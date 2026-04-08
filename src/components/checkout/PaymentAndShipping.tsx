@@ -662,11 +662,11 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               <div className="flex-1">
                 <p className="text-sm text-gray-300 group-hover:text-white transition-colors">
                   Souhlasím s{' '}
-                  <a href="#" className="text-emerald-400 hover:text-emerald-300 underline">
+                  <a href="/podminky" target="_blank" className="text-emerald-400 hover:text-emerald-300 underline">
                     obchodními podmínkami
                   </a>
                   {' '}a{' '}
-                  <a href="#" className="text-emerald-400 hover:text-emerald-300 underline">
+                  <a href="/soukromi" target="_blank" className="text-emerald-400 hover:text-emerald-300 underline">
                     zásadami ochrany osobních údajů
                   </a>
                 </p>
