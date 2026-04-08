@@ -15,11 +15,18 @@ export default function HeroSection() {
       {/* Ambient orange particles — limited edition vibe, GPU-only */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         {[
-          { size: 250, x: '5%', y: '15%', delay: '0s', dur: '25s', opacity: 0.35 },
-          { size: 180, x: '75%', y: '10%', delay: '4s', dur: '30s', opacity: 0.25 },
-          { size: 300, x: '65%', y: '65%', delay: '8s', dur: '22s', opacity: 0.3 },
-          { size: 140, x: '15%', y: '70%', delay: '12s', dur: '28s', opacity: 0.2 },
-          { size: 220, x: '45%', y: '40%', delay: '6s', dur: '35s', opacity: 0.15 },
+          { size: 80, x: '8%', y: '12%', delay: '0s', dur: '20s', opacity: 0.3 },
+          { size: 60, x: '25%', y: '30%', delay: '2s', dur: '26s', opacity: 0.25 },
+          { size: 100, x: '78%', y: '8%', delay: '4s', dur: '24s', opacity: 0.28 },
+          { size: 70, x: '65%', y: '35%', delay: '6s', dur: '30s', opacity: 0.2 },
+          { size: 90, x: '90%', y: '55%', delay: '1s', dur: '22s', opacity: 0.25 },
+          { size: 55, x: '40%', y: '60%', delay: '8s', dur: '28s', opacity: 0.22 },
+          { size: 75, x: '15%', y: '72%', delay: '10s', dur: '25s', opacity: 0.3 },
+          { size: 65, x: '55%', y: '80%', delay: '3s', dur: '32s', opacity: 0.2 },
+          { size: 85, x: '70%', y: '65%', delay: '12s', dur: '27s', opacity: 0.25 },
+          { size: 50, x: '35%', y: '15%', delay: '5s', dur: '23s', opacity: 0.18 },
+          { size: 95, x: '50%', y: '45%', delay: '7s', dur: '29s', opacity: 0.22 },
+          { size: 60, x: '85%', y: '25%', delay: '9s', dur: '21s', opacity: 0.28 },
         ].map((p, i) => (
           <div
             key={`ambient-${i}`}
@@ -30,7 +37,7 @@ export default function HeroSection() {
               left: p.x,
               top: p.y,
               background: `radial-gradient(circle, rgba(251,146,60,${p.opacity}) 0%, rgba(249,115,22,${p.opacity * 0.5}) 40%, transparent 70%)`,
-              filter: 'blur(60px)',
+              filter: 'blur(30px)',
               animationDelay: p.delay,
               animationDuration: p.dur,
               willChange: 'transform',
