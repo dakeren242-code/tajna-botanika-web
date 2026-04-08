@@ -391,9 +391,6 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                       {isZasilkovna && <span className="ml-auto text-xs text-gray-400">+ {COD_FEE} Kč</span>}
                     </div>
                     <p className="text-sm text-gray-400">Platba při převzetí zásilky</p>
-                    {!isZasilkovna && paymentMethod === 'cash_on_delivery' && (
-                      <p className="text-xs text-amber-300 mt-1">Dobírka je dostupná pouze se Zásilkovnou</p>
-                    )}
                   </div>
                 </div>
               </div>
@@ -402,7 +399,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 name="payment"
                 value="cash_on_delivery"
                 checked={paymentMethod === 'cash_on_delivery'}
-                onChange={() => setPaymentMethod('cash_on_delivery')}
+                onChange={() => { setPaymentMethod('cash_on_delivery'); if (isPersonal) setShippingMethod('zasilkovna'); }}
                 className="sr-only"
               />
             </label>
@@ -416,9 +413,11 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
           </h2>
 
           <div className="space-y-3">
-            {/* Personal Pickup - merged option */}
+            {/* Personal Pickup - disabled when COD selected */}
             <label
-              className={`group relative block cursor-pointer transition-all duration-300 ${
+              className={`group relative block transition-all duration-300 ${
+                paymentMethod === 'cash_on_delivery' ? 'opacity-40 pointer-events-none' : 'cursor-pointer'
+              } ${
                 isPersonal
                   ? 'ring-2 ring-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
                   : ''
@@ -453,14 +452,18 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                     <p className="text-sm text-gray-400 mb-2">
                       Oblast Praha - Beroun, domluvíme místo a čas
                     </p>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> Dostupnost 24/7
-                      </span>
-                      <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full">
-                        Zdarma
-                      </span>
-                    </div>
+                    {paymentMethod === 'cash_on_delivery' ? (
+                      <p className="text-xs text-amber-300">Osobní převzetí není možné s dobírkou - vyberte bankovní převod</p>
+                    ) : (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> Dostupnost 24/7
+                        </span>
+                        <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full">
+                          Zdarma
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
