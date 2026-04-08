@@ -19,7 +19,17 @@ export default function ScrollReveal({
     const element = elementRef.current;
     if (!element) return;
 
-    // Start hidden only if we can observe
+    const rect = element.getBoundingClientRect();
+    const isInView = rect.top < window.innerHeight + 100 && rect.bottom > -100;
+
+    // If already in viewport (e.g. navigating back to homepage), show immediately
+    if (isInView) {
+      element.style.opacity = '1';
+      element.style.transform = 'none';
+      return;
+    }
+
+    // Below viewport - set up scroll animation
     element.style.opacity = '0';
     element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
 
@@ -48,8 +58,8 @@ export default function ScrollReveal({
 
     observer.observe(element);
 
-    // Safety net: ALWAYS reveal within 1.5s no matter what
-    const safety = setTimeout(reveal, 1500 + delay);
+    // Safety net: ALWAYS reveal within 1s
+    const safety = setTimeout(reveal, 1000 + delay);
 
     return () => {
       observer.unobserve(element);
