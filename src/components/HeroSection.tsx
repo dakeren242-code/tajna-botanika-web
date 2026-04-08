@@ -110,13 +110,14 @@ export default function HeroSection() {
       </div>
 
       {/* Scroll arrow — absolute bottom center of hero */}
-      <button
+      <div
         onClick={scrollToProducts}
-        className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-0.5 text-white/20 hover:text-emerald-400 transition-all duration-300 cursor-pointer group"
+        className="absolute bottom-3 left-1/2 z-10 flex flex-col items-center gap-0.5 text-white/20 hover:text-emerald-400 cursor-pointer group"
+        style={{ transform: 'translateX(-50%)', transition: 'color 0.3s' }}
       >
         <span className="text-[10px] tracking-[0.2em] uppercase font-medium">Objevte naši kolekci</span>
         <ArrowDown className="w-5 h-5 animate-bounce" style={{ animationDuration: '2s' }} />
-      </button>
+      </div>
 
       <style>{`
         @keyframes levitate {
