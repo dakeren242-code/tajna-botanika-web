@@ -90,16 +90,23 @@ export function Success() {
   const totalAmount = amount ? parseFloat(amount) : 0;
   const productsCost = totalAmount - shippingCost - codFee;
 
+  // Generate short numeric variable symbol (max 10 digits for Czech banks)
+  const rawDigits = (orderNumber || '').replace(/\D/g, '');
+  const variableSymbol = rawDigits.length > 10 ? rawDigits.slice(-10) : rawDigits || String(Date.now()).slice(-10);
+
   const bankDetails = {
     account: '2001645045/2010',
-    amount: `${totalAmount.toFixed(2)} Kč`,
-    variableSymbol: orderNumber || '',
+    amount: `${totalAmount.toFixed(0)} Kč`,
+    variableSymbol,
   };
 
   // Generate QR payment string (SPAYD format for Czech banks)
+  // Spec: https://qr-platba.cz/pro-vyvojare/specifikace-formatu/
   const iban = 'CZ6520100000002001645045';
-  const spayd = `SPD*1.0*ACC:${iban}*AM:${totalAmount.toFixed(2)}*CC:CZK*X-VS:${(orderNumber || '').replace(/\D/g, '')}*MSG:Objednávka ${orderNumber || ''}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(spayd)}`;
+  const amountStr = totalAmount.toFixed(2);
+  // SPAYD must not contain diacritics in MSG, keep it simple
+  const spayd = `SPD*1.0*ACC:${iban}*AM:${amountStr}*CC:CZK*X-VS:${variableSymbol}*MSG:Objednavka ${variableSymbol}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(spayd)}`;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);

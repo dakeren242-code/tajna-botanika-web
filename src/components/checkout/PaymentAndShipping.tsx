@@ -354,57 +354,58 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               />
             </label>
 
-            {/* COD - Only visible when Zasilkovna is selected */}
-            {isZasilkovna && (
-              <label
-                className={`group relative block cursor-pointer transition-all duration-300 ${
+            {/* COD - Dobírka */}
+            <label
+              className={`group relative block cursor-pointer transition-all duration-300 ${
+                paymentMethod === 'cash_on_delivery'
+                  ? 'ring-2 ring-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+                  : ''
+              }`}
+              style={{ borderRadius: '12px' }}
+            >
+              <div
+                className={`p-4 rounded-xl border transition-all duration-300 ${
                   paymentMethod === 'cash_on_delivery'
-                    ? 'ring-2 ring-gray-500/40'
-                    : ''
+                    ? 'bg-emerald-500/10 border-emerald-500/40'
+                    : 'bg-white/5 border-emerald-500/20 hover:border-emerald-500/30'
                 }`}
-                style={{ borderRadius: '12px' }}
               >
-                <div
-                  className={`p-4 rounded-xl border transition-all duration-300 ${
-                    paymentMethod === 'cash_on_delivery'
-                      ? 'bg-white/[0.06] border-gray-500/30'
-                      : 'bg-white/[0.02] border-white/10 hover:border-white/20'
-                  }`}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 pt-1">
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                          paymentMethod === 'cash_on_delivery'
-                            ? 'border-gray-400 bg-gray-400'
-                            : 'border-gray-600 bg-transparent'
-                        }`}
-                      >
-                        {paymentMethod === 'cash_on_delivery' && (
-                          <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Truck className="w-4 h-4 text-gray-500" />
-                        <h3 className="text-gray-300 font-semibold text-sm">Dobírka</h3>
-                        <span className="ml-auto text-xs text-gray-500">+ {COD_FEE} Kč</span>
-                      </div>
-                      <p className="text-xs text-gray-500">Platba při převzetí zásilky na Zásilkovně</p>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 pt-1">
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                        paymentMethod === 'cash_on_delivery'
+                          ? 'border-emerald-500 bg-emerald-500'
+                          : 'border-gray-600 bg-transparent'
+                      }`}
+                    >
+                      {paymentMethod === 'cash_on_delivery' && (
+                        <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
+                      )}
                     </div>
                   </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Truck className="w-5 h-5 text-emerald-400" />
+                      <h3 className="text-white font-bold">Dobírka</h3>
+                      {isZasilkovna && <span className="ml-auto text-xs text-gray-400">+ {COD_FEE} Kč</span>}
+                    </div>
+                    <p className="text-sm text-gray-400">Platba při převzetí zásilky</p>
+                    {!isZasilkovna && paymentMethod === 'cash_on_delivery' && (
+                      <p className="text-xs text-amber-300 mt-1">Dobírka je dostupná pouze se Zásilkovnou</p>
+                    )}
+                  </div>
                 </div>
-                <input
-                  type="radio"
-                  name="payment"
-                  value="cash_on_delivery"
-                  checked={paymentMethod === 'cash_on_delivery'}
-                  onChange={() => setPaymentMethod('cash_on_delivery')}
-                  className="sr-only"
-                />
-              </label>
-            )}
+              </div>
+              <input
+                type="radio"
+                name="payment"
+                value="cash_on_delivery"
+                checked={paymentMethod === 'cash_on_delivery'}
+                onChange={() => setPaymentMethod('cash_on_delivery')}
+                className="sr-only"
+              />
+            </label>
           </div>
         </div>
 
