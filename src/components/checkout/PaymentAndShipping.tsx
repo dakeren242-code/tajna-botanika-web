@@ -413,48 +413,62 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
           </h2>
 
           <div className="space-y-3">
-            {/* Personal Pickup - disabled when COD selected */}
-            <label
-              className={`group relative block transition-all duration-300 ${
-                paymentMethod === 'cash_on_delivery' ? 'opacity-40 pointer-events-none' : 'cursor-pointer'
-              } ${
-                isPersonal
-                  ? 'ring-2 ring-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
-                  : ''
-              }`}
-              style={{ borderRadius: '12px' }}
-            >
-              <div
-                className={`p-4 rounded-xl border transition-all duration-300 ${
-                  isPersonal
-                    ? 'bg-emerald-500/10 border-emerald-500/40'
-                    : 'bg-white/5 border-emerald-500/20 hover:border-emerald-500/30'
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 pt-1">
-                    <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                        isPersonal
-                          ? 'border-emerald-500 bg-emerald-500'
-                          : 'border-gray-600 bg-transparent'
-                      }`}
-                    >
-                      {isPersonal && <div className="w-2.5 h-2.5 rounded-full bg-white"></div>}
+            {/* Personal Pickup - HARD DISABLED when COD selected */}
+            {paymentMethod === 'cash_on_delivery' ? (
+              <div className="opacity-40 rounded-xl" style={{ borderRadius: '12px' }}>
+                <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 pt-1">
+                      <div className="w-5 h-5 rounded-full border-2 border-gray-700 bg-transparent" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <MapPin className="w-5 h-5 text-gray-500" />
+                        <h3 className="text-gray-400 font-bold">Osobní převzetí</h3>
+                        <span className="ml-auto text-sm text-gray-500">Zdarma</span>
+                      </div>
+                      <p className="text-xs text-amber-300/80">Není možné s dobírkou - vyberte bankovní převod</p>
                     </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <MapPin className="w-5 h-5 text-emerald-400" />
-                      <h3 className="text-white font-bold">Osobní převzetí</h3>
-                      <span className="ml-auto text-sm font-semibold text-emerald-400">Zdarma</span>
+                </div>
+              </div>
+            ) : (
+              <label
+                className={`group relative block cursor-pointer transition-all duration-300 ${
+                  isPersonal
+                    ? 'ring-2 ring-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
+                    : ''
+                }`}
+                style={{ borderRadius: '12px' }}
+              >
+                <div
+                  className={`p-4 rounded-xl border transition-all duration-300 ${
+                    isPersonal
+                      ? 'bg-emerald-500/10 border-emerald-500/40'
+                      : 'bg-white/5 border-emerald-500/20 hover:border-emerald-500/30'
+                  }`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 pt-1">
+                      <div
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                          isPersonal
+                            ? 'border-emerald-500 bg-emerald-500'
+                            : 'border-gray-600 bg-transparent'
+                        }`}
+                      >
+                        {isPersonal && <div className="w-2.5 h-2.5 rounded-full bg-white"></div>}
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-400 mb-2">
-                      Oblast Praha - Beroun, domluvíme místo a čas
-                    </p>
-                    {paymentMethod === 'cash_on_delivery' ? (
-                      <p className="text-xs text-amber-300">Osobní převzetí není možné s dobírkou - vyberte bankovní převod</p>
-                    ) : (
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <MapPin className="w-5 h-5 text-emerald-400" />
+                        <h3 className="text-white font-bold">Osobní převzetí</h3>
+                        <span className="ml-auto text-sm font-semibold text-emerald-400">Zdarma</span>
+                      </div>
+                      <p className="text-sm text-gray-400 mb-2">
+                        Oblast Praha - Beroun, domluvíme místo a čas
+                      </p>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full flex items-center gap-1">
                           <Clock className="w-3 h-3" /> Dostupnost 24/7
@@ -463,18 +477,19 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                           Zdarma
                         </span>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <input
-                type="radio"
-                name="shipping"
-                value="personal"
-                checked={isPersonal}
-                onChange={() => { setShippingMethod('personal'); if (paymentMethod === 'cash_on_delivery') setPaymentMethod('bank_transfer'); }}
-                className="sr-only"
-              />
+                <input
+                  type="radio"
+                  name="shipping"
+                  value="personal"
+                  checked={isPersonal}
+                  onChange={() => setShippingMethod('personal')}
+                  className="sr-only"
+                />
+              </label>
+            )}
             </label>
 
             {/* Zasilkovna */}
