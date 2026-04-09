@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Phone, Save, LogOut, Package, AlertCircle, CheckCircle, Gift, Copy, ArrowLeft, Award, Star, Clock, ArrowRight } from 'lucide-react';
+import { User, Mail, Phone, Save, LogOut, Package, AlertCircle, CheckCircle, Gift, Copy, ArrowLeft, Award, Star, Clock } from 'lucide-react';
 import { useLoyalty, TIER_INFO } from '../contexts/LoyaltyContext';
 import LoyaltyBadge from '../components/LoyaltyBadge';
-import { lazy, Suspense, useState as useStateLazy } from 'react';
+import { lazy, Suspense } from 'react';
 const SpinWheel = lazy(() => import('../components/SpinWheel'));
 import { supabase } from '../lib/supabase';
 
@@ -224,7 +224,7 @@ export default function Profile() {
 
 /* ── Loyalty Section (inside Profile) ── */
 function LoyaltySection() {
-  const { points, rewards, activeRedemptions, transactions, redeemReward, loading } = useLoyalty();
+  const { points, rewards, activeRedemptions, transactions, redeemReward } = useLoyalty();
   const [showSpin, setShowSpin] = useState(false);
   const [redeemMsg, setRedeemMsg] = useState('');
 

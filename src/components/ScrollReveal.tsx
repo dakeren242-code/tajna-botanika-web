@@ -19,130 +19,53 @@ export default function ScrollReveal({
     const element = elementRef.current;
     if (!element) return;
 
-    const isMobile = window.innerWidth < 768;
+    const rect = element.getBoundingClientRect();
+    const isInView = rect.top < window.innerHeight + 100 && rect.bottom > -100;
+
+    // If already in viewport (e.g. navigating back to homepage), show immediately
+    if (isInView) {
+      element.style.opacity = '1';
+      element.style.transform = 'none';
+      return;
+    }
+
+    // Below viewport - set up scroll animation
+    element.style.opacity = '0';
+    element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+
+    if (direction === 'up') element.style.transform = 'translateY(30px)';
+    else if (direction === 'down') element.style.transform = 'translateY(-30px)';
+    else if (direction === 'left') element.style.transform = 'translateX(30px)';
+    else if (direction === 'right') element.style.transform = 'translateX(-30px)';
+    else if (direction === 'scale') element.style.transform = 'scale(0.95)';
+
+    const reveal = () => {
+      element.style.opacity = '1';
+      element.style.transform = 'none';
+    };
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setTimeout(() => {
-              element.classList.add('revealed');
-            }, delay);
+            setTimeout(reveal, delay);
             observer.unobserve(element);
           }
         });
       },
-      {
-        threshold: isMobile ? 0 : 0.1,
-        rootMargin: isMobile ? '100px 0px 100px 0px' : '0px 0px -100px 0px',
-      }
+      { threshold: 0, rootMargin: '200px' }
     );
 
     observer.observe(element);
 
-    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
-    if (isMobile) {
-      fallbackTimer = setTimeout(() => {
-        if (!element.classList.contains('revealed')) {
-          element.classList.add('revealed');
-        }
-      }, 500 + delay);
-    }
+    // Safety net: ALWAYS reveal within 1s
+    const safety = setTimeout(reveal, 1000 + delay);
 
     return () => {
-      if (element) {
-        observer.unobserve(element);
-      }
-      if (fallbackTimer) {
-        clearTimeout(fallbackTimer);
-      }
+      observer.unobserve(element);
+      clearTimeout(safety);
     };
-  }, [delay]);
+  }, [delay, direction]);
 
-  const getAnimationClass = () => {
-    switch (direction) {
-      case 'up':
-        return 'scroll-reveal-up';
-      case 'down':
-        return 'scroll-reveal-down';
-      case 'left':
-        return 'scroll-reveal-left';
-      case 'right':
-        return 'scroll-reveal-right';
-      case 'scale':
-        return 'scroll-reveal-scale';
-      case 'fade':
-        return 'scroll-reveal-fade';
-      default:
-        return 'scroll-reveal-up';
-    }
-  };
-
-  return (
-    <>
-      <div
-        ref={elementRef}
-        className={`${getAnimationClass()} ${className}`}
-      >
-        {children}
-      </div>
-
-      <style>{`
-        .scroll-reveal-up,
-        .scroll-reveal-down,
-        .scroll-reveal-left,
-        .scroll-reveal-right,
-        .scroll-reveal-scale,
-        .scroll-reveal-fade {
-          opacity: 0;
-          transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-                      transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-          transform: translateZ(0);
-          backface-visibility: hidden;
-        }
-
-        .scroll-reveal-up {
-          transform: translateY(50px) translateZ(0);
-        }
-
-        .scroll-reveal-down {
-          transform: translateY(-50px) translateZ(0);
-        }
-
-        .scroll-reveal-left {
-          transform: translateX(50px) translateZ(0);
-        }
-
-        .scroll-reveal-right {
-          transform: translateX(-50px) translateZ(0);
-        }
-
-        .scroll-reveal-scale {
-          transform: scale(0.8) translateZ(0);
-        }
-
-        .scroll-reveal-fade {
-          transform: translateZ(0);
-        }
-
-        .scroll-reveal-up.revealed,
-        .scroll-reveal-down.revealed,
-        .scroll-reveal-left.revealed,
-        .scroll-reveal-right.revealed {
-          opacity: 1;
-          transform: translate(0, 0) translateZ(0);
-        }
-
-        .scroll-reveal-scale.revealed {
-          opacity: 1;
-          transform: scale(1) translateZ(0);
-        }
-
-        .scroll-reveal-fade.revealed {
-          opacity: 1;
-          transform: translateZ(0);
-        }
-      `}</style>
-    </>
-  );
+  return <div ref={elementRef} className={className}>{children}</div>;
 }

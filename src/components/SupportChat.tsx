@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageCircle, X, Send, Sparkles, ChevronRight } from 'lucide-react';
+import { MessageCircle, X, Send, Sparkles, ChevronRight, Paperclip, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -8,6 +8,7 @@ interface ChatMessage {
   text: string;
   sender: 'user' | 'bot' | 'admin';
   timestamp: Date;
+  imageUrl?: string;
 }
 
 const QUICK_REPLIES = [
@@ -16,27 +17,6 @@ const QUICK_REPLIES = [
   { label: '🎁 Slevy', keyword: 'sleva' },
   { label: '🌿 Produkty', keyword: 'thc' },
 ];
-
-const AUTO_REPLIES: Record<string, string> = {
-  'doručení': '📦 Doručení zvládneme do 1 2 pracovních dnů přes Zásilkovnu! Vyberete si výdejní místo přímo při objednávce. Nad 1 000 Kč máte dopravu ZDARMA 🎉',
-  'doprava': '🚚 Posíláme přes Zásilkovnu a doručíme do 1 2 pracovních dnů. Nad 1 000 Kč je doprava zdarma! Výdejní místo si vyberete pohodlně při objednávce 📍',
-  'platba': '💳 Platit můžete kartou, převodem i dobírkou. Všechny platby jsou plně zabezpečené šifrováním SSL 🔒',
-  'vrácení': '✅ Máme 30denní záruku spokojenosti! Pokud vám cokoliv nevyhovuje, napište nám a najdeme řešení. Vaše spokojenost je pro nás priorita 💚',
-  'sleva': '🎁 Super tip: při registraci dostanete automaticky 15% slevu na první objednávku! Slevový kód najdete ve svém profilu hned po přihlášení ✨',
-  'thc': '🌿 THC-X je plně legální kanabinoid v České republice. Všechny naše produkty jsou laboratorně testované a splňují veškeré zákonné požadavky 🔬',
-  'kontakt': '📧 Můžete nám napsat na info@tajnabotanika.online nebo přímo sem do chatu. Obvykle odpovíme do 5 minut! ⚡',
-  'legální': '✅ Ano, THC-X je plně legální v ČR. Jedná se o synteticky odvozený kanabinoid, který nespadá pod kontrolované látky. Naše produkty mají laboratorní certifikáty 📋',
-  'objednávka': '🛒 Stačí vybrat produkt, přidat do košíku a dokončit objednávku. Celý proces zabere asi 2 minuty! Pokud potřebujete pomoct, jsme tu pro vás 😊',
-  'kvalita': '🔬 Každý náš produkt prochází laboratorním testováním. Garantujeme prémiovou kvalitu a čistotu. Certifikáty najdete u každého produktu na stránce ✅',
-};
-
-function getAutoReply(message: string): string | null {
-  const lower = message.toLowerCase();
-  for (const [keyword, reply] of Object.entries(AUTO_REPLIES)) {
-    if (lower.includes(keyword)) return reply;
-  }
-  return null;
-}
 
 export default function SupportChat() {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,7 +27,9 @@ export default function SupportChat() {
   const [showQuickReplies, setShowQuickReplies] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
+  const [uploading, setUploading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
 
   // Load conversation from localStorage
@@ -87,6 +69,44 @@ export default function SupportChat() {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isTyping]);
+
+  // Track user presence (invisible to user, visible to admin)
+  useEffect(() => {
+    if (!conversationId) return;
+    const updatePresence = () => {
+      supabase.from('chat_presence').upsert({
+        conversation_id: conversationId,
+        user_email: user?.email || null,
+        user_id: user?.id || null,
+        is_online: true,
+        last_seen_at: new Date().toISOString(),
+        last_read_at: isOpen ? new Date().toISOString() : undefined,
+      }, { onConflict: 'conversation_id' }).then(() => {});
+    };
+    updatePresence();
+    const interval = setInterval(updatePresence, 30000);
+
+    // Mark offline on unmount
+    return () => {
+      clearInterval(interval);
+      supabase.from('chat_presence').upsert({
+        conversation_id: conversationId,
+        is_online: false,
+        last_seen_at: new Date().toISOString(),
+      }, { onConflict: 'conversation_id' }).then(() => {});
+    };
+  }, [conversationId, isOpen, user]);
+
+  // Mark messages as read when chat is open
+  useEffect(() => {
+    if (!isOpen || !conversationId) return;
+    supabase.from('support_messages')
+      .update({ read_by_user: true, read_at: new Date().toISOString() })
+      .eq('conversation_id', conversationId)
+      .eq('sender', 'admin')
+      .eq('read_by_user', false)
+      .then(() => {});
+  }, [isOpen, conversationId, messages]);
 
   // Poll for admin replies
   useEffect(() => {
@@ -163,28 +183,41 @@ export default function SupportChat() {
       });
     } catch {}
 
-    // Show typing indicator
+    // Show typing indicator while AI processes
     setIsTyping(true);
 
-    const autoReply = getAutoReply(text);
-    const delay = autoReply ? 600 + Math.random() * 400 : 800 + Math.random() * 600;
+    try {
+      const result = await supabase.functions.invoke('support-ai-reply', {
+        body: {
+          conversation_id: convId,
+          message: text.trim(),
+          user_email: user?.email || null,
+          user_id: user?.id || null,
+        },
+      });
 
-    setTimeout(() => {
       setIsTyping(false);
-      const botMsg: ChatMessage = {
-        id: `bot_${Date.now()}`,
-        text: autoReply || 'Děkujeme za zprávu! 😊 Náš tým se na to hned podívá. Obvykle odpovíme do 5 minut ⚡\n\nMůžete zatím pokračovat v prohlížení, jakmile odpovíme, dáme vám vědět!',
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, botMsg]);
 
-      supabase.from('support_messages').insert({
-        conversation_id: convId,
-        sender: 'bot',
-        message: botMsg.text,
-      }).then(() => {});
-    }, delay);
+      const reply = result.data?.reply;
+      if (reply) {
+        setMessages(prev => [...prev, {
+          id: `bot_${Date.now()}`,
+          text: reply,
+          sender: 'bot' as const,
+          timestamp: new Date(),
+        }]);
+      } else {
+        throw new Error('No reply from AI');
+      }
+    } catch {
+      setIsTyping(false);
+      setMessages(prev => [...prev, {
+        id: `bot_${Date.now()}`,
+        text: 'Děkujeme za zprávu! 😊 Brzy se vám ozveme. Pro rychlejší pomoc nás kontaktujte na tajnabotanika@seznam.cz ⚡',
+        sender: 'bot' as const,
+        timestamp: new Date(),
+      }]);
+    }
   }, [conversationId, user]);
 
   const sendMessage = useCallback(async () => {
@@ -197,6 +230,92 @@ export default function SupportChat() {
   const handleQuickReply = useCallback((keyword: string) => {
     processMessage(keyword);
   }, [processMessage]);
+
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Max 10MB
+    if (file.size > 10 * 1024 * 1024) {
+      processMessage('Soubor je příliš velký (max 10 MB)');
+      return;
+    }
+
+    setUploading(true);
+    setShowQuickReplies(false);
+
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const fileName = `chat/${Date.now()}_${Math.random().toString(36).substr(2, 6)}.${ext}`;
+
+      const { data, error } = await supabase.storage
+        .from('support-attachments')
+        .upload(fileName, file, { contentType: file.type });
+
+      if (error) {
+        // If bucket doesn't exist, try product-images bucket as fallback
+        const { data: fallbackData, error: fallbackError } = await supabase.storage
+          .from('product-images')
+          .upload(`chat/${fileName}`, file, { contentType: file.type });
+
+        if (fallbackError) throw fallbackError;
+
+        const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(`chat/${fileName}`);
+        await sendImageMessage(urlData.publicUrl, file.name);
+      } else {
+        const { data: urlData } = supabase.storage.from('support-attachments').getPublicUrl(fileName);
+        await sendImageMessage(urlData.publicUrl, file.name);
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      // Show image as local preview even if upload fails
+      const localUrl = URL.createObjectURL(file);
+      await sendImageMessage(localUrl, file.name);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }, []);
+
+  const sendImageMessage = useCallback(async (imageUrl: string, fileName: string) => {
+    const userMsg: ChatMessage = {
+      id: `user_img_${Date.now()}`,
+      text: `📎 ${fileName}`,
+      sender: 'user',
+      timestamp: new Date(),
+      imageUrl,
+    };
+    setMessages(prev => [...prev, userMsg]);
+
+    let convId = conversationId;
+    if (!convId) {
+      convId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setConversationId(convId);
+      localStorage.setItem('tb_chat_conversation_id', convId);
+    }
+
+    try {
+      await supabase.from('support_messages').insert({
+        conversation_id: convId,
+        sender: 'user',
+        message: `[Obrázek] ${imageUrl}`,
+        user_email: user?.email || null,
+        user_id: user?.id || null,
+      });
+    } catch {}
+
+    // Auto-reply
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      setMessages(prev => [...prev, {
+        id: `bot_${Date.now()}`,
+        text: 'Děkujeme za obrázek! 📸 Náš tým se na něj podívá. Jakmile platbu ověříme, dáme vám ihned vědět 💚',
+        sender: 'bot',
+        timestamp: new Date(),
+      }]);
+    }, 800);
+  }, [conversationId, user]);
 
   return (
     <>
@@ -292,7 +411,12 @@ export default function SupportChat() {
                       Zákaznická podpora
                     </span>
                   )}
-                  {msg.text}
+                  {msg.imageUrl && (
+                    <a href={msg.imageUrl} target="_blank" rel="noopener noreferrer" className="block mb-1.5">
+                      <img src={msg.imageUrl} alt="Příloha" className="max-w-full max-h-48 rounded-lg border border-white/10" />
+                    </a>
+                  )}
+                  {!msg.imageUrl && msg.text}
                 </div>
               </div>
             ))}
@@ -337,22 +461,47 @@ export default function SupportChat() {
 
           {/* Input area */}
           <div className="bg-zinc-900/80 backdrop-blur-sm px-4 py-3 border-t border-white/5">
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,.pdf,.jpg,.jpeg,.png,.webp"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+
+            {uploading && (
+              <div className="flex items-center gap-2 px-3 py-2 mb-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
+                <span className="text-xs text-emerald-300">Nahrávám obrázek...</span>
+              </div>
+            )}
+
             <form
               onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
               className="flex gap-2 items-center"
             >
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 text-gray-400 flex items-center justify-center hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-400 transition-all duration-200 disabled:opacity-30 flex-shrink-0"
+                title="Přiložit obrázek nebo screenshot"
+              >
+                <Paperclip className="w-4 h-4" />
+              </button>
               <input
                 ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Napište zprávu... 💬"
+                placeholder="Napište zprávu..."
                 className="flex-1 bg-white/[0.06] border border-white/10 rounded-2xl px-4 py-2.5 text-[14px] text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.08] focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200"
               />
               <button
                 type="submit"
-                disabled={!input.trim()}
-                className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center hover:shadow-lg hover:shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:hover:scale-100 disabled:hover:shadow-none"
+                disabled={!input.trim() && !uploading}
+                className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center hover:shadow-lg hover:shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-30 disabled:hover:scale-100 disabled:hover:shadow-none flex-shrink-0"
               >
                 <Send className="w-4 h-4" />
               </button>

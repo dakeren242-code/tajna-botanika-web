@@ -79,7 +79,7 @@ export default function Checkout() {
       const discountAmount = discountPercent ? Math.round(totalPrice * discountPercent / 100) : 0;
       const discountedPrice = totalPrice - discountAmount;
       const isFreeShipping = discountedPrice >= FREE_SHIPPING_THRESHOLD;
-      const isPersonalPickup = shippingMethod === 'personal_pickup' || shippingMethod === 'personal_invoice';
+      const isPersonalPickup = shippingMethod === 'personal' || shippingMethod === 'personal_pickup' || shippingMethod === 'personal_invoice';
       const shippingCost = isPersonalPickup ? 0 : (isFreeShipping ? 0 : SHIPPING_COST);
       const codFee = paymentMethod === 'cash_on_delivery' && !isPersonalPickup ? COD_FEE : 0;
       const finalTotal = discountedPrice + shippingCost + codFee;
@@ -191,39 +191,39 @@ export default function Checkout() {
         user_zip: customerData.zip,
         user_country: 'cz',
         user_id: user?.id,
+        // fbclid for Meta EMQ — captured from landing URL param
+        fbc: sessionStorage.getItem('tb_fbc') || undefined,
+        fbclid: sessionStorage.getItem('tb_fbclid') || undefined,
       });
 
-      clearCart();
+      // Send admin notification (fire-and-forget, don't block checkout)
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      fetch(`${supabaseUrl}/functions/v1/order-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({
+          orderId: order.id,
+          orderNumber: order.order_number,
+          customerName: `${customerData.firstName} ${customerData.lastName}`,
+          customerEmail: customerData.email,
+          customerPhone: customerData.phone,
+          totalAmount: finalTotal,
+          paymentMethod,
+          shippingMethod,
+          items: items.map(item => ({
+            name: item.product.name,
+            quantity: item.quantity,
+            gramAmount: item.gramAmount,
+            price: getPrice(item.gramAmount) * item.quantity,
+          })),
+        }),
+      }).catch(() => {}); // Silent fail - notification is not critical
 
-      // Card payment → redirect to Comgate payment gateway
-      if (paymentMethod === 'card') {
-        try {
-          const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-          const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-          const response = await fetch(`${supabaseUrl}/functions/v1/comgate-create`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${supabaseKey}`,
-            },
-            body: JSON.stringify({
-              orderId: order.id,
-              amount: finalTotal,
-              email: customerData.email,
-              label: `Objednávka ${order.order_number}`,
-            }),
-          });
-          const result = await response.json();
-          if (result.redirect) {
-            window.location.href = result.redirect;
-            return;
-          }
-          // If Comgate fails, fall back to success page with bank transfer info
-          console.error('Comgate redirect failed:', result);
-        } catch (e) {
-          console.error('Comgate error:', e);
-        }
-      }
+      clearCart();
 
       navigate(`/success?order=${order.order_number}&payment=${paymentMethod}&amount=${finalTotal}&shipping=${shippingCost}&cod=${codFee}&phone=${encodeURIComponent(customerData.phone)}&shippingMethod=${shippingMethod}`);
     } catch (err: any) {

@@ -1,4 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
+import { initPostHog, phPage } from './lib/posthog';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -61,8 +62,11 @@ const ReferralSection = lazy(() => import('./components/ReferralSection'));
 const FloatingRegisterCTA = lazy(() => import('./components/FloatingRegisterCTA'));
 
 const LoadingSpinner = () => (
-  <div className="flex items-center justify-center min-h-screen bg-black">
-    <Loader2 className="w-12 h-12 text-emerald-400 animate-spin" />
+  <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-black via-emerald-950 to-black">
+    <div className="text-center">
+      <Loader2 className="w-10 h-10 text-emerald-400 animate-spin mx-auto mb-3" />
+      <p className="text-emerald-400/60 text-sm">Načítání...</p>
+    </div>
   </div>
 );
 
@@ -205,13 +209,42 @@ function ScrollToTop() {
 function PageViewTracker() {
   const location = useLocation();
   useEffect(() => {
+    // Capture fbclid from URL and store for Meta EMQ improvement
+    const params = new URLSearchParams(window.location.search);
+    const fbclid = params.get('fbclid');
+    if (fbclid) {
+      // Store fbclid with timestamp — used later in CAPI Purchase events
+      const fbc = `fb.1.${Date.now()}.${fbclid}`;
+      sessionStorage.setItem('tb_fbclid', fbclid);
+      sessionStorage.setItem('tb_fbc', fbc);
+      // Also store in cookie for _fbc (Meta format)
+      const expires = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `_fbc=${fbc}; expires=${expires}; path=/; SameSite=Lax`;
+    }
+
     trackPageView(location.pathname);
+    // Track in Supabase for admin dashboard stats (fire-and-forget, no await)
+    let sid = sessionStorage.getItem('vsid');
+    if (!sid) {
+      sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      sessionStorage.setItem('vsid', sid);
+    }
+    supabase.auth.getUser().then(({ data }) => {
+      supabase.from('page_views').insert({
+        session_id: sid,
+        path: location.pathname,
+        user_id: data?.user?.id ?? null,
+      }).then(() => {/* silent */});
+    });
+    phPage(location.pathname);
   }, [location.pathname]);
   return null;
 }
 
 function TrackingWrapper({ children }: { children: React.ReactNode }) {
   useTracking();
+  // Init PostHog once
+  useEffect(() => { initPostHog(); }, []);
   return <>{children}</>;
 }
 

@@ -1,14 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, RefreshCw, User, Bot, Clock } from 'lucide-react';
+import { MessageCircle, Send, RefreshCw, User, Bot, Clock, Eye, CheckCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+
+interface ChatPresence {
+  conversation_id: string;
+  is_online: boolean;
+  last_seen_at: string | null;
+  last_read_at: string | null;
+  user_email: string | null;
+}
 
 interface Conversation {
   conversation_id: string;
   user_email: string | null;
+  user_id: string | null;
+  customer_name: string | null;
+  order_count: number;
   last_message: string;
   last_time: string;
   unread: number;
   messages: Message[];
+  presence?: ChatPresence;
 }
 
 interface Message {
@@ -18,6 +30,7 @@ interface Message {
   message: string;
   created_at: string;
   user_email?: string | null;
+  user_id?: string | null;
 }
 
 export default function SupportAdmin() {
@@ -52,16 +65,69 @@ export default function SupportAdmin() {
         const unreadAfterAdmin = lastAdminReply
           ? userMsgs.filter(m => new Date(m.created_at) > new Date(lastAdminReply.created_at)).length
           : userMsgs.length;
+        const firstUserMsg = userMsgs[0] as any;
 
         return {
           conversation_id: convId,
-          user_email: userMsgs[0]?.user_email || null,
+          user_email: firstUserMsg?.user_email || null,
+          user_id: firstUserMsg?.user_id || null,
+          customer_name: null,
+          order_count: 0,
           last_message: lastMsg.message,
           last_time: lastMsg.created_at,
           unread: unreadAfterAdmin,
           messages: msgs,
         };
       });
+
+      // Enrich with customer name + order count for logged-in users
+      const userIds = convList.map(c => c.user_id).filter(Boolean) as string[];
+      if (userIds.length > 0) {
+        const [profilesRes, ordersRes] = await Promise.all([
+          supabase.from('user_profiles').select('id, full_name').in('id', userIds),
+          supabase.from('orders').select('user_id').in('user_id', userIds),
+        ]);
+
+        const profileMap: Record<string, string> = {};
+        if (profilesRes.data) {
+          for (const p of profilesRes.data) {
+            if (p.full_name) profileMap[p.id] = p.full_name;
+          }
+        }
+
+        const orderCountMap: Record<string, number> = {};
+        if (ordersRes.data) {
+          for (const o of ordersRes.data) {
+            if (o.user_id) orderCountMap[o.user_id] = (orderCountMap[o.user_id] || 0) + 1;
+          }
+        }
+
+        for (const conv of convList) {
+          if (conv.user_id) {
+            conv.customer_name = profileMap[conv.user_id] || null;
+            conv.order_count = orderCountMap[conv.user_id] || 0;
+          }
+        }
+      }
+
+      // Fetch presence data
+      const { data: presenceData } = await supabase
+        .from('chat_presence')
+        .select('*');
+
+      const presenceMap: Record<string, ChatPresence> = {};
+      if (presenceData) {
+        for (const p of presenceData) {
+          // Consider online if last_seen_at is within 60 seconds
+          const isRecentlyOnline = p.last_seen_at && (Date.now() - new Date(p.last_seen_at).getTime()) < 60000;
+          presenceMap[p.conversation_id] = { ...p, is_online: isRecentlyOnline ? p.is_online : false };
+        }
+      }
+
+      // Attach presence to conversations
+      for (const conv of convList) {
+        conv.presence = presenceMap[conv.conversation_id];
+      }
 
       // Sort by last message time, newest first
       convList.sort((a, b) => new Date(b.last_time).getTime() - new Date(a.last_time).getTime());
@@ -148,19 +214,48 @@ export default function SupportAdmin() {
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-semibold text-white truncate">
-                    {conv.user_email || 'Anonymní návštěvník'}
-                  </span>
-                  {conv.unread > 0 && (
-                    <span className="w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                      {conv.unread}
+                  <div className="flex items-center gap-2 min-w-0">
+                    {/* Online indicator */}
+                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                      conv.presence?.is_online ? 'bg-green-400 shadow-sm shadow-green-400/50' : 'bg-gray-600'
+                    }`} title={conv.presence?.is_online ? 'Online' : 'Offline'} />
+                    <span className="text-sm font-semibold text-white truncate">
+                      {conv.customer_name || conv.user_email || 'Anonymní návštěvník'}
                     </span>
-                  )}
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {conv.user_id && (
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                        conv.order_count > 0
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      }`}>
+                        {conv.order_count > 0 ? `Stálý (${conv.order_count}×)` : 'Nový'}
+                      </span>
+                    )}
+                    {conv.unread > 0 && (
+                      <span className="w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                        {conv.unread}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <p className="text-xs text-gray-500 truncate">{conv.last_message}</p>
-                <div className="flex items-center gap-1 mt-1">
-                  <Clock className="w-3 h-3 text-gray-600" />
-                  <span className="text-[10px] text-gray-600">{formatTime(conv.last_time)}</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-gray-600" />
+                    <span className="text-[10px] text-gray-600">{formatTime(conv.last_time)}</span>
+                  </div>
+                  {/* Read status - show if user has read admin messages */}
+                  {conv.presence?.last_read_at && (
+                    <div className="flex items-center gap-0.5" title={`Precteno: ${new Date(conv.presence.last_read_at).toLocaleString('cs-CZ')}`}>
+                      <CheckCheck className="w-3 h-3 text-blue-400" />
+                      <span className="text-[9px] text-blue-400">precteno</span>
+                    </div>
+                  )}
+                  {conv.presence?.is_online && (
+                    <span className="text-[9px] text-green-400 font-medium">online</span>
+                  )}
                 </div>
               </button>
             ))
@@ -171,6 +266,45 @@ export default function SupportAdmin() {
         <div className="flex-1 flex flex-col">
           {selectedConv ? (
             <>
+              {/* Selected conversation presence header */}
+              {(() => {
+                const selConv = conversations.find(c => c.conversation_id === selectedConv);
+                if (!selConv) return null;
+                return (
+                  <div className="px-4 py-2 border-b border-white/10 flex items-center gap-3 bg-white/[0.02]">
+                    <span className={`w-2.5 h-2.5 rounded-full ${selConv.presence?.is_online ? 'bg-green-400 shadow-sm shadow-green-400/50 animate-pulse' : 'bg-gray-600'}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-white">
+                          {selConv.customer_name || selConv.user_email || 'Anonymní návštěvník'}
+                        </span>
+                        {selConv.user_id && (
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                            selConv.order_count > 0
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                          }`}>
+                            {selConv.order_count > 0 ? `Stálý zákazník (${selConv.order_count} obj.)` : 'Nový zákazník'}
+                          </span>
+                        )}
+                      </div>
+                      {selConv.user_email && selConv.customer_name && (
+                        <span className="text-[10px] text-gray-500">{selConv.user_email}</span>
+                      )}
+                      <span className="text-xs text-gray-500">
+                        {selConv.presence?.is_online ? ' · Právě online' :
+                          selConv.presence?.last_seen_at ? ` · Naposledy: ${formatTime(selConv.presence.last_seen_at)}` : ''}
+                      </span>
+                    </div>
+                    {selConv.presence?.last_read_at && (
+                      <div className="flex items-center gap-1 text-xs text-blue-400" title={`Precteno: ${new Date(selConv.presence.last_read_at).toLocaleString('cs-CZ')}`}>
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Precetl/a zpravy</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {selectedMessages.map((msg) => (
                   <div
@@ -199,8 +333,11 @@ export default function SupportAdmin() {
                           <span className="text-[10px] text-gray-500 font-bold block mb-1">Auto-odpověď</span>
                         )}
                         {msg.message}
-                        <span className="block text-[10px] text-gray-600 mt-1">
+                        <span className="flex items-center gap-1 text-[10px] text-gray-600 mt-1">
                           {formatTime(msg.created_at)}
+                          {msg.sender === 'admin' && (msg as any).read_by_user && (
+                            <CheckCheck className="w-3 h-3 text-blue-400 ml-1" title="Precteno uzivatelem" />
+                          )}
                         </span>
                       </div>
                       {msg.sender !== 'user' && (

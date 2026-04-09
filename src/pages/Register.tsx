@@ -47,7 +47,13 @@ export default function Register() {
       return;
     }
 
-    trackEvent('CompleteRegistration', { user_email: email });
+    const nameParts = fullName.trim().split(/\s+/);
+    trackEvent('CompleteRegistration', {
+      user_email: email,
+      user_first_name: nameParts[0] || undefined,
+      user_last_name: nameParts.slice(1).join(' ') || undefined,
+      user_country: 'cz',
+    });
 
     // Auto-sign in after registration (trigger auto-confirmed the email)
     await supabase.auth.signInWithPassword({ email, password });

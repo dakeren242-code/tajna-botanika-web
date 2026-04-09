@@ -327,10 +327,10 @@ const academyRooms = [
 
 /* Science inline content */
 const scienceFacts = [
-  { icon: Brain, title: 'Endokanabinoidní systém', text: 'Vaše tělo má vlastní systém kanabinoidních receptorů (CB1 a CB2). Reguluje náladu, bolest, apetit i spánek. Objeven v roce 1992.', color: '#a855f7' },
-  { icon: Droplets, title: 'Entourage effect', text: 'Kanabinoidy a terpény působí silněji společně než každý zvlášť. Proto jsou full-spectrum extrakty účinnější než izoláty.', color: '#10b981' },
+  { icon: Brain, title: 'Endokanabinoidní systém', text: 'Lidské tělo má vlastní systém kanabinoidních receptorů (CB1 a CB2), objeven v roce 1992. Je předmětem intenzivního vědeckého výzkumu.', color: '#a855f7' },
+  { icon: Droplets, title: 'Entourage effect', text: 'Kanabinoidy a terpeny tvoří společně komplexní chemický profil. Každá odrůda má unikátní kombinaci těchto látek.', color: '#10b981' },
   { icon: FlaskConical, title: 'THC-X vs HHC', text: 'THC-X je hexylový ester s unikátními vlastnostmi. HHC je hydrogenovaná forma THC — stabilnější, ale jednodušší. Oba legální v ČR.', color: '#6366f1' },
-  { icon: Flower2, title: '5 klíčových terpénů', text: 'Myrcen (relax), Limonen (energie), Karyofylen (protizánět), Linalool (spánek), Pinen (soustředění). Každý má jinou vůni a účinek.', color: '#f59e0b' },
+  { icon: Flower2, title: '5 klíčových terpénů', text: 'Myrcen (zemitý), Limonen (citrusový), Karyofylen (pepřový), Linalool (květinový), Pinen (borovicový). Každý má jinou vůni a charakter.', color: '#f59e0b' },
 ];
 
 /* Garden tips */

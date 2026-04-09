@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CheckCircle, Home, Package, Building2, Truck, Copy, Phone, MapPin, Clock, QrCode } from 'lucide-react';
+import { CheckCircle, Building2, Truck, Copy, MapPin, Clock, QrCode } from 'lucide-react';
 
 interface Confetti {
   id: number;
@@ -17,9 +17,6 @@ export function Success() {
   const orderNumber = searchParams.get('order');
   const paymentMethod = searchParams.get('payment');
   const amount = searchParams.get('amount');
-  const shipping = searchParams.get('shipping');
-  const cod = searchParams.get('cod');
-  const phone = searchParams.get('phone');
   const shippingMethod = searchParams.get('shippingMethod');
 
   const [confetti, setConfetti] = useState<Confetti[]>([]);
@@ -85,21 +82,25 @@ export function Success() {
     };
   }, []);
 
-  const shippingCost = shipping ? parseFloat(shipping) : 0;
-  const codFee = cod ? parseFloat(cod) : 0;
   const totalAmount = amount ? parseFloat(amount) : 0;
-  const productsCost = totalAmount - shippingCost - codFee;
+
+  // Generate short numeric variable symbol (max 10 digits for Czech banks)
+  const rawDigits = (orderNumber || '').replace(/\D/g, '');
+  const variableSymbol = rawDigits.length > 10 ? rawDigits.slice(-10) : rawDigits || String(Date.now()).slice(-10);
 
   const bankDetails = {
     account: '2001645045/2010',
-    amount: `${totalAmount.toFixed(2)} Kč`,
-    variableSymbol: orderNumber || '',
+    amount: `${totalAmount.toFixed(0)} Kč`,
+    variableSymbol,
   };
 
   // Generate QR payment string (SPAYD format for Czech banks)
+  // Spec: https://qr-platba.cz/pro-vyvojare/specifikace-formatu/
   const iban = 'CZ6520100000002001645045';
-  const spayd = `SPD*1.0*ACC:${iban}*AM:${totalAmount.toFixed(2)}*CC:CZK*X-VS:${(orderNumber || '').replace(/\D/g, '')}*MSG:Objednávka ${orderNumber || ''}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(spayd)}`;
+  const amountStr = totalAmount.toFixed(2);
+  // SPAYD must not contain diacritics in MSG, keep it simple
+  const spayd = `SPD*1.0*ACC:${iban}*AM:${amountStr}*CC:CZK*X-VS:${variableSymbol}*MSG:Objednavka ${variableSymbol}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(spayd)}`;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -245,108 +246,122 @@ export function Success() {
                 </div>
               </div>
 
-              <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                <p className="text-yellow-300 text-sm font-medium">
-                  Po uhrazení objednávku ihned zpracujeme a odešleme. Potvrďte platbu zasláním screenshotu na náš kontakt pro rychlejší vyřízení.
+              {/* Priority banner */}
+              <div className="mt-6 p-5 bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-amber-500/15 border border-amber-400/30 rounded-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-amber-400/10 to-transparent rounded-bl-full" />
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-amber-400/20 to-yellow-500/20 rounded-full flex items-center justify-center border border-amber-400/30">
+                    <span className="text-2xl">⚡</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="text-amber-200 font-bold text-sm">PRIORITNÍ ZPRACOVÁNÍ</h4>
+                      <span className="px-2 py-0.5 bg-amber-400/20 text-amber-300 text-[10px] font-bold rounded-full border border-amber-400/30">VIP</span>
+                    </div>
+                    <p className="text-amber-300/80 text-sm leading-relaxed">
+                      Platby převodem zpracováváme <span className="text-amber-200 font-semibold">přednostně</span>. Po připsání částky vaši objednávku ihned připravíme k odeslání.
+                    </p>
+                    <div className="mt-3 flex items-center gap-3 text-xs">
+                      <span className="flex items-center gap-1 text-amber-300/70">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                        Rychlejší vyřízení
+                      </span>
+                      <span className="flex items-center gap-1 text-amber-300/70">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                        Přednostní odeslání
+                      </span>
+                      <span className="flex items-center gap-1 text-amber-300/70">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                        Žádné poplatky
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                <p className="text-emerald-300 text-sm font-medium">
+                  💡 Po uhrazení pošlete screenshot platby na náš kontakt pro ještě rychlejší vyřízení.
                 </p>
               </div>
             </div>
           )}
 
-          {paymentMethod === 'cash_on_delivery' && shippingMethod !== 'personal_pickup' && shippingMethod !== 'personal_invoice' && (
+          {paymentMethod === 'cash_on_delivery' && (
             <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-xl p-6 border border-emerald-500/30 mb-8 text-left">
               <div className="flex items-center gap-3 mb-4">
                 <Truck className="w-6 h-6 text-emerald-400" />
                 <h2 className="text-xl font-bold text-white">Platba při převzetí</h2>
               </div>
-
-              <div className="space-y-3">
-                <p className="text-gray-400">
-                  Platbu ve výši <span className="text-white font-semibold">{totalAmount.toFixed(2)} Kč</span> provedete hotově nebo kartou při převzetí zásilky na Zásilkovně.
+              <p className="text-gray-400">
+                Platbu ve výši <span className="text-white font-semibold">{totalAmount.toFixed(0)} Kč</span> provedete při převzetí zásilky na Zásilkovně.
+              </p>
+              <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                <p className="text-emerald-300 text-sm">
+                  O stavu zásilky vás budeme informovat e-mailem.
                 </p>
-
-                <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                  <p className="text-emerald-300 text-sm">
-                    O stavu zásilky vás budeme informovat SMS zprávou a e-mailem na vámi zadané kontakty.
-                  </p>
-                </div>
               </div>
             </div>
           )}
 
-          {shippingMethod === 'personal_invoice' && (
-            <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-xl p-6 border border-emerald-500/30 mb-8 text-left">
-              <div className="flex items-center gap-3 mb-4">
-                <MapPin className="w-6 h-6 text-emerald-400" />
-                <h2 className="text-xl font-bold text-white">Osobní vyzvednutí po uhrazení faktury</h2>
-              </div>
-
-              <div className="space-y-4">
-                <p className="text-gray-400">
-                  Vaše objednávka bude připravena k osobnímu vyzvednutí po uhrazení faktury obratem.
-                </p>
-
-                <div className="space-y-3">
-                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Clock className="w-5 h-5 text-emerald-400" />
-                      <h4 className="text-white font-semibold">Dostupnost</h4>
-                    </div>
-                    <p className="text-emerald-300 text-sm">
-                      Oblast Praha - Beroun, dostupnost 24/7
-                    </p>
-                  </div>
-
-                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                    <h4 className="text-yellow-400 font-semibold mb-2">Další kroky:</h4>
-                    <ol className="text-yellow-300 text-sm space-y-1 list-decimal list-inside">
-                      <li>Proveďte platbu podle instrukcí výše (pošlete nám obrázek z mobilu po zaplacení)</li>
-                      <li>Po ověření platby vám domlouváme místo předání v oblasti Praha - Beroun</li>
-                      <li>Vyzvednutí je možné 24/7 dle vzájemné dohody</li>
-                    </ol>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {shippingMethod === 'personal_pickup' && (
+          {(shippingMethod === 'personal' || shippingMethod === 'personal_invoice' || shippingMethod === 'personal_pickup') && paymentMethod !== 'cash_on_delivery' && (
             <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-xl p-6 border border-emerald-500/30 mb-8 text-left">
               <div className="flex items-center gap-3 mb-4">
                 <MapPin className="w-6 h-6 text-emerald-400" />
                 <h2 className="text-xl font-bold text-white">Osobní převzetí</h2>
               </div>
-
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <p className="text-gray-400">
-                  Vaše objednávka je připravena k osobnímu převzetí ještě dnes po zaplacení.
+                  Po zaplacení domluvíme místo a čas předání v oblasti Praha - Beroun.
                 </p>
-
-                <div className="space-y-3">
-                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Clock className="w-5 h-5 text-emerald-400" />
-                      <h4 className="text-white font-semibold">Dostupnost</h4>
-                    </div>
-                    <p className="text-emerald-300 text-sm">
-                      K dispozici 24/7 - převzetí je možné kdykoli vám to vyhovuje
-                    </p>
+                <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-5 h-5 text-emerald-400" />
+                    <h4 className="text-white font-semibold">Dostupnost 24/7</h4>
                   </div>
-
-                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                    <h4 className="text-yellow-400 font-semibold mb-2">Další kroky:</h4>
-                    <ol className="text-yellow-300 text-sm space-y-1 list-decimal list-inside">
-                      <li>Proveďte platbu podle instrukcí výše</li>
-                      <li>Po potvrzení platby vám zašleme přesnou adresu a kontaktní informace na e-mail</li>
-                      <li>Převzít můžete kdykoli během 24 hodin od zaplacení</li>
-                    </ol>
-                  </div>
+                  <p className="text-emerald-300 text-sm">
+                    Převzetí je možné kdykoli - flexibilně se domluvíme
+                  </p>
+                </div>
+                <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                  <h4 className="text-yellow-400 font-semibold mb-2">Co teď:</h4>
+                  <ol className="text-yellow-300 text-sm space-y-1 list-decimal list-inside">
+                    <li>Zaplaťte převodem (QR kód výše)</li>
+                    <li>Pošlete screenshot platby do chatu níže</li>
+                    <li>Domluvíme místo předání (Praha - Beroun)</li>
+                  </ol>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="space-y-3 mt-8">
+          {/* Screenshot CTA - for bank transfer payments */}
+          {paymentMethod === 'bank_transfer' && (
+            <div className="mt-8 p-6 bg-gradient-to-br from-emerald-500/15 to-teal-500/10 rounded-xl border border-emerald-500/30">
+              <div className="text-center mb-4">
+                <h3 className="text-white font-bold text-lg mb-1">Zaplatili jste? Pošlete nám potvrzení!</h3>
+                <p className="text-gray-400 text-sm">Pošlete screenshot platby a objednávku zpracujeme okamžitě</p>
+              </div>
+              <button
+                onClick={() => {
+                  // Open support chat with pre-filled message
+                  const chatBtn = document.querySelector('[aria-label="Otevřít chat podpory"]') as HTMLButtonElement;
+                  if (chatBtn) chatBtn.click();
+                  // Set a flag for SupportChat to detect
+                  localStorage.setItem('tb_chat_prefill', `Dobrý den, posílám potvrzení platby pro objednávku #${orderNumber || ''}`);
+                }}
+                className="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] hover:scale-[1.02] flex items-center justify-center gap-2"
+              >
+                <span className="text-xl">📸</span>
+                Poslat screenshot platby do chatu
+              </button>
+              <p className="text-center text-xs text-gray-500 mt-3">
+                Nebo pošlete na <span className="text-emerald-400">tajnabotanika@seznam.cz</span>
+              </p>
+            </div>
+          )}
+
+          <div className="space-y-3 mt-6">
             <Link
               to="/"
               className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(16,185,129,0.4)] hover:scale-[1.02]"

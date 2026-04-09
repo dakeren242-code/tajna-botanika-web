@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CreditCard, Building2, Truck, Package, Check, ChevronRight, MapPin, Clock, User, Mail, Phone as PhoneIcon, Tag, Loader2 } from 'lucide-react';
+import { Building2, Truck, Package, Check, ChevronRight, MapPin, Clock, User, Mail, Phone as PhoneIcon, Tag, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface PaymentAndShippingProps {
@@ -21,11 +21,11 @@ interface PaymentAndShippingProps {
 const FREE_SHIPPING_THRESHOLD = 1000;
 const SHIPPING_COST = 79;
 const COD_FEE = 30;
-const PERSONAL_PICKUP_MIN_GRAMS = 10;
+// const PERSONAL_PICKUP_MIN_GRAMS = 10; // reserved for future use
 
-export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete, loading }: PaymentAndShippingProps) {
-  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'card' | 'cash_on_delivery'>('bank_transfer');
-  const [shippingMethod, setShippingMethod] = useState<'zasilkovna' | 'personal_pickup' | 'personal_invoice' | undefined>(undefined);
+export default function PaymentAndShipping({ totalPrice, totalGrams: _totalGrams, onComplete, loading }: PaymentAndShippingProps) {
+  const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'cash_on_delivery'>('bank_transfer');
+  const [shippingMethod, setShippingMethod] = useState<'zasilkovna' | 'personal' | undefined>(undefined);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -42,15 +42,12 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
   const [promoError, setPromoError] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; percent: number; id: string } | null>(null);
 
-  const canUsePersonalPickup = totalGrams > PERSONAL_PICKUP_MIN_GRAMS;
-
   const isFreeShipping = totalPrice >= FREE_SHIPPING_THRESHOLD;
-  const isPersonalPickup = shippingMethod === 'personal_pickup';
-  const isPersonalInvoice = shippingMethod === 'personal_invoice';
+  const isPersonal = shippingMethod === 'personal';
   const isZasilkovna = shippingMethod === 'zasilkovna';
 
-  const shippingCost = !shippingMethod ? 0 : (isPersonalPickup || isPersonalInvoice ? 0 : (isFreeShipping ? 0 : SHIPPING_COST));
-  const codFee = paymentMethod === 'cash_on_delivery' && !isPersonalPickup && !isPersonalInvoice && shippingMethod ? COD_FEE : 0;
+  const shippingCost = !shippingMethod ? 0 : (isPersonal ? 0 : (isFreeShipping ? 0 : SHIPPING_COST));
+  const codFee = paymentMethod === 'cash_on_delivery' && isZasilkovna ? COD_FEE : 0;
   const discountAmount = appliedDiscount ? Math.round(totalPrice * appliedDiscount.percent / 100) : 0;
   const finalTotal = totalPrice - discountAmount + shippingCost + codFee;
 
@@ -96,23 +93,27 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
       return;
     }
 
-    onComplete(paymentMethod, shippingMethod, {
+    // If COD selected but shipping is personal, force bank_transfer
+    const finalPayment = paymentMethod === 'cash_on_delivery' && isPersonal ? 'bank_transfer' : paymentMethod;
+    // Map 'personal' back to 'personal_invoice' for DB compatibility
+    // shippingMethod is guaranteed non-undefined here because validation passed above
+    const finalShipping = shippingMethod === 'personal' ? 'personal_invoice' : (shippingMethod as string);
+
+    onComplete(finalPayment, finalShipping, {
       firstName,
       lastName,
       email,
       phone,
-      address: shippingMethod === 'zasilkovna' ? address : undefined,
-      city: shippingMethod === 'zasilkovna' ? city : undefined,
-      zip: shippingMethod === 'zasilkovna' ? zip : undefined,
+      address: isZasilkovna ? address : undefined,
+      city: isZasilkovna ? city : undefined,
+      zip: isZasilkovna ? zip : undefined,
       notes,
     }, appliedDiscount?.code, appliedDiscount?.percent);
   };
 
-  const isFormValid = firstName && lastName && email && phone && shippingMethod && termsAccepted &&
-    (shippingMethod !== 'zasilkovna' || (address && city && zip));
 
   return (
-    <div className="animate-fadeSlideIn">
+    <div className="animate-fadeSlideIn" style={{ overflowAnchor: 'none' }}>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Způsob platby a doručení</h1>
         <p className="text-gray-400 mb-3">Vyplňte kontaktní údaje a vyberte způsob platby a dopravy</p>
@@ -142,7 +143,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !firstName ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                 placeholder="Vaše jméno"
               />
-              {submitted && !firstName && <p className="mt-1 text-xs text-red-400">Vyplnte jmeno</p>}
+              {submitted && !firstName && <p className="mt-1 text-xs text-red-400">Vyplňte jméno</p>}
             </div>
 
             <div id="field-lastname">
@@ -157,7 +158,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !lastName ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
                 placeholder="Vaše příjmení"
               />
-              {submitted && !lastName && <p className="mt-1 text-xs text-red-400">Vyplnte prijmeni</p>}
+              {submitted && !lastName && <p className="mt-1 text-xs text-red-400">Vyplňte příjmení</p>}
             </div>
 
             <div id="field-email">
@@ -175,7 +176,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                   placeholder="vas@email.cz"
                 />
               </div>
-              {submitted && !email && <p className="mt-1 text-xs text-red-400">Vyplnte emailovou adresu</p>}
+              {submitted && !email && <p className="mt-1 text-xs text-red-400">Vyplňte e-mailovou adresu</p>}
             </div>
 
             <div id="field-phone">
@@ -193,63 +194,65 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                   placeholder="+420 123 456 789"
                 />
               </div>
-              {submitted && !phone && <p className="mt-1 text-xs text-red-400">Vyplnte telefonni cislo</p>}
+              {submitted && !phone && <p className="mt-1 text-xs text-red-400">Vyplňte telefonní číslo</p>}
             </div>
           </div>
 
-          {shippingMethod === 'zasilkovna' && (
-            <div className="mt-6 pt-6 border-t border-emerald-500/20">
-              <h3 className="text-lg font-bold text-white mb-4">Dodací adresa</h3>
-              <div className="grid grid-cols-1 gap-4">
-                <div id="field-address">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Ulice a číslo popisné <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    required
-                    className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !address ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
-                    placeholder="např. Hlavní 123"
-                  />
-                  {submitted && !address && <p className="mt-1 text-xs text-red-400">Vyplnte ulici a cislo</p>}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div id="field-city">
+          <div className={`grid transition-all duration-300 ease-in-out ${isZasilkovna ? 'grid-rows-[1fr] mt-6' : 'grid-rows-[0fr]'}`} style={{ overflowAnchor: 'none' }}>
+            <div className="overflow-hidden" aria-hidden={!isZasilkovna}>
+              <div className="pt-6 border-t border-emerald-500/20">
+                <h3 className="text-lg font-bold text-white mb-4">Dodací adresa</h3>
+                <div className="grid grid-cols-1 gap-4">
+                  <div id="field-address">
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Město <span className="text-red-400">*</span>
+                      Ulice a číslo popisné <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="text"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      required
-                      className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !city ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
-                      placeholder="Praha"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      tabIndex={isZasilkovna ? 0 : -1}
+                      className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && isZasilkovna && !address ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
+                      placeholder="např. Hlavní 123"
                     />
-                    {submitted && !city && <p className="mt-1 text-xs text-red-400">Vyplnte mesto</p>}
+                    {submitted && isZasilkovna && !address && <p className="mt-1 text-xs text-red-400">Vyplňte ulici a číslo</p>}
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      PSČ <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={zip}
-                      onChange={(e) => setZip(e.target.value)}
-                      required
-                      className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && !zip ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
-                      placeholder="120 00"
-                    />
-                    {submitted && !zip && <p className="mt-1 text-xs text-red-400">Vyplnte PSC</p>}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div id="field-city">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Město <span className="text-red-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        tabIndex={isZasilkovna ? 0 : -1}
+                        className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && isZasilkovna && !city ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
+                        placeholder="Praha"
+                      />
+                      {submitted && isZasilkovna && !city && <p className="mt-1 text-xs text-red-400">Vyplňte město</p>}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        PSČ <span className="text-red-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={zip}
+                        onChange={(e) => setZip(e.target.value)}
+                        tabIndex={isZasilkovna ? 0 : -1}
+                        className={`w-full px-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all ${submitted && isZasilkovna && !zip ? 'border-red-500/60 bg-red-500/5' : 'border-emerald-500/30'}`}
+                        placeholder="120 00"
+                      />
+                      {submitted && isZasilkovna && !zip && <p className="mt-1 text-xs text-red-400">Vyplňte PSČ</p>}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
           <div className="mt-6 pt-6 border-t border-emerald-500/20">
             <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -267,25 +270,24 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
 
         <div className="bg-white/5 rounded-xl p-6 border border-emerald-500/20">
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <CreditCard className="w-6 h-6 text-emerald-400" />
+            <Building2 className="w-6 h-6 text-emerald-400" />
             Způsob platby
           </h2>
 
           <div className="space-y-3">
+            {/* Bank Transfer - PRIMARY */}
             <label
               className={`group relative block cursor-pointer transition-all duration-300 ${
                 paymentMethod === 'bank_transfer'
-                  ? 'ring-2 ring-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                  ? 'ring-2 ring-emerald-500/60 shadow-[0_0_25px_rgba(16,185,129,0.3)]'
                   : ''
               }`}
-              style={{
-                borderRadius: '12px',
-              }}
+              style={{ borderRadius: '12px' }}
             >
               <div
-                className={`p-4 rounded-xl border transition-all duration-300 ${
+                className={`p-5 rounded-xl border transition-all duration-300 ${
                   paymentMethod === 'bank_transfer'
-                    ? 'bg-emerald-500/10 border-emerald-500/40'
+                    ? 'bg-gradient-to-br from-emerald-500/15 to-teal-500/10 border-emerald-500/40'
                     : 'bg-white/5 border-emerald-500/20 hover:border-emerald-500/30'
                 }`}
               >
@@ -304,22 +306,50 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1.5">
                       <Building2 className="w-5 h-5 text-emerald-400" />
-                      <h3 className="text-white font-bold">Bankovní převod</h3>
-                      {paymentMethod === 'bank_transfer' && (
-                        <span className="ml-auto px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full">
-                          DOPORUČENO
-                        </span>
-                      )}
+                      <h3 className="text-white font-bold text-lg">Bankovní převod</h3>
+                      <span className="ml-auto px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/30">
+                        DOPORUČENO
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-400 mb-2">
-                      Bezpečná a plně funkční platební metoda
+                    <p className="text-sm text-gray-400 mb-3">
+                      Jednoduchá a bezpečná platba - naskenujte QR kód v bankovní aplikaci
                     </p>
-                    <div className="flex items-start gap-2 text-xs text-gray-500">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Platba probíhá převodem na účet po dokončení objednávky</span>
+                    <div className="space-y-1.5">
+                      <div className="flex items-start gap-2 text-xs text-gray-400">
+                        <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <span>QR kód pro okamžitou platbu v bankovní aplikaci</span>
+                      </div>
+                      <div className="flex items-start gap-2 text-xs text-gray-400">
+                        <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <span>Žádné poplatky navíc</span>
+                      </div>
+                      <div className="flex items-start gap-2 text-xs text-gray-400">
+                        <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <span>Po zaplacení objednávku ihned zpracujeme</span>
+                      </div>
                     </div>
+
+                    {/* Priority processing banner — only shown when bank_transfer is selected */}
+                    {paymentMethod === 'bank_transfer' && (
+                      <div className="mt-4 p-4 bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-amber-500/15 border border-amber-400/40 rounded-xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-amber-400/10 to-transparent rounded-bl-full" />
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-amber-400/20 to-yellow-500/20 rounded-full flex items-center justify-center border border-amber-400/30">
+                            <span className="text-lg">⚡</span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <p className="text-amber-200 text-xs font-bold tracking-wide uppercase">Prioritní zpracování</p>
+                              <span className="px-1.5 py-0.5 bg-amber-400/20 text-amber-300 text-[9px] font-bold rounded-full border border-amber-400/30">VIP</span>
+                            </div>
+                            <p className="text-amber-300/80 text-[11px] leading-relaxed">Objednávky s převodem odesíláme <span className="text-amber-200 font-semibold">tentýž den</span> — žádné čekání</p>
+                          </div>
+                          <span className="text-lg flex-shrink-0">🏆</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -333,86 +363,19 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               />
             </label>
 
+            {/* COD - Dobírka */}
             <label
               className={`group relative block cursor-pointer transition-all duration-300 ${
-                paymentMethod === 'card'
-                  ? 'ring-2 ring-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                paymentMethod === 'cash_on_delivery'
+                  ? 'ring-2 ring-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
                   : ''
               }`}
               style={{ borderRadius: '12px' }}
             >
               <div
                 className={`p-4 rounded-xl border transition-all duration-300 ${
-                  paymentMethod === 'card'
-                    ? 'bg-emerald-500/10 border-emerald-500/40'
-                    : 'bg-white/5 border-emerald-500/20 hover:border-emerald-500/30'
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 pt-1">
-                    <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                        paymentMethod === 'card'
-                          ? 'border-emerald-500 bg-emerald-500'
-                          : 'border-gray-600 bg-transparent'
-                      }`}
-                    >
-                      {paymentMethod === 'card' && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <CreditCard className="w-5 h-5 text-emerald-400" />
-                      <h3 className="text-white font-bold">Platba kartou</h3>
-                      <div className="ml-auto flex items-center gap-1.5">
-                        <img
-                          src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
-                          alt="Visa"
-                          className="h-4 opacity-70"
-                        />
-                        <img
-                          src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
-                          alt="Mastercard"
-                          className="h-4 opacity-70"
-                        />
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-400 mb-2">
-                      Rychlá a bezpečná platba online kartou
-                    </p>
-                    <div className="flex items-start gap-2 text-xs text-gray-500">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Přes zabezpečenou platební bránu Comgate</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <input
-                type="radio"
-                name="payment"
-                value="card"
-                checked={paymentMethod === 'card'}
-                onChange={() => setPaymentMethod('card')}
-                className="sr-only"
-              />
-            </label>
-
-            <label
-              className={`group relative block cursor-pointer transition-all duration-300 ${
-                paymentMethod === 'cash_on_delivery'
-                  ? 'ring-2 ring-emerald-500/40'
-                  : ''
-              }`}
-              style={{
-                borderRadius: '12px',
-              }}
-            >
-              <div
-                className={`p-4 rounded-xl border transition-all duration-300 ${
                   paymentMethod === 'cash_on_delivery'
-                    ? 'bg-white/10 border-emerald-500/30'
+                    ? 'bg-emerald-500/10 border-emerald-500/40'
                     : 'bg-white/5 border-emerald-500/20 hover:border-emerald-500/30'
                 }`}
               >
@@ -432,9 +395,9 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <Truck className="w-5 h-5 text-gray-400" />
+                      <Truck className="w-5 h-5 text-emerald-400" />
                       <h3 className="text-white font-bold">Dobírka</h3>
-                      <span className="ml-auto text-xs text-gray-400">+ {COD_FEE} Kč</span>
+                      {isZasilkovna && <span className="ml-auto text-xs text-gray-400">+ {COD_FEE} Kč</span>}
                     </div>
                     <p className="text-sm text-gray-400">Platba při převzetí zásilky</p>
                   </div>
@@ -445,7 +408,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 name="payment"
                 value="cash_on_delivery"
                 checked={paymentMethod === 'cash_on_delivery'}
-                onChange={() => setPaymentMethod('cash_on_delivery')}
+                onChange={() => { setPaymentMethod('cash_on_delivery'); if (isPersonal) setShippingMethod('zasilkovna'); }}
                 className="sr-only"
               />
             </label>
@@ -459,68 +422,88 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
           </h2>
 
           <div className="space-y-3">
-            <label
-              className={`group relative block cursor-pointer transition-all duration-300 ${
-                shippingMethod === 'personal_invoice'
-                  ? 'ring-2 ring-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
-                  : ''
-              }`}
-              style={{ borderRadius: '12px' }}
-            >
-              <div
-                className={`p-4 rounded-xl border transition-all duration-300 ${
-                  shippingMethod === 'personal_invoice'
-                    ? 'bg-emerald-500/10 border-emerald-500/40'
-                    : 'bg-white/5 border-emerald-500/20 hover:border-emerald-500/30'
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 pt-1">
-                    <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                        shippingMethod === 'personal_invoice'
-                          ? 'border-emerald-500 bg-emerald-500'
-                          : 'border-gray-600 bg-transparent'
-                      }`}
-                    >
-                      {shippingMethod === 'personal_invoice' && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
-                      )}
+            {/* Personal Pickup - HARD DISABLED when COD selected */}
+            {paymentMethod === 'cash_on_delivery' ? (
+              <div className="opacity-40 rounded-xl" style={{ borderRadius: '12px' }}>
+                <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 pt-1">
+                      <div className="w-5 h-5 rounded-full border-2 border-gray-700 bg-transparent" />
                     </div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <MapPin className="w-5 h-5 text-emerald-400" />
-                      <h3 className="text-white font-bold">Osobní vyzvednutí po uhrazení faktury obratem</h3>
-                      <span className="ml-auto text-sm font-semibold text-emerald-400">
-                        Zdarma
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-400 mb-2">
-                      Domlouváme místo Praha - Beroun 24/7
-                    </p>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        24/7 dostupnost
-                      </span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <MapPin className="w-5 h-5 text-gray-500" />
+                        <h3 className="text-gray-400 font-bold">Osobní převzetí</h3>
+                        <span className="ml-auto text-sm text-gray-500">Zdarma</span>
+                      </div>
+                      <p className="text-xs text-amber-300/80">Není možné s dobírkou - vyberte bankovní převod</p>
                     </div>
                   </div>
                 </div>
               </div>
-              <input
-                type="radio"
-                name="shipping"
-                value="personal_invoice"
-                checked={shippingMethod === 'personal_invoice'}
-                onChange={() => setShippingMethod('personal_invoice')}
-                className="sr-only"
-              />
-            </label>
+            ) : (
+              <label
+                className={`group relative block cursor-pointer transition-all duration-300 ${
+                  isPersonal
+                    ? 'ring-2 ring-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
+                    : ''
+                }`}
+                style={{ borderRadius: '12px' }}
+              >
+                <div
+                  className={`p-4 rounded-xl border transition-all duration-300 ${
+                    isPersonal
+                      ? 'bg-emerald-500/10 border-emerald-500/40'
+                      : 'bg-white/5 border-emerald-500/20 hover:border-emerald-500/30'
+                  }`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 pt-1">
+                      <div
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                          isPersonal
+                            ? 'border-emerald-500 bg-emerald-500'
+                            : 'border-gray-600 bg-transparent'
+                        }`}
+                      >
+                        {isPersonal && <div className="w-2.5 h-2.5 rounded-full bg-white"></div>}
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <MapPin className="w-5 h-5 text-emerald-400" />
+                        <h3 className="text-white font-bold">Osobní převzetí</h3>
+                        <span className="ml-auto text-sm font-semibold text-emerald-400">Zdarma</span>
+                      </div>
+                      <p className="text-sm text-gray-400 mb-2">
+                        Oblast Praha - Beroun, domluvíme místo a čas
+                      </p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> Dostupnost 24/7
+                        </span>
+                        <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full">
+                          Zdarma
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <input
+                  type="radio"
+                  name="shipping"
+                  value="personal"
+                  checked={isPersonal}
+                  onChange={() => setShippingMethod('personal')}
+                  className="sr-only"
+                />
+              </label>
+            )}
 
+            {/* Zasilkovna */}
             <label
               className={`group relative block cursor-pointer transition-all duration-300 ${
-                shippingMethod === 'zasilkovna'
+                isZasilkovna
                   ? 'ring-2 ring-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
                   : ''
               }`}
@@ -528,7 +511,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
             >
               <div
                 className={`p-4 rounded-xl border transition-all duration-300 ${
-                  shippingMethod === 'zasilkovna'
+                  isZasilkovna
                     ? 'bg-emerald-500/10 border-emerald-500/40'
                     : 'bg-white/5 border-emerald-500/20 hover:border-emerald-500/30'
                 }`}
@@ -537,14 +520,12 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                   <div className="flex-shrink-0 pt-1">
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                        shippingMethod === 'zasilkovna'
+                        isZasilkovna
                           ? 'border-emerald-500 bg-emerald-500'
                           : 'border-gray-600 bg-transparent'
                       }`}
                     >
-                      {shippingMethod === 'zasilkovna' && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-white"></div>
-                      )}
+                      {isZasilkovna && <div className="w-2.5 h-2.5 rounded-full bg-white"></div>}
                     </div>
                   </div>
                   <div className="flex-1">
@@ -560,11 +541,11 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                       </span>
                     </div>
                     <p className="text-sm text-gray-400 mb-2">
-                      Doručení na výdejní místo nebo adresu
+                      Doručení na výdejní místo Zásilkovny
                     </p>
                     <div className="flex items-center gap-2">
                       <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full">
-                        {isFreeShipping ? 'Doprava zdarma' : `Doprava zdarma od ${FREE_SHIPPING_THRESHOLD} Kč`}
+                        {isFreeShipping ? 'Doprava zdarma' : `Zdarma od ${FREE_SHIPPING_THRESHOLD} Kč`}
                       </span>
                     </div>
                   </div>
@@ -574,36 +555,38 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                 type="radio"
                 name="shipping"
                 value="zasilkovna"
-                checked={shippingMethod === 'zasilkovna'}
+                checked={isZasilkovna}
                 onChange={() => setShippingMethod('zasilkovna')}
                 className="sr-only"
               />
             </label>
           </div>
 
-          {shippingMethod === 'personal_invoice' && (
-            <div className="mt-4 p-4 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 rounded-xl">
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-white font-semibold mb-1">Jak to probíhá</h4>
-                  <p className="text-sm text-gray-300 mb-2">
-                    Po dokončení objednávky vám zašleme fakturu. Po uhrazení obratem domlouváme místo předání v oblasti Praha - Beroun.
-                  </p>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="w-4 h-4 text-emerald-400" />
-                    <span className="text-emerald-300 font-medium">K dispozici 24/7 - flexibilní předání</span>
+          <div className={`grid transition-all duration-300 ease-in-out ${isPersonal ? 'grid-rows-[1fr] mt-4' : 'grid-rows-[0fr]'}`}>
+            <div className="overflow-hidden">
+              <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-white font-semibold mb-1">Jak to funguje</h4>
+                    <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
+                      <li>Zaplaťte převodem (QR kód obdržíte po dokončení)</li>
+                      <li>Pošlete nám screenshot platby do chatu</li>
+                      <li>Domluvíme místo předání (Praha - Beroun, 24/7)</li>
+                    </ol>
                   </div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
-          {submitted && !shippingMethod && (
-            <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-              <p className="text-sm text-red-400 text-center">Vyberte zpusob dopravy pro pokracovani</p>
+          <div className={`grid transition-all duration-300 ease-in-out ${submitted && !shippingMethod ? 'grid-rows-[1fr] mt-3' : 'grid-rows-[0fr]'}`}>
+            <div className="overflow-hidden">
+              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                <p className="text-sm text-red-400 text-center">Vyberte způsob dopravy pro pokračování</p>
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
         <div className="bg-white/5 rounded-xl p-6 border border-emerald-500/20">
@@ -656,7 +639,7 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               </div>
             )}
 
-            {paymentMethod === 'cash_on_delivery' && shippingMethod && !isPersonalPickup && !isPersonalInvoice && (
+            {paymentMethod === 'cash_on_delivery' && isZasilkovna && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-400">Poplatek za dobírku</span>
                 <span className="text-white font-semibold">{codFee.toFixed(2)} Kč</span>
@@ -710,16 +693,16 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
               <div className="flex-1">
                 <p className="text-sm text-gray-300 group-hover:text-white transition-colors">
                   Souhlasím s{' '}
-                  <a href="#" className="text-emerald-400 hover:text-emerald-300 underline">
+                  <a href="/podminky" target="_blank" className="text-emerald-400 hover:text-emerald-300 underline">
                     obchodními podmínkami
                   </a>
                   {' '}a{' '}
-                  <a href="#" className="text-emerald-400 hover:text-emerald-300 underline">
+                  <a href="/soukromi" target="_blank" className="text-emerald-400 hover:text-emerald-300 underline">
                     zásadami ochrany osobních údajů
                   </a>
                 </p>
                 {submitted && !termsAccepted && (
-                  <p className="mt-1 text-xs text-red-400">Muste souhlasit s obchodnimi podminkami</p>
+                  <p className="mt-1 text-xs text-red-400">Musíte souhlasit s obchodními podmínkami</p>
                 )}
               </div>
             </label>
