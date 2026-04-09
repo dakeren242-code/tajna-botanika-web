@@ -4,9 +4,59 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { supabase } from '../lib/supabase';
 import { trackEvent } from '../hooks/useTracking';
-import { AlertCircle, ArrowLeft } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ShoppingCart, Truck, CreditCard, CheckCircle } from 'lucide-react';
 import { getPrice, FREE_SHIPPING_THRESHOLD, SHIPPING_COST, COD_FEE } from '../lib/prices';
 import PaymentAndShipping from '../components/checkout/PaymentAndShipping';
+
+const CHECKOUT_STEPS = [
+  { label: 'Kosik', icon: ShoppingCart },
+  { label: 'Doruceni', icon: Truck },
+  { label: 'Platba', icon: CreditCard },
+  { label: 'Hotovo', icon: CheckCircle },
+] as const;
+
+function CheckoutProgressBar({ currentStep }: { currentStep: number }) {
+  return (
+    <div className="mb-8">
+      <div className="flex items-center justify-between max-w-md mx-auto">
+        {CHECKOUT_STEPS.map((step, index) => {
+          const Icon = step.icon;
+          const isActive = index <= currentStep;
+          const isCurrent = index === currentStep;
+          return (
+            <div key={step.label} className="flex items-center flex-1 last:flex-initial">
+              <div className="flex flex-col items-center">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                    isCurrent
+                      ? 'bg-emerald-500 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)]'
+                      : isActive
+                        ? 'bg-emerald-600/80 border-emerald-500/60'
+                        : 'bg-white/5 border-gray-600'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-500'}`} />
+                </div>
+                <span className={`mt-2 text-xs font-medium ${
+                  isCurrent ? 'text-emerald-400' : isActive ? 'text-emerald-500/70' : 'text-gray-500'
+                }`}>
+                  {step.label}
+                </span>
+              </div>
+              {index < CHECKOUT_STEPS.length - 1 && (
+                <div className="flex-1 mx-2 mb-5">
+                  <div className={`h-0.5 rounded-full transition-all duration-300 ${
+                    index < currentStep ? 'bg-emerald-500' : 'bg-gray-700'
+                  }`} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 interface CustomerData {
   firstName: string;
@@ -236,6 +286,7 @@ export default function Checkout() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-emerald-950 to-black py-20 px-4">
       <div className="max-w-4xl mx-auto">
+        <CheckoutProgressBar currentStep={1} />
         <Link to="/cart" className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm mb-4">
           <ArrowLeft className="w-4 h-4" />Zpět do košíku
         </Link>

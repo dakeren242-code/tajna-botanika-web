@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Building2, Truck, Package, Check, ChevronRight, MapPin, Clock, User, Mail, Phone as PhoneIcon, Tag, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -41,6 +41,23 @@ export default function PaymentAndShipping({ totalPrice, totalGrams: _totalGrams
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoError, setPromoError] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; percent: number; id: string } | null>(null);
+
+  // Debounced save of email to cart_sessions for abandoned cart tracking
+  const emailTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    if (!email || !email.includes('@')) return;
+    if (emailTimerRef.current) clearTimeout(emailTimerRef.current);
+    emailTimerRef.current = setTimeout(() => {
+      const sid = sessionStorage.getItem('vsid');
+      if (!sid) return;
+      supabase
+        .from('cart_sessions')
+        .update({ email })
+        .eq('session_id', sid)
+        .then(() => {/* silent */});
+    }, 1500);
+    return () => { if (emailTimerRef.current) clearTimeout(emailTimerRef.current); };
+  }, [email]);
 
   const isFreeShipping = totalPrice >= FREE_SHIPPING_THRESHOLD;
   const isPersonal = shippingMethod === 'personal';
