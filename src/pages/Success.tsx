@@ -310,7 +310,7 @@ export function Success() {
             </div>
           )}
 
-          {(shippingMethod === 'personal_invoice' || shippingMethod === 'personal_pickup' || shippingMethod === 'personal') && paymentMethod !== 'cash_on_delivery' && (
+          {(shippingMethod === 'personal' || shippingMethod === 'personal_invoice' || shippingMethod === 'personal_pickup') && paymentMethod !== 'cash_on_delivery' && (
             <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-xl p-6 border border-emerald-500/30 mb-8 text-left">
               <div className="flex items-center gap-3 mb-4">
                 <MapPin className="w-6 h-6 text-emerald-400" />

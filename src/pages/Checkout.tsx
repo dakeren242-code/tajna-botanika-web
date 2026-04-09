@@ -79,7 +79,7 @@ export default function Checkout() {
       const discountAmount = discountPercent ? Math.round(totalPrice * discountPercent / 100) : 0;
       const discountedPrice = totalPrice - discountAmount;
       const isFreeShipping = discountedPrice >= FREE_SHIPPING_THRESHOLD;
-      const isPersonalPickup = shippingMethod === 'personal_pickup' || shippingMethod === 'personal_invoice';
+      const isPersonalPickup = shippingMethod === 'personal' || shippingMethod === 'personal_pickup' || shippingMethod === 'personal_invoice';
       const shippingCost = isPersonalPickup ? 0 : (isFreeShipping ? 0 : SHIPPING_COST);
       const codFee = paymentMethod === 'cash_on_delivery' && !isPersonalPickup ? COD_FEE : 0;
       const finalTotal = discountedPrice + shippingCost + codFee;
