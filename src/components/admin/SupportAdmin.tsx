@@ -168,12 +168,8 @@ export default function SupportAdmin() {
 
   const formatTime = (dateStr: string) => {
     const d = new Date(dateStr);
-    const now = new Date();
-    const diff = now.getTime() - d.getTime();
-    if (diff < 60000) return 'právě teď';
-    if (diff < 3600000) return `před ${Math.floor(diff / 60000)}m`;
-    if (diff < 86400000) return `před ${Math.floor(diff / 3600000)}h`;
-    return d.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short' });
+    const time = d.toLocaleString('cs-CZ', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Prague' });
+    return time;
   };
 
   return (
