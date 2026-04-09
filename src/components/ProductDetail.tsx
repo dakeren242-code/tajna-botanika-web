@@ -81,6 +81,8 @@ export default function ProductDetail() {
       3: 490,
       5: 690,
       10: 1290,
+      50: 4990,
+      100: 8990,
     };
     return prices[gramage] || 0;
   };
@@ -236,23 +238,37 @@ export default function ProductDetail() {
               <div className="space-y-6 pt-8 border-t border-white/10">
                 <div>
                   <div className="text-gray-400 text-sm mb-3 font-semibold">VYBERTE GRAMÁŽ</div>
-                  <div className="grid grid-cols-4 gap-3">
-                    {[1, 3, 5, 10].map((gram) => (
-                      <button
-                        key={gram}
-                        onClick={() => setSelectedGramage(gram)}
-                        className={`px-3 py-4 rounded-xl font-bold transition-all duration-300 ${
-                          selectedGramage === gram
-                            ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-black scale-105 shadow-lg shadow-yellow-500/30'
-                            : 'bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:scale-105'
-                        }`}
-                      >
-                        <div className="text-lg">{gram}g</div>
-                        <div className={`text-xs mt-1 ${selectedGramage === gram ? 'text-black/70' : 'text-gray-400'}`}>
-                          {getGramagePrice(gram)} Kč
-                        </div>
-                      </button>
-                    ))}
+                  <div className="grid grid-cols-3 gap-3">
+                    {[1, 3, 5, 10, 50, 100].map((gram) => {
+                      const badge = gram === 50 ? 'Velkoobchod' : gram === 100 ? 'TOP CENA' : null;
+                      const perGramPrice = Math.round(getGramagePrice(gram) / gram);
+                      return (
+                        <button
+                          key={gram}
+                          onClick={() => setSelectedGramage(gram)}
+                          className={`relative px-3 py-4 rounded-xl font-bold transition-all duration-300 ${
+                            selectedGramage === gram
+                              ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-black scale-105 shadow-lg shadow-yellow-500/30'
+                              : 'bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:scale-105'
+                          }`}
+                        >
+                          {badge && (
+                            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full whitespace-nowrap leading-none">
+                              {badge}
+                            </span>
+                          )}
+                          <div className="text-lg">{gram}g</div>
+                          <div className={`text-xs mt-1 ${selectedGramage === gram ? 'text-black/70' : 'text-gray-400'}`}>
+                            {getGramagePrice(gram).toLocaleString('cs-CZ')} Kč
+                          </div>
+                          {gram >= 50 && (
+                            <div className={`text-[10px] mt-0.5 ${selectedGramage === gram ? 'text-black/50' : 'text-emerald-400'}`}>
+                              {perGramPrice} Kč/g
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 

@@ -8,6 +8,8 @@ export const PRICE_MAP: Record<string, number> = {
   '3g': 490,
   '5g': 690,
   '10g': 1290,
+  '50g': 4990,
+  '100g': 8990,
 };
 
 export const FREE_SHIPPING_THRESHOLD = 1000;

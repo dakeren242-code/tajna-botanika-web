@@ -18,7 +18,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
   const { addToCart } = useCart();
 
   const isBundle = product.category === 'bundle';
-  const gramOptions = ['1g', '3g', '5g', '10g'];
+  const gramOptions = ['1g', '3g', '5g', '10g', '50g', '100g'];
 
   const calculatePrice = (grams: string) => {
     const priceMap: Record<string, number> = {
@@ -26,6 +26,8 @@ export default function ProductCard({ product, index }: ProductCardProps) {
       '3g': 490,
       '5g': 690,
       '10g': 1290,
+      '50g': 4990,
+      '100g': 8990,
     };
     return priceMap[grams] || 190;
   };
@@ -221,9 +223,9 @@ export default function ProductCard({ product, index }: ProductCardProps) {
             <div className="pt-4 border-t border-white/10 flex flex-col items-center gap-4">
               {!isBundle && (
                 <div className="w-full">
-                  <div className="grid grid-cols-4 gap-2 mb-4" onClick={(e) => e.stopPropagation()}>
+                  <div className="grid grid-cols-3 gap-2 mb-4" onClick={(e) => e.stopPropagation()}>
                     {gramOptions.map((option) => {
-                      const isBestValue = option === '3g' || option === '5g';
+                      const badge = option === '3g' ? 'Oblíbené' : option === '5g' ? 'Výhodné' : option === '50g' ? 'Velkoobchod' : option === '100g' ? 'TOP CENA' : null;
                       return (
                         <button
                           key={option}
@@ -237,9 +239,13 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                               : 'bg-white/10 text-gray-400 hover:bg-white/20'
                           }`}
                         >
-                          {isBestValue && (
-                            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider bg-gradient-to-r from-yellow-400 to-amber-500 text-black rounded-full whitespace-nowrap leading-none">
-                              {option === '3g' ? 'Oblíbené' : 'Výhodné'}
+                          {badge && (
+                            <span className={`absolute -top-2.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider rounded-full whitespace-nowrap leading-none ${
+                              option === '50g' || option === '100g'
+                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                                : 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black'
+                            }`}>
+                              {badge}
                             </span>
                           )}
                           {option}

@@ -69,6 +69,8 @@ export default function Cart() {
                     '3g': 490,
                     '5g': 690,
                     '10g': 1290,
+                    '50g': 4990,
+                    '100g': 8990,
                   };
                   const unitPrice = isBundle ? item.bundlePrice! : (priceMap[item.gramAmount] || 190);
                   const totalItemPrice = unitPrice * item.quantity;
