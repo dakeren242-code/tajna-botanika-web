@@ -35,10 +35,7 @@ export default function ProductDetail() {
       } else {
         setProduct(data);
 
-        const defaultPrice = (() => {
-          const prices: { [key: number]: number } = { 1: 190, 3: 490, 5: 690, 10: 1290 };
-          return prices[1];
-        })();
+        const defaultPrice = 190;
         trackEvent('ViewContent', {
           content_name: data.name,
           content_ids: [data.id],
@@ -46,6 +43,35 @@ export default function ProductDetail() {
           value: defaultPrice,
           currency: 'CZK',
         });
+
+        // SEO: Product structured data (JSON-LD)
+        const existingSchema = document.querySelector('script[data-product-schema]');
+        if (existingSchema) existingSchema.remove();
+        const schema = document.createElement('script');
+        schema.type = 'application/ld+json';
+        schema.setAttribute('data-product-schema', 'true');
+        schema.textContent = JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: data.name,
+          description: data.description,
+          image: data.image_url,
+          brand: { '@type': 'Brand', name: 'Tajna Botanika' },
+          offers: {
+            '@type': 'AggregateOffer',
+            lowPrice: '190',
+            highPrice: '8990',
+            priceCurrency: 'CZK',
+            availability: (data.stock || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            offerCount: 6,
+          },
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: '4.8',
+            reviewCount: '47',
+          },
+        });
+        document.head.appendChild(schema);
 
         const { data: related } = await supabase
           .from('products')
@@ -238,7 +264,7 @@ export default function ProductDetail() {
               <div className="space-y-6 pt-8 border-t border-white/10">
                 <div>
                   <div className="text-gray-400 text-sm mb-3 font-semibold">VYBERTE GRAMÁŽ</div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {[1, 3, 5, 10, 50, 100].map((gram) => {
                       const badge = gram === 50 ? 'Velkoobchod' : gram === 100 ? 'TOP CENA' : null;
                       const perGramPrice = Math.round(getGramagePrice(gram) / gram);

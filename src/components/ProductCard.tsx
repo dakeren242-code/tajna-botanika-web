@@ -223,7 +223,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
             <div className="pt-4 border-t border-white/10 flex flex-col items-center gap-4">
               {!isBundle && (
                 <div className="w-full">
-                  <div className="grid grid-cols-3 gap-2 mb-4" onClick={(e) => e.stopPropagation()}>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4" onClick={(e) => e.stopPropagation()}>
                     {gramOptions.map((option) => {
                       const badge = option === '3g' ? 'Oblíbené' : option === '5g' ? 'Výhodné' : option === '50g' ? 'Velkoobchod' : option === '100g' ? 'TOP CENA' : null;
                       return (

@@ -6,6 +6,22 @@ function ExitIntentPopup() {
   const [show, setShow] = useState(false);
   const [minimized, setMinimized] = useState(false);
   const [hasShown, setHasShown] = useState(false);
+  const [countdown, setCountdown] = useState(15 * 60); // 15 minutes in seconds
+
+  // Countdown timer
+  useEffect(() => {
+    if (!show) return;
+    const timer = setInterval(() => {
+      setCountdown(prev => prev > 0 ? prev - 1 : 0);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [show]);
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
 
   useEffect(() => {
     // Don't show if already shown this session or user already registered
@@ -138,9 +154,19 @@ function ExitIntentPopup() {
               Zaregistrujte se a získejte{' '}
               <span className="text-emerald-400 font-black">slevu 15%</span>
             </p>
-            <p className="text-gray-500 text-sm mb-8 max-w-sm mx-auto">
+            <p className="text-gray-500 text-sm mb-4 max-w-sm mx-auto">
               Slevový kód vám pošleme ihned na email. Platí na celý sortiment bez omezení.
             </p>
+
+            {/* Countdown timer */}
+            {countdown > 0 && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-xl mb-6">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                <span className="text-red-400 text-sm font-bold">
+                  Nabídka vyprší za {formatTime(countdown)}
+                </span>
+              </div>
+            )}
 
             {/* CTA — big and glowy */}
             <Link
