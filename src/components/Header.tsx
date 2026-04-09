@@ -93,38 +93,6 @@ export default function Header() {
                       </div>
                       <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-amber-400 transition-colors" />
                     </button>
-
-                    <div className="mx-4 my-1.5 border-t border-white/[0.06]" />
-
-                    {/* Akce */}
-                    <button
-                      onClick={() => goTo('/akce')}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 transition-all group text-left"
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-pink-500/20 border border-red-500/20 flex items-center justify-center flex-shrink-0 group-hover:border-red-500/40 transition-all">
-                        <Flame className="w-5 h-5 text-red-400" />
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-white font-bold text-sm block">Akce & Slevy</span>
-                        <span className="text-gray-500 text-xs">Aktuální zvýhodněné nabídky</span>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-red-400 transition-colors" />
-                    </button>
-
-                    {/* Akademie */}
-                    <button
-                      onClick={() => goTo('/akademie')}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-emerald-500/10 transition-all group text-left"
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 group-hover:border-emerald-500/40 transition-all">
-                        <BookOpen className="w-5 h-5 text-emerald-400" />
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-white font-bold text-sm block">Akademie</span>
-                        <span className="text-gray-500 text-xs">Vše o THC-X a účincích</span>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-emerald-400 transition-colors" />
-                    </button>
                   </div>
 
                   {/* Bottom CTA */}
@@ -139,6 +107,33 @@ export default function Header() {
                 </div>
               )}
             </div>
+
+            {/* Akademie — zpět jako samostatný link */}
+            <Link
+              to="/akademie"
+              className="hidden md:flex items-center gap-1.5 px-3 py-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all text-sm"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span className="font-medium">Akademie</span>
+            </Link>
+
+            {/* Akce — zpět jako samostatný link */}
+            <Link
+              to="/akce"
+              className="relative flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all text-sm"
+            >
+              <Flame className="w-4 h-4" />
+              <span className="hidden sm:inline font-medium">Akce</span>
+              <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+            </Link>
+
+            {/* Mobile: Akademie icon-only */}
+            <Link
+              to="/akademie"
+              className="flex md:hidden items-center px-2.5 py-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all"
+            >
+              <BookOpen className="w-4 h-4" />
+            </Link>
 
             {isAdmin && (
               <>
