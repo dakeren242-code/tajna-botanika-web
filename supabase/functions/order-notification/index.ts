@@ -2,8 +2,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const ADMIN_EMAIL = Deno.env.get("ADMIN_NOTIFICATION_EMAIL") || "tajnabotanika@seznam.cz";
-const BANK_ACCOUNT = "1234567890/0100"; // TODO: Replace with real account number
-const BANK_IBAN = "CZ00 0100 0000 0012 3456 7890"; // TODO: Replace with real IBAN
+const BANK_ACCOUNT = "2001645045/2010";
+const BANK_IBAN = "CZ6520100000002001645045";
 
 interface OrderItem {
   name: string;
