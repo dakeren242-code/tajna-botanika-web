@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, RefreshCw, User, Bot, Clock, Wifi, WifiOff, Eye, EyeOff, CheckCheck } from 'lucide-react';
+import { MessageCircle, Send, RefreshCw, User, Bot, Clock, Eye, CheckCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface ChatPresence {
@@ -13,6 +13,9 @@ interface ChatPresence {
 interface Conversation {
   conversation_id: string;
   user_email: string | null;
+  user_id: string | null;
+  customer_name: string | null;
+  order_count: number;
   last_message: string;
   last_time: string;
   unread: number;
@@ -27,6 +30,7 @@ interface Message {
   message: string;
   created_at: string;
   user_email?: string | null;
+  user_id?: string | null;
 }
 
 export default function SupportAdmin() {
@@ -61,16 +65,50 @@ export default function SupportAdmin() {
         const unreadAfterAdmin = lastAdminReply
           ? userMsgs.filter(m => new Date(m.created_at) > new Date(lastAdminReply.created_at)).length
           : userMsgs.length;
+        const firstUserMsg = userMsgs[0] as any;
 
         return {
           conversation_id: convId,
-          user_email: userMsgs[0]?.user_email || null,
+          user_email: firstUserMsg?.user_email || null,
+          user_id: firstUserMsg?.user_id || null,
+          customer_name: null,
+          order_count: 0,
           last_message: lastMsg.message,
           last_time: lastMsg.created_at,
           unread: unreadAfterAdmin,
           messages: msgs,
         };
       });
+
+      // Enrich with customer name + order count for logged-in users
+      const userIds = convList.map(c => c.user_id).filter(Boolean) as string[];
+      if (userIds.length > 0) {
+        const [profilesRes, ordersRes] = await Promise.all([
+          supabase.from('user_profiles').select('id, full_name').in('id', userIds),
+          supabase.from('orders').select('user_id').in('user_id', userIds),
+        ]);
+
+        const profileMap: Record<string, string> = {};
+        if (profilesRes.data) {
+          for (const p of profilesRes.data) {
+            if (p.full_name) profileMap[p.id] = p.full_name;
+          }
+        }
+
+        const orderCountMap: Record<string, number> = {};
+        if (ordersRes.data) {
+          for (const o of ordersRes.data) {
+            if (o.user_id) orderCountMap[o.user_id] = (orderCountMap[o.user_id] || 0) + 1;
+          }
+        }
+
+        for (const conv of convList) {
+          if (conv.user_id) {
+            conv.customer_name = profileMap[conv.user_id] || null;
+            conv.order_count = orderCountMap[conv.user_id] || 0;
+          }
+        }
+      }
 
       // Fetch presence data
       const { data: presenceData } = await supabase
@@ -182,14 +220,25 @@ export default function SupportAdmin() {
                       conv.presence?.is_online ? 'bg-green-400 shadow-sm shadow-green-400/50' : 'bg-gray-600'
                     }`} title={conv.presence?.is_online ? 'Online' : 'Offline'} />
                     <span className="text-sm font-semibold text-white truncate">
-                      {conv.user_email || 'Anonymni navstevnik'}
+                      {conv.customer_name || conv.user_email || 'Anonymní návštěvník'}
                     </span>
                   </div>
-                  {conv.unread > 0 && (
-                    <span className="w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">
-                      {conv.unread}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {conv.user_id && (
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                        conv.order_count > 0
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      }`}>
+                        {conv.order_count > 0 ? `Stálý (${conv.order_count}×)` : 'Nový'}
+                      </span>
+                    )}
+                    {conv.unread > 0 && (
+                      <span className="w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                        {conv.unread}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <p className="text-xs text-gray-500 truncate">{conv.last_message}</p>
                 <div className="flex items-center gap-2 mt-1">
@@ -225,10 +274,26 @@ export default function SupportAdmin() {
                   <div className="px-4 py-2 border-b border-white/10 flex items-center gap-3 bg-white/[0.02]">
                     <span className={`w-2.5 h-2.5 rounded-full ${selConv.presence?.is_online ? 'bg-green-400 shadow-sm shadow-green-400/50 animate-pulse' : 'bg-gray-600'}`} />
                     <div className="flex-1 min-w-0">
-                      <span className="text-sm font-semibold text-white">{selConv.user_email || 'Anonymni navstevnik'}</span>
-                      <span className="text-xs text-gray-500 ml-2">
-                        {selConv.presence?.is_online ? 'Prave online' :
-                          selConv.presence?.last_seen_at ? `Naposledy: ${formatTime(selConv.presence.last_seen_at)}` : ''}
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-white">
+                          {selConv.customer_name || selConv.user_email || 'Anonymní návštěvník'}
+                        </span>
+                        {selConv.user_id && (
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                            selConv.order_count > 0
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                          }`}>
+                            {selConv.order_count > 0 ? `Stálý zákazník (${selConv.order_count} obj.)` : 'Nový zákazník'}
+                          </span>
+                        )}
+                      </div>
+                      {selConv.user_email && selConv.customer_name && (
+                        <span className="text-[10px] text-gray-500">{selConv.user_email}</span>
+                      )}
+                      <span className="text-xs text-gray-500">
+                        {selConv.presence?.is_online ? ' · Právě online' :
+                          selConv.presence?.last_seen_at ? ` · Naposledy: ${formatTime(selConv.presence.last_seen_at)}` : ''}
                       </span>
                     </div>
                     {selConv.presence?.last_read_at && (

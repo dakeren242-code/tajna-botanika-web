@@ -18,27 +18,6 @@ const QUICK_REPLIES = [
   { label: '🌿 Produkty', keyword: 'thc' },
 ];
 
-const AUTO_REPLIES: Record<string, string> = {
-  'doručení': '📦 Doručení zvládneme do 1 2 pracovních dnů přes Zásilkovnu! Vyberete si výdejní místo přímo při objednávce. Nad 1 000 Kč máte dopravu ZDARMA 🎉',
-  'doprava': '🚚 Posíláme přes Zásilkovnu a doručíme do 1 2 pracovních dnů. Nad 1 000 Kč je doprava zdarma! Výdejní místo si vyberete pohodlně při objednávce 📍',
-  'platba': '💳 Platit můžete kartou, převodem i dobírkou. Všechny platby jsou plně zabezpečené šifrováním SSL 🔒',
-  'vrácení': '✅ Máme 30denní záruku spokojenosti! Pokud vám cokoliv nevyhovuje, napište nám a najdeme řešení. Vaše spokojenost je pro nás priorita 💚',
-  'sleva': '🎁 Super tip: při registraci dostanete automaticky 15% slevu na první objednávku! Slevový kód najdete ve svém profilu hned po přihlášení ✨',
-  'thc': '🌿 THC-X je plně legální kanabinoid v České republice. Všechny naše produkty jsou laboratorně testované a splňují veškeré zákonné požadavky 🔬',
-  'kontakt': '📧 Můžete nám napsat na info@tajnabotanika.online nebo přímo sem do chatu. Obvykle odpovíme do 5 minut! ⚡',
-  'legální': '✅ Ano, THC-X je plně legální v ČR. Jedná se o synteticky odvozený kanabinoid, který nespadá pod kontrolované látky. Naše produkty mají laboratorní certifikáty 📋',
-  'objednávka': '🛒 Stačí vybrat produkt, přidat do košíku a dokončit objednávku. Celý proces zabere asi 2 minuty! Pokud potřebujete pomoct, jsme tu pro vás 😊',
-  'kvalita': '🔬 Každý náš produkt prochází laboratorním testováním. Garantujeme prémiovou kvalitu a čistotu. Certifikáty najdete u každého produktu na stránce ✅',
-};
-
-function getAutoReply(message: string): string | null {
-  const lower = message.toLowerCase();
-  for (const [keyword, reply] of Object.entries(AUTO_REPLIES)) {
-    if (lower.includes(keyword)) return reply;
-  }
-  return null;
-}
-
 export default function SupportChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -204,28 +183,41 @@ export default function SupportChat() {
       });
     } catch {}
 
-    // Show typing indicator
+    // Show typing indicator while AI processes
     setIsTyping(true);
 
-    const autoReply = getAutoReply(text);
-    const delay = autoReply ? 600 + Math.random() * 400 : 800 + Math.random() * 600;
+    try {
+      const result = await supabase.functions.invoke('support-ai-reply', {
+        body: {
+          conversation_id: convId,
+          message: text.trim(),
+          user_email: user?.email || null,
+          user_id: user?.id || null,
+        },
+      });
 
-    setTimeout(() => {
       setIsTyping(false);
-      const botMsg: ChatMessage = {
-        id: `bot_${Date.now()}`,
-        text: autoReply || 'Děkujeme za zprávu! 😊 Náš tým se na to hned podívá. Obvykle odpovíme do 5 minut ⚡\n\nMůžete zatím pokračovat v prohlížení, jakmile odpovíme, dáme vám vědět!',
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, botMsg]);
 
-      supabase.from('support_messages').insert({
-        conversation_id: convId,
-        sender: 'bot',
-        message: botMsg.text,
-      }).then(() => {});
-    }, delay);
+      const reply = result.data?.reply;
+      if (reply) {
+        setMessages(prev => [...prev, {
+          id: `bot_${Date.now()}`,
+          text: reply,
+          sender: 'bot' as const,
+          timestamp: new Date(),
+        }]);
+      } else {
+        throw new Error('No reply from AI');
+      }
+    } catch {
+      setIsTyping(false);
+      setMessages(prev => [...prev, {
+        id: `bot_${Date.now()}`,
+        text: 'Děkujeme za zprávu! 😊 Brzy se vám ozveme. Pro rychlejší pomoc nás kontaktujte na tajnabotanika@seznam.cz ⚡',
+        sender: 'bot' as const,
+        timestamp: new Date(),
+      }]);
+    }
   }, [conversationId, user]);
 
   const sendMessage = useCallback(async () => {

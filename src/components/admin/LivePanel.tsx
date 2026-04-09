@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import {
   Users, Package, AlertTriangle, Mail, Eye, DollarSign, RefreshCw,
-  Ticket, ShoppingCart, TrendingUp, UserCheck, Clock
+  Ticket, ShoppingCart, TrendingUp, UserCheck, BarChart2
 } from 'lucide-react';
 
 interface Contact {
@@ -52,12 +52,21 @@ interface DiscountCode {
   expires_at: string | null;
 }
 
+interface DayStats {
+  date: string;
+  label: string;
+  orders: number;
+  newContacts: number;
+  registrations: number;
+}
+
 export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [products, setProducts] = useState<ProductStock[]>([]);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [discounts, setDiscounts] = useState<DiscountCode[]>([]);
   const [userCount, setUserCount] = useState(0);
+  const [userDates, setUserDates] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -67,13 +76,16 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
       supabase.from('products').select('id, name, stock, category').order('stock', { ascending: true }),
       supabase.from('orders').select('id, order_number, total_amount, payment_status, status, created_at, customer_email, customer_first_name, customer_last_name, first_name, last_name, email, payment_method, shipping_method, discount_amount').order('created_at', { ascending: false }),
       supabase.from('discount_codes').select('*').order('created_at', { ascending: false }),
-      supabase.from('user_profiles').select('id', { count: 'exact' }),
+      supabase.from('user_profiles').select('id, created_at').order('created_at', { ascending: false }),
     ]);
     if (c.data) setContacts(c.data);
     if (p.data) setProducts(p.data);
     if (o.data) setOrders(o.data);
     if (d.data) setDiscounts(d.data);
-    if (u.count !== null) setUserCount(u.count);
+    if (u.data) {
+      setUserCount(u.data.length);
+      setUserDates(u.data.map((r: any) => r.created_at));
+    }
     setLoading(false);
   };
 
@@ -87,6 +99,24 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
   const outStock = products.filter(p => (p.stock ?? 0) === 0);
   const activeDisc = discounts.filter(d => !d.is_used && (!d.expires_at || new Date(d.expires_at) > new Date()));
   const usedDisc = discounts.filter(d => d.is_used);
+
+  // Daily stats for last 7 days
+  const dayNames = ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'];
+  const dailyStats: DayStats[] = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    const dateStr = d.toISOString().split('T')[0];
+    const label = i === 6 ? 'Dnes' : i === 5 ? 'Včera' : dayNames[d.getDay()];
+    return {
+      date: dateStr,
+      label,
+      orders: orders.filter(o => o.created_at.startsWith(dateStr)).length,
+      newContacts: contacts.filter(c => c.created_at.startsWith(dateStr)).length,
+      registrations: userDates.filter(d2 => d2.startsWith(dateStr)).length,
+    };
+  });
+  const maxDayOrders = Math.max(...dailyStats.map(d => d.orders), 1);
+  const maxDayContacts = Math.max(...dailyStats.map(d => d.newContacts + d.registrations), 1);
 
   const ago = (d: string) => {
     const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
@@ -140,6 +170,72 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
             </div>
           );
         })}
+      </div>
+
+      {/* Daily activity - last 7 days */}
+      <div className="bg-black/30 border border-white/5 rounded-xl p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart2 className="w-4 h-4 text-emerald-400" />
+          <span className="text-sm font-bold text-white">Denní aktivita (posledních 7 dní)</span>
+          <span className="text-[10px] text-gray-500 ml-auto">Objednávky · Nové kontakty · Registrace</span>
+        </div>
+        <div className="grid grid-cols-7 gap-2">
+          {dailyStats.map((day, i) => {
+            const orderHeight = day.orders > 0 ? Math.max(8, Math.round((day.orders / maxDayOrders) * 60)) : 0;
+            const contactHeight = (day.newContacts + day.registrations) > 0
+              ? Math.max(8, Math.round(((day.newContacts + day.registrations) / maxDayContacts) * 60))
+              : 0;
+            const isToday = i === 6;
+            return (
+              <div key={day.date} className={`flex flex-col items-center gap-1 ${isToday ? 'opacity-100' : 'opacity-70'}`}>
+                {/* Bar chart area */}
+                <div className="flex items-end gap-0.5 h-16">
+                  {/* Orders bar (emerald) */}
+                  <div className="flex flex-col items-center">
+                    {day.orders > 0 && (
+                      <span className="text-[8px] text-emerald-400 font-bold mb-0.5">{day.orders}</span>
+                    )}
+                    <div
+                      className={`w-3 rounded-sm ${isToday ? 'bg-emerald-400' : 'bg-emerald-500/40'}`}
+                      style={{ height: `${orderHeight}px`, minHeight: day.orders > 0 ? '8px' : '2px', opacity: day.orders > 0 ? 1 : 0.2 }}
+                    />
+                  </div>
+                  {/* Contacts+Registrations bar (blue) */}
+                  <div className="flex flex-col items-center">
+                    {(day.newContacts + day.registrations) > 0 && (
+                      <span className="text-[8px] text-blue-400 font-bold mb-0.5">{day.newContacts + day.registrations}</span>
+                    )}
+                    <div
+                      className={`w-3 rounded-sm ${isToday ? 'bg-blue-400' : 'bg-blue-500/40'}`}
+                      style={{ height: `${contactHeight}px`, minHeight: (day.newContacts + day.registrations) > 0 ? '8px' : '2px', opacity: (day.newContacts + day.registrations) > 0 ? 1 : 0.2 }}
+                    />
+                  </div>
+                </div>
+                {/* Day label */}
+                <span className={`text-[10px] font-bold ${isToday ? 'text-white' : 'text-gray-500'}`}>{day.label}</span>
+                {/* Totals below */}
+                {(day.orders > 0 || day.newContacts + day.registrations > 0) && (
+                  <div className="text-[8px] text-center leading-tight">
+                    {day.orders > 0 && <div className="text-emerald-400">{day.orders} obj.</div>}
+                    {(day.newContacts + day.registrations) > 0 && (
+                      <div className="text-blue-400">{day.newContacts + day.registrations} kontaktů</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/5">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-sm bg-emerald-400" />
+            <span className="text-[10px] text-gray-500">Objednávky</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-sm bg-blue-400" />
+            <span className="text-[10px] text-gray-500">Nové kontakty + registrace</span>
+          </div>
+        </div>
       </div>
 
       {/* Low stock */}

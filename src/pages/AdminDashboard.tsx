@@ -639,7 +639,10 @@ export default function AdminDashboard() {
                                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${psl.color}`}>{psl.label}</span>
                               </div>
                               <div className="flex items-center gap-4 text-sm text-gray-400">
-                                <span>{new Date(order.created_at).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                                <span className="flex items-center gap-1">
+                                  <span>{new Date(order.created_at).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                                  <span className="text-emerald-400/70 font-mono text-xs">{new Date(order.created_at).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}</span>
+                                </span>
                                 <span className="text-white font-bold">{formatAmount(order.total_amount)} Kč</span>
                                 {orderItems[order.id] && (
                                   <span className="text-xs px-2 py-0.5 bg-emerald-500/20 text-emerald-400 font-bold rounded-full">
