@@ -346,7 +346,7 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
     }
 
     const capiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/facebook-capi`;
-    await fetch(capiUrl, {
+    const response = await fetch(capiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -354,6 +354,10 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
       },
       body: JSON.stringify(payload),
     });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      console.error('CAPI error:', response.status, err);
+    }
   } catch (error) {
     console.error('Failed to send Facebook CAPI event:', error);
   }
@@ -437,6 +441,9 @@ export function trackPageView(pagePath?: string) {
       if (cachedUserPhone) enriched.user_phone = cachedUserPhone;
       if (cachedUserFirstName) enriched.user_first_name = cachedUserFirstName;
       if (cachedUserLastName) enriched.user_last_name = cachedUserLastName;
+      if (cachedUserCity) enriched.user_city = cachedUserCity;
+      if (cachedUserZip) enriched.user_zip = cachedUserZip;
+      if (cachedUserCountry) enriched.user_country = cachedUserCountry;
       sendToFacebookCAPI('PageView', enriched, eventId, consent.marketing);
     }, 1500);
   }

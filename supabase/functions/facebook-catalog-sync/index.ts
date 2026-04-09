@@ -158,14 +158,12 @@ Deno.serve(async (req: Request) => {
     if (action === "sync" || action === "create") {
       console.log(`🔄 Starting product sync...`);
 
-      // Use batch API to sync products
-      const batch_requests: BatchRequest[] = products.map((product: Product) => {
+      // Helper to build a product batch request with the given method
+      function buildProductRequest(product: Product, method: string): BatchRequest {
         const priceInCents = Math.round(Number(product.price) * 100);
-        const retailer_id = product.id; // Always use UUID — this is what's stored in the catalog as retailer_id
-
         return {
-          method: "UPDATE",
-          retailer_id: retailer_id,
+          method,
+          retailer_id: product.id,
           data: {
             name: product.name,
             description: product.description || product.name,
@@ -178,90 +176,126 @@ Deno.serve(async (req: Request) => {
             brand: "Botanika",
           },
         };
-      });
+      }
 
-      // Process in batches of 50 (Facebook limit)
+      async function sendBatch(batch: BatchRequest[]): Promise<BatchResponse & { ok: boolean }> {
+        const batchUrl = `https://graph.facebook.com/v21.0/${FACEBOOK_CATALOG_ID}/batch`;
+        const response = await fetch(batchUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ access_token: FACEBOOK_ACCESS_TOKEN, requests: batch }),
+        });
+        const result: BatchResponse = await response.json();
+        console.log(`📥 Batch response:`, JSON.stringify(result).substring(0, 500));
+        return { ...result, ok: response.ok };
+      }
+
+      // Pass 1: UPDATE all products (handles existing catalog items correctly).
+      // Pass 2: CREATE any that failed in pass 1 (they weren't in the catalog yet).
+      // This two-pass approach is safe: UPDATE never creates, CREATE never overwrites,
+      // so neither pass can break what the other did.
+      const needsCreate: Product[] = [];
       const batchSize = 50;
-      for (let i = 0; i < batch_requests.length; i += batchSize) {
-        const batch = batch_requests.slice(i, i + batchSize);
-        console.log(`📤 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(batch_requests.length / batchSize)} (${batch.length} products)`);
+
+      // --- Pass 1: UPDATE ---
+      const updateRequests = products.map((p: Product) => buildProductRequest(p, "UPDATE"));
+      for (let i = 0; i < updateRequests.length; i += batchSize) {
+        const batch = updateRequests.slice(i, i + batchSize);
+        const batchProducts = products.slice(i, i + batchSize);
+        console.log(`📤 [UPDATE] Batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(updateRequests.length / batchSize)} (${batch.length} products)`);
 
         try {
-          const batchUrl = `https://graph.facebook.com/v21.0/${FACEBOOK_CATALOG_ID}/batch`;
-          const response = await fetch(batchUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              access_token: FACEBOOK_ACCESS_TOKEN,
-              requests: batch,
-            }),
-          });
+          const result = await sendBatch(batch);
 
-          const result: BatchResponse = await response.json();
-          console.log(`📥 Batch response:`, JSON.stringify(result).substring(0, 500));
-
-          if (response.ok) {
-            // Facebook only returns handles for products whose data actually changed.
-            // Products already up-to-date are silently accepted (no handle, no error).
-            // Treat: has error entry → failed. No error entry → success.
+          if (result.ok) {
             const errorMap = new Map((result.errors || []).map(e => [e.retailer_id, e]));
-
             for (let j = 0; j < batch.length; j++) {
-              const retailer_id = batch[j].retailer_id;
-              const handle = result.handles?.[j];
-              const product = products.find((p: Product) => p.id === retailer_id);
-              const errorInfo = errorMap.get(retailer_id);
-
+              const product = batchProducts[j];
+              const errorInfo = errorMap.get(product.id);
               if (errorInfo) {
-                results.failed++;
-                results.errors.push({
-                  id: retailer_id,
-                  product_name: product?.name || "Unknown",
-                  error: errorInfo.error?.message || "Facebook rejected this product",
-                  rejection_reason: errorInfo.error?.message,
-                });
-                console.log(`❌ Product failed: ${product?.name} (${retailer_id})`);
+                // Queue for CREATE pass — product likely doesn't exist in catalog yet
+                console.log(`⚠️ UPDATE failed for ${product.name} (${product.id}), will retry with CREATE`);
+                needsCreate.push(product);
               } else {
                 results.success++;
                 results.synced_products.push({
-                  id: retailer_id,
-                  product_name: product?.name || "Unknown",
-                  catalog_id: handle || "unchanged",
+                  id: product.id,
+                  product_name: product.name,
+                  catalog_id: result.handles?.[j] || "unchanged",
                 });
-                console.log(`✅ Product synced: ${product?.name} (${retailer_id})`);
+                console.log(`✅ Product updated: ${product.name} (${product.id})`);
               }
             }
           } else {
-            console.error(`❌ Batch request failed:`, result);
-            // Batch failed entirely
-            for (const req of batch) {
-              const product = products.find((p: Product) =>
-                p.id === req.retailer_id || p.meta_catalog_id === req.retailer_id
-              );
-              results.failed++;
-              results.errors.push({
-                id: req.retailer_id,
-                product_name: product?.name || "Unknown",
-                error: JSON.stringify(result),
-                rejection_reason: (result as unknown as { error?: { message: string } }).error?.message || "Batch request failed",
-              });
-            }
+            console.error(`❌ UPDATE batch failed entirely, queuing all for CREATE`);
+            needsCreate.push(...batchProducts);
           }
         } catch (error) {
-          console.error(`❌ Batch processing error:`, error);
-          for (const req of batch) {
-            const product = products.find((p: Product) =>
-              p.id === req.retailer_id || p.meta_catalog_id === req.retailer_id
-            );
-            results.failed++;
-            results.errors.push({
-              id: req.retailer_id,
-              product_name: product?.name || "Unknown",
-              error: error instanceof Error ? error.message : "Unknown error",
-              rejection_reason: error instanceof Error ? error.message : "Unknown error",
-            });
+          console.error(`❌ UPDATE batch processing error:`, error);
+          needsCreate.push(...batchProducts);
+        }
+      }
+
+      // --- Pass 2: CREATE (products not yet in the catalog) ---
+      if (needsCreate.length > 0) {
+        console.log(`🆕 Creating ${needsCreate.length} product(s) not yet in catalog...`);
+        const createRequests = needsCreate.map((p: Product) => buildProductRequest(p, "CREATE"));
+
+        for (let i = 0; i < createRequests.length; i += batchSize) {
+          const batch = createRequests.slice(i, i + batchSize);
+          const batchProducts = needsCreate.slice(i, i + batchSize);
+          console.log(`📤 [CREATE] Batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(createRequests.length / batchSize)} (${batch.length} products)`);
+
+          try {
+            const result = await sendBatch(batch);
+
+            if (result.ok) {
+              const errorMap = new Map((result.errors || []).map(e => [e.retailer_id, e]));
+              for (let j = 0; j < batch.length; j++) {
+                const product = batchProducts[j];
+                const errorInfo = errorMap.get(product.id);
+                if (errorInfo) {
+                  results.failed++;
+                  results.errors.push({
+                    id: product.id,
+                    product_name: product.name,
+                    error: errorInfo.error?.message || "Facebook rejected this product",
+                    rejection_reason: errorInfo.error?.message,
+                  });
+                  console.log(`❌ Product failed: ${product.name} (${product.id})`);
+                } else {
+                  results.success++;
+                  results.synced_products.push({
+                    id: product.id,
+                    product_name: product.name,
+                    catalog_id: result.handles?.[j] || "created",
+                  });
+                  console.log(`✅ Product created: ${product.name} (${product.id})`);
+                }
+              }
+            } else {
+              console.error(`❌ CREATE batch failed entirely:`, result);
+              for (const product of batchProducts) {
+                results.failed++;
+                results.errors.push({
+                  id: product.id,
+                  product_name: product.name,
+                  error: JSON.stringify(result),
+                  rejection_reason: (result as unknown as { error?: { message: string } }).error?.message || "Batch request failed",
+                });
+              }
+            }
+          } catch (error) {
+            console.error(`❌ CREATE batch processing error:`, error);
+            for (const product of batchProducts) {
+              results.failed++;
+              results.errors.push({
+                id: product.id,
+                product_name: product.name,
+                error: error instanceof Error ? error.message : "Unknown error",
+                rejection_reason: error instanceof Error ? error.message : "Unknown error",
+              });
+            }
           }
         }
       }
