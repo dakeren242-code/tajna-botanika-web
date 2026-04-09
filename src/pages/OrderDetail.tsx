@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, Order, OrderItem, Address } from '../lib/supabase';
-import { ArrowLeft, Package, MapPin, CreditCard, FileText, User, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, CreditCard, FileText } from 'lucide-react';
 
 const statusLabels = {
   pending: { label: 'Čeká na zpracování', color: 'text-yellow-400 bg-yellow-500/10' },

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CheckCircle, Home, Package, Building2, Truck, Copy, Phone, MapPin, Clock, QrCode } from 'lucide-react';
+import { CheckCircle, Building2, Truck, Copy, MapPin, Clock, QrCode } from 'lucide-react';
 
 interface Confetti {
   id: number;
@@ -17,9 +17,6 @@ export function Success() {
   const orderNumber = searchParams.get('order');
   const paymentMethod = searchParams.get('payment');
   const amount = searchParams.get('amount');
-  const shipping = searchParams.get('shipping');
-  const cod = searchParams.get('cod');
-  const phone = searchParams.get('phone');
   const shippingMethod = searchParams.get('shippingMethod');
 
   const [confetti, setConfetti] = useState<Confetti[]>([]);
@@ -85,10 +82,7 @@ export function Success() {
     };
   }, []);
 
-  const shippingCost = shipping ? parseFloat(shipping) : 0;
-  const codFee = cod ? parseFloat(cod) : 0;
   const totalAmount = amount ? parseFloat(amount) : 0;
-  const _productsCost = totalAmount - shippingCost - codFee;
 
   // Generate short numeric variable symbol (max 10 digits for Czech banks)
   const rawDigits = (orderNumber || '').replace(/\D/g, '');

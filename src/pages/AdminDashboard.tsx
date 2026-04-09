@@ -2,7 +2,7 @@ import { useState, useEffect, Component, ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase, Order } from '../lib/supabase';
-import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag, Facebook, Radio, Trash2, BarChart3, AlertTriangle, Eye, Mail, Phone as PhoneIcon, MapPin, Truck, CreditCard, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { Shield, Package, DollarSign, Users, TrendingUp, ArrowLeft, ShoppingBag, Facebook, Radio, Trash2, BarChart3, AlertTriangle, Mail, Phone as PhoneIcon, MapPin, Truck, CreditCard, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import ProductManagement from '../components/admin/ProductManagement';
 import FacebookCatalogManager from '../components/admin/FacebookCatalogManager';
 import SupportAdmin from '../components/admin/SupportAdmin';
@@ -88,6 +88,7 @@ export default function AdminDashboard() {
     deliveredOrders: 0,
   });
   const [liveVisitors, setLiveVisitors] = useState(0);
+  const [ordersLoading, setOrdersLoading] = useState(true);
 
   useEffect(() => {
     if (authLoading) return;
@@ -111,44 +112,50 @@ export default function AdminDashboard() {
   }, []);
 
   const loadOrders = async () => {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
+    setOrdersLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (!error && data) {
-      setOrders(data);
+      if (!error && data) {
+        setOrders(data);
 
-      const totalRevenue = data
-        .filter((o) => o.payment_status === 'paid')
-        .reduce((sum, o) => sum + Number(o.total_amount), 0);
+        const totalRevenue = data
+          .filter((o) => o.payment_status === 'paid')
+          .reduce((sum, o) => sum + Number(o.total_amount), 0);
 
-      setStats({
-        totalOrders: data.length,
-        totalRevenue,
-        pendingOrders: data.filter((o) => o.status === 'pending').length,
-        deliveredOrders: data.filter((o) => o.status === 'delivered').length,
-      });
+        setStats({
+          totalOrders: data.length,
+          totalRevenue,
+          pendingOrders: data.filter((o) => o.status === 'pending').length,
+          deliveredOrders: data.filter((o) => o.status === 'delivered').length,
+        });
 
-      // Pre-load all order items for gram totals in preview
-      const orderIds = data.map(o => o.id);
-      if (orderIds.length > 0) {
-        const { data: allItems } = await supabase
-          .from('order_items')
-          .select('*')
-          .in('order_id', orderIds);
-        if (allItems) {
-          const grouped: Record<string, any[]> = {};
-          for (const item of allItems) {
-            if (!grouped[item.order_id]) grouped[item.order_id] = [];
-            grouped[item.order_id].push(item);
+        // Pre-load all order items for gram totals in preview
+        const orderIds = data.map(o => o.id);
+        if (orderIds.length > 0) {
+          const { data: allItems } = await supabase
+            .from('order_items')
+            .select('*')
+            .in('order_id', orderIds);
+          if (allItems) {
+            const grouped: Record<string, any[]> = {};
+            for (const item of allItems) {
+              if (!grouped[item.order_id]) grouped[item.order_id] = [];
+              grouped[item.order_id].push(item);
+            }
+            setOrderItems(grouped);
           }
-          setOrderItems(grouped);
         }
       }
+    } catch (_err) {
+      // Silently handle network errors — error boundary will catch render crashes
+    } finally {
+      setLoading(false);
+      setOrdersLoading(false);
     }
-
-    setLoading(false);
   };
 
   const loadOrderItems = async (orderId: string) => {
@@ -496,7 +503,15 @@ export default function AdminDashboard() {
 
           {activeTab === 'orders' && (
             <AdminErrorBoundary>
-              <div className="mb-6 flex items-center gap-4 px-6 py-4 bg-gradient-to-r from-green-500/15 to-emerald-500/10 border border-green-500/30 rounded-xl">
+              {ordersLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="flex flex-col items-center gap-3">
+                    <RefreshCw className="w-8 h-8 text-emerald-400 animate-spin" />
+                    <p className="text-gray-400 text-sm">Načítání objednávek...</p>
+                  </div>
+                </div>
+              ) : (
+              <><div className="mb-6 flex items-center gap-4 px-6 py-4 bg-gradient-to-r from-green-500/15 to-emerald-500/10 border border-green-500/30 rounded-xl">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
                   <Radio className="w-4 h-4 text-green-400" />
@@ -790,6 +805,8 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </div>
+              </>
+              )}
             </AdminErrorBoundary>
           )}
 

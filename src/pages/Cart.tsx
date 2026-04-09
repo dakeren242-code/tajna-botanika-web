@@ -4,7 +4,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ShoppingCart, Minus, Plus, Trash2, ArrowLeft, ShoppingBag, Truck, Zap, TrendingUp } from 'lucide-react';
 
 const FREE_SHIPPING_THRESHOLD = 1000;
-const SHIPPING_COST = 79;
 
 export default function Cart() {
   const { items, removeFromCart, updateQuantity, totalPrice, addToCart } = useCart();
@@ -12,7 +11,6 @@ export default function Cart() {
   const navigate = useNavigate();
 
   const isFreeShipping = totalPrice >= FREE_SHIPPING_THRESHOLD;
-  const shippingCost = isFreeShipping ? 0 : SHIPPING_COST;
   const remainingForFreeShipping = FREE_SHIPPING_THRESHOLD - totalPrice;
   const freeShippingProgress = Math.min((totalPrice / FREE_SHIPPING_THRESHOLD) * 100, 100);
 
@@ -80,7 +78,7 @@ export default function Cart() {
                       className="flex gap-4 p-4 bg-white/5 border border-emerald-500/10 rounded-xl"
                     >
                       <img
-                        src={item.product.image_url}
+                        src={item.product.image_url ?? ''}
                         alt={item.product.name}
                         className="w-24 h-24 object-cover rounded-lg"
                       />

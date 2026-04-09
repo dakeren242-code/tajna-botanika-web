@@ -21,9 +21,9 @@ interface PaymentAndShippingProps {
 const FREE_SHIPPING_THRESHOLD = 1000;
 const SHIPPING_COST = 79;
 const COD_FEE = 30;
-const PERSONAL_PICKUP_MIN_GRAMS = 10;
+// const PERSONAL_PICKUP_MIN_GRAMS = 10; // reserved for future use
 
-export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete, loading }: PaymentAndShippingProps) {
+export default function PaymentAndShipping({ totalPrice, totalGrams: _totalGrams, onComplete, loading }: PaymentAndShippingProps) {
   const [paymentMethod, setPaymentMethod] = useState<'bank_transfer' | 'cash_on_delivery'>('bank_transfer');
   const [shippingMethod, setShippingMethod] = useState<'zasilkovna' | 'personal' | undefined>(undefined);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -96,7 +96,8 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
     // If COD selected but shipping is personal, force bank_transfer
     const finalPayment = paymentMethod === 'cash_on_delivery' && isPersonal ? 'bank_transfer' : paymentMethod;
     // Map 'personal' back to 'personal_invoice' for DB compatibility
-    const finalShipping = shippingMethod === 'personal' ? 'personal_invoice' : shippingMethod;
+    // shippingMethod is guaranteed non-undefined here because validation passed above
+    const finalShipping = shippingMethod === 'personal' ? 'personal_invoice' : (shippingMethod as string);
 
     onComplete(finalPayment, finalShipping, {
       firstName,
@@ -110,8 +111,6 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
     }, appliedDiscount?.code, appliedDiscount?.percent);
   };
 
-  const isFormValid = firstName && lastName && email && phone && shippingMethod && termsAccepted &&
-    (!isZasilkovna || (address && city && zip));
 
   return (
     <div className="animate-fadeSlideIn" style={{ overflowAnchor: 'none' }}>
@@ -332,17 +331,25 @@ export default function PaymentAndShipping({ totalPrice, totalGrams, onComplete,
                       </div>
                     </div>
 
-                    {/* Priority processing banner */}
-                    <div className="mt-4 p-3.5 bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/10 border border-amber-400/30 rounded-lg">
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-xl">⚡</span>
-                        <div className="flex-1">
-                          <p className="text-amber-200 text-xs font-bold tracking-wide">PRIORITNÍ ZPRACOVÁNÍ</p>
-                          <p className="text-amber-300/70 text-[11px] mt-0.5">Objednávky s převodem odesíláme ještě tentýž den</p>
+                    {/* Priority processing banner — only shown when bank_transfer is selected */}
+                    {paymentMethod === 'bank_transfer' && (
+                      <div className="mt-4 p-4 bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-amber-500/15 border border-amber-400/40 rounded-xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-amber-400/10 to-transparent rounded-bl-full" />
+                        <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-amber-400/20 to-yellow-500/20 rounded-full flex items-center justify-center border border-amber-400/30">
+                            <span className="text-lg">⚡</span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <p className="text-amber-200 text-xs font-bold tracking-wide uppercase">Prioritní zpracování</p>
+                              <span className="px-1.5 py-0.5 bg-amber-400/20 text-amber-300 text-[9px] font-bold rounded-full border border-amber-400/30">VIP</span>
+                            </div>
+                            <p className="text-amber-300/80 text-[11px] leading-relaxed">Objednávky s převodem odesíláme <span className="text-amber-200 font-semibold">tentýž den</span> — žádné čekání</p>
+                          </div>
+                          <span className="text-lg flex-shrink-0">🏆</span>
                         </div>
-                        <span className="text-xl">🏆</span>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
