@@ -40,7 +40,7 @@ const bundleConfig: Record<BundleTier, {
     savingsPercent: 27,
     color: 'from-amber-500/15 to-orange-500/15',
     borderColor: 'border-amber-400/25',
-    features: ['Premium magnetická krabice', 'Kompletní dokumentace', 'Sběratelská karta'],
+    features: ['Kompletní dokumentace', 'Certifikáty analýz', 'Průvodce odrůdami'],
   },
   complete: {
     name: 'Kompletní Kolekce',
@@ -52,7 +52,7 @@ const bundleConfig: Record<BundleTier, {
     savingsPercent: 32,
     color: 'from-emerald-500/15 to-teal-500/15',
     borderColor: 'border-emerald-400/25',
-    features: ['Luxusní dárková kazeta', 'Botanická mapa terpenů', 'Certifikát autenticity', 'Doprava zdarma'],
+    features: ['Kompletní dokumentace', 'Certifikáty analýz', 'Průvodce odrůdami', 'Doprava zdarma'],
   },
 };
 
@@ -78,7 +78,7 @@ const typeColors: Record<string, string> = {
 export default function BundleBuilder() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addBundleToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedTier, setSelectedTier] = useState<BundleTier>(
     (searchParams.get('tier') as BundleTier) || 'collector'
@@ -128,9 +128,7 @@ export default function BundleBuilder() {
 
   const handleAddToCart = () => {
     const selected = products.filter(p => selectedProducts.has(p.id));
-    selected.forEach(product => {
-      addToCart(product, config.gramAmount, 1);
-    });
+    addBundleToCart(selected, config.gramAmount, selectedTier, config.name, config.bundlePrice);
     setAdded(true);
     setTimeout(() => {
       navigate('/cart');

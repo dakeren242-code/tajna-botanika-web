@@ -219,4 +219,8 @@ export interface CartItem {
   product: Product;
   quantity: number;
   gramAmount: string;
+  bundleId?: string;
+  bundleName?: string;
+  bundlePrice?: number;
+  bundleProducts?: Product[];
 }

@@ -7,6 +7,7 @@ import { useAuth } from './AuthContext';
 interface CartContextType {
   items: CartItem[];
   addToCart: (product: Product, gramAmount: string, quantity?: number) => void;
+  addBundleToCart: (products: Product[], gramAmount: string, bundleId: string, bundleName: string, bundlePrice: number) => void;
   removeFromCart: (productId: string, gramAmount: string) => void;
   updateQuantity: (productId: string, gramAmount: string, quantity: number) => void;
   clearCart: () => void;
@@ -45,7 +46,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         sessionStorage.setItem('vsid', s);
         return s;
       })();
-    const total = items.reduce((sum, item) => sum + getPrice(item.gramAmount) * item.quantity, 0);
+    const total = items.reduce((sum, item) => {
+      if (item.bundlePrice) return sum + item.bundlePrice * item.quantity;
+      return sum + getPrice(item.gramAmount) * item.quantity;
+    }, 0);
     supabase.from('cart_sessions').upsert({
       session_id: sid,
       user_id: user?.id ?? null,
@@ -88,6 +92,38 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return () => { if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current); };
   }, [items, user]);
 
+  const addBundleToCart = useCallback((products: Product[], gramAmount: string, bundleId: string, bundleName: string, bundlePrice: number) => {
+    trackEvent('AddToCart', {
+      content_name: bundleName,
+      content_ids: products.map(p => p.id),
+      content_type: 'product_group',
+      value: bundlePrice,
+      currency: 'CZK',
+      contents: products.map(p => ({ id: p.id, quantity: 1 })),
+    });
+
+    setItems((current) => {
+      // Check if same bundle already in cart
+      const existing = current.find(item => item.bundleId === bundleId);
+      if (existing) {
+        return current.map(item =>
+          item.bundleId === bundleId
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...current, {
+        product: products[0],
+        quantity: 1,
+        gramAmount,
+        bundleId,
+        bundleName,
+        bundlePrice,
+        bundleProducts: products,
+      }];
+    });
+  }, []);
+
   const addToCart = useCallback((product: Product, gramAmount: string, quantity: number = 1) => {
     const itemPrice = getPrice(gramAmount);
     const totalValue = itemPrice * quantity;
@@ -118,22 +154,32 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
-  const removeFromCart = useCallback((productId: string, gramAmount: string) => {
+  const removeFromCart = useCallback((productId: string, gramAmountOrBundleId: string) => {
     setItems((current) =>
-      current.filter((item) => !(item.product.id === productId && item.gramAmount === gramAmount))
+      current.filter((item) => {
+        // Bundle removal
+        if (item.bundleId && item.bundleId === gramAmountOrBundleId) return false;
+        // Regular item removal
+        if (!item.bundleId && item.product.id === productId && item.gramAmount === gramAmountOrBundleId) return false;
+        return true;
+      })
     );
   }, []);
 
-  const updateQuantity = useCallback((productId: string, gramAmount: string, quantity: number) => {
+  const updateQuantity = useCallback((productId: string, gramAmountOrBundleId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(productId, gramAmount);
+      removeFromCart(productId, gramAmountOrBundleId);
       return;
     }
 
     setItems((current) =>
-      current.map((item) =>
-        item.product.id === productId && item.gramAmount === gramAmount ? { ...item, quantity } : item
-      )
+      current.map((item) => {
+        // Bundle quantity update
+        if (item.bundleId && item.bundleId === gramAmountOrBundleId) return { ...item, quantity };
+        // Regular item quantity update
+        if (!item.bundleId && item.product.id === productId && item.gramAmount === gramAmountOrBundleId) return { ...item, quantity };
+        return item;
+      })
     );
   }, [removeFromCart]);
 
@@ -147,19 +193,23 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const totalPrice = useMemo(() =>
-    items.reduce((sum, item) => sum + getPrice(item.gramAmount) * item.quantity, 0),
+    items.reduce((sum, item) => {
+      if (item.bundlePrice) return sum + item.bundlePrice * item.quantity;
+      return sum + getPrice(item.gramAmount) * item.quantity;
+    }, 0),
     [items]
   );
 
   const value = useMemo(() => ({
     items,
     addToCart,
+    addBundleToCart,
     removeFromCart,
     updateQuantity,
     clearCart,
     totalItems,
     totalPrice,
-  }), [items, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice]);
+  }), [items, addToCart, addBundleToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };

@@ -63,42 +63,73 @@ export default function Cart() {
 
               <div className="space-y-4">
                 {items.map((item) => {
+                  const isBundle = !!item.bundleId;
                   const priceMap: Record<string, number> = {
                     '1g': 190,
                     '3g': 490,
                     '5g': 690,
                     '10g': 1290,
                   };
-                  const unitPrice = priceMap[item.gramAmount] || 190;
+                  const unitPrice = isBundle ? item.bundlePrice! : (priceMap[item.gramAmount] || 190);
                   const totalItemPrice = unitPrice * item.quantity;
+                  const originalBundlePrice = isBundle && item.bundleProducts
+                    ? item.bundleProducts.length * (priceMap[item.gramAmount] || 190)
+                    : 0;
 
                   return (
                     <div
-                      key={`${item.product.id}-${item.gramAmount}`}
-                      className="flex gap-4 p-4 bg-white/5 border border-emerald-500/10 rounded-xl"
+                      key={isBundle ? `bundle-${item.bundleId}` : `${item.product.id}-${item.gramAmount}`}
+                      className={`flex gap-4 p-4 rounded-xl ${
+                        isBundle
+                          ? 'bg-gradient-to-br from-amber-500/10 to-orange-500/5 border border-amber-500/20'
+                          : 'bg-white/5 border border-emerald-500/10'
+                      }`}
                     >
-                      <img
-                        src={item.product.image_url ?? ''}
-                        alt={item.product.name}
-                        className="w-24 h-24 object-cover rounded-lg"
-                      />
+                      {isBundle ? (
+                        <div className="w-24 h-24 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <ShoppingBag className="w-10 h-10 text-amber-400" />
+                        </div>
+                      ) : (
+                        <img
+                          src={item.product.image_url ?? ''}
+                          alt={item.product.name}
+                          className="w-24 h-24 object-cover rounded-lg"
+                        />
+                      )}
 
                       <div className="flex-1">
                         <h3 className="text-lg font-semibold text-white mb-1">
-                          {item.product.name}
+                          {isBundle ? item.bundleName : item.product.name}
                         </h3>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded">
-                            {item.gramAmount}
+                          <span className={`px-2 py-1 text-xs font-bold rounded ${
+                            isBundle
+                              ? 'bg-amber-500/20 text-amber-400'
+                              : 'bg-emerald-500/20 text-emerald-400'
+                          }`}>
+                            {isBundle ? `${item.bundleProducts?.length} odrůd × ${item.gramAmount}` : item.gramAmount}
                           </span>
+                          {isBundle && originalBundlePrice > 0 && (
+                            <span className="px-2 py-1 bg-emerald-500/15 text-emerald-400 text-xs font-bold rounded">
+                              Ušetříte {originalBundlePrice - unitPrice} Kč
+                            </span>
+                          )}
                         </div>
-                        <p className="text-emerald-400 font-bold mb-3">
-                          {unitPrice.toFixed(2)} Kč
+                        {isBundle && item.bundleProducts && (
+                          <p className="text-gray-500 text-xs mb-2 leading-relaxed">
+                            {item.bundleProducts.map(p => p.name).join(' · ')}
+                          </p>
+                        )}
+                        <p className={`font-bold mb-3 ${isBundle ? 'text-amber-400' : 'text-emerald-400'}`}>
+                          {isBundle && originalBundlePrice > 0 && (
+                            <span className="text-gray-600 line-through text-sm mr-2">{originalBundlePrice} Kč</span>
+                          )}
+                          {unitPrice} Kč
                         </p>
 
                         <div className="flex items-center gap-3">
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.gramAmount, item.quantity - 1)}
+                            onClick={() => updateQuantity(item.product.id, item.bundleId || item.gramAmount, item.quantity - 1)}
                             className="p-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-lg transition-colors"
                           >
                             <Minus className="w-4 h-4 text-emerald-400" />
@@ -107,7 +138,7 @@ export default function Cart() {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.gramAmount, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.product.id, item.bundleId || item.gramAmount, item.quantity + 1)}
                             className="p-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-lg transition-colors"
                           >
                             <Plus className="w-4 h-4 text-emerald-400" />
@@ -117,13 +148,13 @@ export default function Cart() {
 
                       <div className="flex flex-col items-end justify-between">
                         <button
-                          onClick={() => removeFromCart(item.product.id, item.gramAmount)}
+                          onClick={() => removeFromCart(item.product.id, item.bundleId || item.gramAmount)}
                           className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>
                         <p className="text-white font-bold">
-                          {totalItemPrice.toFixed(2)} Kč
+                          {totalItemPrice} Kč
                         </p>
                       </div>
                     </div>
