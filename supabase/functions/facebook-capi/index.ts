@@ -107,8 +107,14 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    // Parse body once — reused for domain check and event processing.
+    // Never call req.json() twice or combine req.clone().json() + req.json():
+    // in Deno Deploy's edge runtime the body stream is consumed on first read,
+    // so a second parse silently fails and drops the event.
+    const body = await req.json();
+    const { event_name, custom_data, user_data, event_source_url, event_id, data_processing_options, data_processing_options_country, data_processing_options_state } = body;
+
     // Block events from non-production domains
-    const body = await req.clone().json();
     const sourceUrl = body?.event_source_url || '';
     const ALLOWED_DOMAIN = 'tajnabotanika.online';
     if (sourceUrl && !sourceUrl.includes(ALLOWED_DOMAIN)) {
@@ -140,8 +146,6 @@ Deno.serve(async (req: Request) => {
         }
       );
     }
-
-    const { event_name, custom_data, user_data, event_source_url, event_id, data_processing_options, data_processing_options_country, data_processing_options_state } = await req.json();
 
     const validation = isValidEventData(event_name, custom_data);
     if (!validation.valid) {

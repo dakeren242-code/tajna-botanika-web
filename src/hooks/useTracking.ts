@@ -359,15 +359,19 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` },
           body,
           keepalive: true,
-        }).catch(() => {});
+        }).then(r => { if (!r.ok) r.json().catch(() => ({})).then(err => console.error('CAPI error:', r.status, err)); }).catch(() => {});
       }
     } else {
-      await fetch(capiUrl, {
+      const response = await fetch(capiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` },
         body,
         keepalive: true,
       });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        console.error('CAPI error:', response.status, err);
+      }
     }
   } catch (error) {
     console.error('Failed to send Facebook CAPI event:', error);
