@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CreditCard, Building2, Truck, Package, Check, ChevronRight, MapPin, Clock, User, Mail, Phone as PhoneIcon, Tag, Loader2 } from 'lucide-react';
+import { Building2, Truck, Package, Check, ChevronRight, MapPin, Clock, User, Mail, Phone as PhoneIcon, Tag, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface PaymentAndShippingProps {
