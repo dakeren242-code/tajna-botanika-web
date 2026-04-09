@@ -46,7 +46,7 @@ export default function PaymentOk() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/order-history"
+              to="/orders"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all"
             >
               <Package className="w-5 h-5" />
