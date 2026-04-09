@@ -209,6 +209,19 @@ function PageViewTracker() {
   const location = useLocation();
   useEffect(() => {
     trackPageView(location.pathname);
+    // Track in Supabase for admin dashboard stats (fire-and-forget, no await)
+    let sid = sessionStorage.getItem('vsid');
+    if (!sid) {
+      sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      sessionStorage.setItem('vsid', sid);
+    }
+    supabase.auth.getUser().then(({ data }) => {
+      supabase.from('page_views').insert({
+        session_id: sid,
+        path: location.pathname,
+        user_id: data?.user?.id ?? null,
+      }).then(() => {/* silent */});
+    });
   }, [location.pathname]);
   return null;
 }

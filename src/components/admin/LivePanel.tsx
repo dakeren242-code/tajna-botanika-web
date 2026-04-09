@@ -58,6 +58,17 @@ interface DayStats {
   orders: number;
   newContacts: number;
   registrations: number;
+  pageViews: number;
+}
+
+interface PageViewRow {
+  created_at: string;
+}
+
+interface CartSessionRow {
+  item_count: number;
+  total_value: number;
+  updated_at: string;
 }
 
 export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
@@ -67,16 +78,21 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
   const [discounts, setDiscounts] = useState<DiscountCode[]>([]);
   const [userCount, setUserCount] = useState(0);
   const [userDates, setUserDates] = useState<string[]>([]);
+  const [pageViews, setPageViews] = useState<PageViewRow[]>([]);
+  const [cartSessions, setCartSessions] = useState<CartSessionRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
-    const [c, p, o, d, u] = await Promise.all([
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const [c, p, o, d, u, pv, cs] = await Promise.all([
       supabase.from('email_contacts').select('*').order('created_at', { ascending: false }),
       supabase.from('products').select('id, name, stock, category').order('stock', { ascending: true }),
       supabase.from('orders').select('id, order_number, total_amount, payment_status, status, created_at, customer_email, customer_first_name, customer_last_name, first_name, last_name, email, payment_method, shipping_method, discount_amount').order('created_at', { ascending: false }),
       supabase.from('discount_codes').select('*').order('created_at', { ascending: false }),
       supabase.from('user_profiles').select('id, created_at').order('created_at', { ascending: false }),
+      supabase.from('page_views').select('created_at').gte('created_at', sevenDaysAgo),
+      supabase.from('cart_sessions').select('item_count, total_value, updated_at').gt('item_count', 0),
     ]);
     if (c.data) setContacts(c.data);
     if (p.data) setProducts(p.data);
@@ -86,6 +102,8 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
       setUserCount(u.data.length);
       setUserDates(u.data.map((r: any) => r.created_at));
     }
+    if (pv.data) setPageViews(pv.data as PageViewRow[]);
+    if (cs.data) setCartSessions(cs.data as CartSessionRow[]);
     setLoading(false);
   };
 
@@ -100,6 +118,13 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
   const activeDisc = discounts.filter(d => !d.is_used && (!d.expires_at || new Date(d.expires_at) > new Date()));
   const usedDisc = discounts.filter(d => d.is_used);
 
+  // Cart abandonment stats
+  const activeCarts = cartSessions.length;
+  const cartTotal = cartSessions.reduce((s, c) => s + Number(c.total_value), 0);
+  const todayStr = new Date().toISOString().split('T')[0];
+  const pageViewsToday = pageViews.filter(pv => pv.created_at.startsWith(todayStr)).length;
+  const pageViewsTotal = pageViews.length;
+
   // Daily stats for last 7 days
   const dayNames = ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'];
   const dailyStats: DayStats[] = Array.from({ length: 7 }, (_, i) => {
@@ -113,10 +138,11 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
       orders: orders.filter(o => o.created_at.startsWith(dateStr)).length,
       newContacts: contacts.filter(c => c.created_at.startsWith(dateStr)).length,
       registrations: userDates.filter(d2 => d2.startsWith(dateStr)).length,
+      pageViews: pageViews.filter(pv => pv.created_at.startsWith(dateStr)).length,
     };
   });
   const maxDayOrders = Math.max(...dailyStats.map(d => d.orders), 1);
-  const maxDayContacts = Math.max(...dailyStats.map(d => d.newContacts + d.registrations), 1);
+  const maxDayViews = Math.max(...dailyStats.map(d => d.pageViews), 1);
 
   const ago = (d: string) => {
     const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
@@ -139,21 +165,42 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
       </div>
 
       {/* Live + KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div className="col-span-2 md:col-span-1 bg-gradient-to-br from-green-500/15 to-emerald-500/10 border border-green-500/30 rounded-xl p-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-gradient-to-br from-green-500/15 to-emerald-500/10 border border-green-500/30 rounded-xl p-4">
           <div className="flex items-center gap-1.5 mb-2">
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
             <Eye className="w-3.5 h-3.5 text-green-400" />
-            <span className="text-green-400 text-[10px] font-bold uppercase">Live</span>
+            <span className="text-green-400 text-[10px] font-bold uppercase">Live teď</span>
           </div>
           <span className="text-3xl font-black text-white">{liveVisitors}</span>
-          <p className="text-gray-500 text-[10px]">na webu teď</p>
+          <p className="text-gray-500 text-[10px]">návštěvníků online</p>
         </div>
+        <div className="bg-gradient-to-br from-cyan-500/10 border border-cyan-500/20 rounded-xl p-4">
+          <Eye className="w-4 h-4 mb-1.5 text-cyan-400 opacity-60" />
+          <span className="text-xl font-bold text-white block">{pageViewsToday}</span>
+          <p className="text-gray-500 text-[10px]">zobrazení dnes</p>
+          <p className="text-cyan-400/60 text-[9px] mt-0.5">{pageViewsTotal} za 7 dní</p>
+        </div>
+        <div className="bg-gradient-to-br from-orange-500/10 border border-orange-500/20 rounded-xl p-4">
+          <ShoppingCart className="w-4 h-4 mb-1.5 text-orange-400 opacity-60" />
+          <span className="text-xl font-bold text-white block">{activeCarts}</span>
+          <p className="text-gray-500 text-[10px]">košíků s položkami</p>
+          <p className="text-orange-400/60 text-[9px] mt-0.5">{cartTotal.toFixed(0)} Kč celkem</p>
+        </div>
+        <div className="bg-gradient-to-br from-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
+          <Package className="w-4 h-4 mb-1.5 text-emerald-400 opacity-60" />
+          <span className="text-xl font-bold text-white block">{paid.length}/{orders.length}</span>
+          <p className="text-gray-500 text-[10px]">zaplaceno/celkem obj.</p>
+          <p className="text-emerald-400/60 text-[9px] mt-0.5">{revenue.toFixed(0)} Kč tržby</p>
+        </div>
+      </div>
+      {/* KPIs row 2 */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 -mt-3">
         {[
           { l: 'Registrace', v: userCount, icon: Users, c: 'emerald' },
-          { l: 'Objednávky', v: `${paid.length}/${orders.length}`, icon: Package, c: 'blue' },
-          { l: 'Tržby', v: `${revenue.toFixed(0)} Kč`, icon: DollarSign, c: 'green' },
-          { l: 'Průměr', v: `${avg.toFixed(0)} Kč`, icon: TrendingUp, c: 'purple' },
+          { l: 'Tržby celkem', v: `${revenue.toFixed(0)} Kč`, icon: DollarSign, c: 'green' },
+          { l: 'Průměr obj.', v: `${avg.toFixed(0)} Kč`, icon: TrendingUp, c: 'purple' },
+          { l: 'Kontaktů', v: contacts.length, icon: Mail, c: 'blue' },
         ].map((k, i) => {
           const I = k.icon;
           const colors: Record<string, string> = {
@@ -177,19 +224,27 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
         <div className="flex items-center gap-2 mb-4">
           <BarChart2 className="w-4 h-4 text-emerald-400" />
           <span className="text-sm font-bold text-white">Denní aktivita (posledních 7 dní)</span>
-          <span className="text-[10px] text-gray-500 ml-auto">Objednávky · Nové kontakty · Registrace</span>
+          <span className="text-[10px] text-gray-500 ml-auto">Zobrazení · Objednávky</span>
         </div>
         <div className="grid grid-cols-7 gap-2">
           {dailyStats.map((day, i) => {
             const orderHeight = day.orders > 0 ? Math.max(8, Math.round((day.orders / maxDayOrders) * 60)) : 0;
-            const contactHeight = (day.newContacts + day.registrations) > 0
-              ? Math.max(8, Math.round(((day.newContacts + day.registrations) / maxDayContacts) * 60))
-              : 0;
+            const viewHeight = day.pageViews > 0 ? Math.max(4, Math.round((day.pageViews / maxDayViews) * 60)) : 0;
             const isToday = i === 6;
             return (
               <div key={day.date} className={`flex flex-col items-center gap-1 ${isToday ? 'opacity-100' : 'opacity-70'}`}>
                 {/* Bar chart area */}
                 <div className="flex items-end gap-0.5 h-16">
+                  {/* Page views bar (cyan) */}
+                  <div className="flex flex-col items-center">
+                    {day.pageViews > 0 && (
+                      <span className="text-[8px] text-cyan-400 font-bold mb-0.5">{day.pageViews}</span>
+                    )}
+                    <div
+                      className={`w-3 rounded-sm ${isToday ? 'bg-cyan-400' : 'bg-cyan-500/40'}`}
+                      style={{ height: `${viewHeight}px`, minHeight: day.pageViews > 0 ? '4px' : '2px', opacity: day.pageViews > 0 ? 1 : 0.2 }}
+                    />
+                  </div>
                   {/* Orders bar (emerald) */}
                   <div className="flex flex-col items-center">
                     {day.orders > 0 && (
@@ -200,41 +255,33 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
                       style={{ height: `${orderHeight}px`, minHeight: day.orders > 0 ? '8px' : '2px', opacity: day.orders > 0 ? 1 : 0.2 }}
                     />
                   </div>
-                  {/* Contacts+Registrations bar (blue) */}
-                  <div className="flex flex-col items-center">
-                    {(day.newContacts + day.registrations) > 0 && (
-                      <span className="text-[8px] text-blue-400 font-bold mb-0.5">{day.newContacts + day.registrations}</span>
-                    )}
-                    <div
-                      className={`w-3 rounded-sm ${isToday ? 'bg-blue-400' : 'bg-blue-500/40'}`}
-                      style={{ height: `${contactHeight}px`, minHeight: (day.newContacts + day.registrations) > 0 ? '8px' : '2px', opacity: (day.newContacts + day.registrations) > 0 ? 1 : 0.2 }}
-                    />
-                  </div>
                 </div>
                 {/* Day label */}
                 <span className={`text-[10px] font-bold ${isToday ? 'text-white' : 'text-gray-500'}`}>{day.label}</span>
                 {/* Totals below */}
-                {(day.orders > 0 || day.newContacts + day.registrations > 0) && (
-                  <div className="text-[8px] text-center leading-tight">
-                    {day.orders > 0 && <div className="text-emerald-400">{day.orders} obj.</div>}
-                    {(day.newContacts + day.registrations) > 0 && (
-                      <div className="text-blue-400">{day.newContacts + day.registrations} kontaktů</div>
-                    )}
-                  </div>
-                )}
+                <div className="text-[8px] text-center leading-tight">
+                  {day.pageViews > 0 && <div className="text-cyan-400">{day.pageViews} zobr.</div>}
+                  {day.orders > 0 && <div className="text-emerald-400">{day.orders} obj.</div>}
+                </div>
               </div>
             );
           })}
         </div>
         <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/5">
           <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-sm bg-cyan-400" />
+            <span className="text-[10px] text-gray-500">Zobrazení stránek</span>
+          </div>
+          <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-sm bg-emerald-400" />
             <span className="text-[10px] text-gray-500">Objednávky</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-sm bg-blue-400" />
-            <span className="text-[10px] text-gray-500">Nové kontakty + registrace</span>
-          </div>
+          {activeCarts > 0 && (
+            <div className="ml-auto flex items-center gap-1.5">
+              <ShoppingCart className="w-3 h-3 text-orange-400" />
+              <span className="text-[10px] text-orange-400 font-bold">{activeCarts} opuštěných košíků ({cartTotal.toFixed(0)} Kč)</span>
+            </div>
+          )}
         </div>
       </div>
 

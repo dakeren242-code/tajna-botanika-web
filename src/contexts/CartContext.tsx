@@ -37,6 +37,24 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
+  // Sync cart session stats to Supabase for admin abandonment tracking
+  useEffect(() => {
+    const sid = sessionStorage.getItem('vsid') ||
+      (() => {
+        const s = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+        sessionStorage.setItem('vsid', s);
+        return s;
+      })();
+    const total = items.reduce((sum, item) => sum + getPrice(item.gramAmount) * item.quantity, 0);
+    supabase.from('cart_sessions').upsert({
+      session_id: sid,
+      user_id: user?.id ?? null,
+      item_count: items.length,
+      total_value: total,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'session_id' }).then(() => {/* silent */});
+  }, [items, user]);
+
   // Sync cart to Supabase for logged-in users (debounced)
   useEffect(() => {
     if (!user) return;
