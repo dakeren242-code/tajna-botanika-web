@@ -72,6 +72,14 @@ interface CartSessionRow {
   updated_at: string;
 }
 
+interface OrderItem {
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  total_price: number;
+  created_at: string;
+}
+
 export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [products, setProducts] = useState<ProductStock[]>([]);
@@ -81,12 +89,13 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
   const [userDates, setUserDates] = useState<string[]>([]);
   const [pageViews, setPageViews] = useState<PageViewRow[]>([]);
   const [cartSessions, setCartSessions] = useState<CartSessionRow[]>([]);
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const [c, p, o, d, u, pv, cs] = await Promise.all([
+    const [c, p, o, d, u, pv, cs, oi] = await Promise.all([
       supabase.from('email_contacts').select('*').order('created_at', { ascending: false }),
       supabase.from('products').select('id, name, stock, category').order('stock', { ascending: true }),
       supabase.from('orders').select('id, order_number, total_amount, payment_status, status, created_at, customer_email, customer_first_name, customer_last_name, first_name, last_name, email, payment_method, shipping_method, discount_amount').order('created_at', { ascending: false }),
@@ -94,6 +103,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
       supabase.from('user_profiles').select('id, created_at').order('created_at', { ascending: false }),
       supabase.from('page_views').select('session_id, created_at').gte('created_at', sevenDaysAgo),
       supabase.from('cart_sessions').select('item_count, total_value, updated_at').gt('item_count', 0),
+      supabase.from('order_items').select('product_id, product_name, quantity, total_price, created_at').order('created_at', { ascending: false }),
     ]);
     if (c.data) setContacts(c.data);
     if (p.data) setProducts(p.data);
@@ -105,6 +115,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
     }
     if (pv.data) setPageViews(pv.data as PageViewRow[]);
     if (cs.data) setCartSessions(cs.data as CartSessionRow[]);
+    if (oi.data) setOrderItems(oi.data as OrderItem[]);
     setLoading(false);
   };
 
@@ -156,6 +167,32 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
   });
   const maxDayOrders = Math.max(...dailyStats.map(d => d.orders), 1);
   const maxDayViews = Math.max(...dailyStats.map(d => d.pageViews), 1);
+
+  // Revenue by time period
+  const revenueToday = paid.filter(o => toLocalDateStr(o.created_at) === todayStr).reduce((s, o) => s + Number(o.total_amount), 0);
+  const startOf7days = new Date(); startOf7days.setDate(startOf7days.getDate() - 6);
+  const startOf30days = new Date(); startOf30days.setDate(startOf30days.getDate() - 29);
+  const revenue7d = paid.filter(o => new Date(o.created_at) >= startOf7days).reduce((s, o) => s + Number(o.total_amount), 0);
+  const revenue30d = paid.filter(o => new Date(o.created_at) >= startOf30days).reduce((s, o) => s + Number(o.total_amount), 0);
+  const ordersToday = orders.filter(o => toLocalDateStr(o.created_at) === todayStr).length;
+  const orders7d = orders.filter(o => new Date(o.created_at) >= startOf7days).length;
+  const orders30d = orders.filter(o => new Date(o.created_at) >= startOf30days).length;
+  const conversionToday = uniqueVisitorsToday > 0 ? ((ordersToday / uniqueVisitorsToday) * 100).toFixed(1) : '0.0';
+
+  // Top products (from orderItems, aggregate by product_name)
+  const productMap: Record<string, { name: string; qty: number; revenue: number }> = {};
+  for (const item of orderItems) {
+    if (!productMap[item.product_id]) productMap[item.product_id] = { name: item.product_name, qty: 0, revenue: 0 };
+    productMap[item.product_id].qty += item.quantity;
+    productMap[item.product_id].revenue += Number(item.total_price);
+  }
+  const topProducts = Object.values(productMap).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+
+  // Order status breakdown
+  const statusCounts = { pending: 0, shipped: 0, delivered: 0, cancelled: 0 };
+  for (const o of orders) {
+    if (o.status in statusCounts) statusCounts[o.status as keyof typeof statusCounts]++;
+  }
 
   const ago = (d: string) => {
     const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000);
@@ -232,6 +269,30 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
         })}
       </div>
 
+      {/* Revenue + Conversion */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 -mt-3">
+        <div className="bg-black/30 border border-white/5 rounded-xl p-4">
+          <p className="text-gray-500 text-[10px] mb-1">Tržby dnes</p>
+          <span className="text-lg font-bold text-white">{revenueToday.toFixed(0)} Kč</span>
+          <p className="text-emerald-400/60 text-[9px] mt-0.5">{ordersToday} obj.</p>
+        </div>
+        <div className="bg-black/30 border border-white/5 rounded-xl p-4">
+          <p className="text-gray-500 text-[10px] mb-1">Tržby 7 dní</p>
+          <span className="text-lg font-bold text-white">{revenue7d.toFixed(0)} Kč</span>
+          <p className="text-emerald-400/60 text-[9px] mt-0.5">{orders7d} obj.</p>
+        </div>
+        <div className="bg-black/30 border border-white/5 rounded-xl p-4">
+          <p className="text-gray-500 text-[10px] mb-1">Tržby 30 dní</p>
+          <span className="text-lg font-bold text-white">{revenue30d.toFixed(0)} Kč</span>
+          <p className="text-emerald-400/60 text-[9px] mt-0.5">{orders30d} obj.</p>
+        </div>
+        <div className="bg-black/30 border border-white/5 rounded-xl p-4">
+          <p className="text-gray-500 text-[10px] mb-1">Konverze dnes</p>
+          <span className="text-lg font-bold text-white">{conversionToday}%</span>
+          <p className="text-gray-500/60 text-[9px] mt-0.5">{uniqueVisitorsToday} vis. → {ordersToday} obj.</p>
+        </div>
+      </div>
+
       {/* Daily activity - last 7 days */}
       <div className="bg-black/30 border border-white/5 rounded-xl p-5">
         <div className="flex items-center gap-2 mb-4">
@@ -295,6 +356,66 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
               <span className="text-[10px] text-orange-400 font-bold">{activeCarts} opuštěných košíků ({cartTotal.toFixed(0)} Kč)</span>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Top products + Order pipeline */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Top products */}
+        <div className="bg-black/30 border border-white/5 rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="w-4 h-4 text-emerald-400" />
+            <span className="text-sm font-bold text-white">Nejprodávanější produkty</span>
+          </div>
+          {topProducts.length === 0 ? (
+            <p className="text-gray-500 text-xs text-center py-4">Žádná data</p>
+          ) : (
+            <div className="space-y-2.5">
+              {topProducts.map((p, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="text-[10px] font-bold text-gray-600 w-4">{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-xs font-medium truncate">{p.name}</p>
+                    <p className="text-gray-500 text-[10px]">{p.qty} ks prodáno</p>
+                  </div>
+                  <span className="text-emerald-400 text-xs font-bold shrink-0">{p.revenue.toFixed(0)} Kč</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* Order status pipeline */}
+        <div className="bg-black/30 border border-white/5 rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Package className="w-4 h-4 text-blue-400" />
+            <span className="text-sm font-bold text-white">Pipeline objednávek</span>
+          </div>
+          <div className="space-y-3">
+            {([
+              { label: 'Čeká na vyřízení', key: 'pending', color: 'yellow' },
+              { label: 'Odesláno', key: 'shipped', color: 'blue' },
+              { label: 'Doručeno', key: 'delivered', color: 'emerald' },
+              { label: 'Zrušeno', key: 'cancelled', color: 'red' },
+            ] as const).map(s => {
+              const count = statusCounts[s.key];
+              const pct = orders.length > 0 ? Math.round((count / orders.length) * 100) : 0;
+              const barColor = s.color === 'yellow' ? 'bg-yellow-400' : s.color === 'blue' ? 'bg-blue-400' : s.color === 'emerald' ? 'bg-emerald-400' : 'bg-red-400';
+              return (
+                <div key={s.key}>
+                  <div className="flex justify-between text-[10px] mb-1">
+                    <span className="text-gray-400">{s.label}</span>
+                    <span className="text-white font-bold">{count} <span className="text-gray-500">({pct}%)</span></span>
+                  </div>
+                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div className={`h-full ${barColor} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-3 pt-3 border-t border-white/5 text-center">
+            <span className="text-[10px] text-gray-500">Celkem {orders.length} objednávek</span>
+          </div>
         </div>
       </div>
 
