@@ -62,6 +62,7 @@ interface DayStats {
 }
 
 interface PageViewRow {
+  session_id: string;
   created_at: string;
 }
 
@@ -91,7 +92,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
       supabase.from('orders').select('id, order_number, total_amount, payment_status, status, created_at, customer_email, customer_first_name, customer_last_name, first_name, last_name, email, payment_method, shipping_method, discount_amount').order('created_at', { ascending: false }),
       supabase.from('discount_codes').select('*').order('created_at', { ascending: false }),
       supabase.from('user_profiles').select('id, created_at').order('created_at', { ascending: false }),
-      supabase.from('page_views').select('created_at').gte('created_at', sevenDaysAgo),
+      supabase.from('page_views').select('session_id, created_at').gte('created_at', sevenDaysAgo),
       supabase.from('cart_sessions').select('item_count, total_value, updated_at').gt('item_count', 0),
     ]);
     if (c.data) setContacts(c.data);
@@ -121,24 +122,36 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
   // Cart abandonment stats
   const activeCarts = cartSessions.length;
   const cartTotal = cartSessions.reduce((s, c) => s + Number(c.total_value), 0);
-  const todayStr = new Date().toISOString().split('T')[0];
-  const pageViewsToday = pageViews.filter(pv => pv.created_at.startsWith(todayStr)).length;
-  const pageViewsTotal = pageViews.length;
+
+  // Helper: get local date string in Czech timezone (UTC+1/UTC+2)
+  const toLocalDateStr = (isoStr: string) => {
+    const d = new Date(isoStr);
+    return d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Prague' }); // 'sv-SE' gives YYYY-MM-DD
+  };
+  const todayStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Prague' });
+
+  // Count unique visitors (unique session_ids) per day
+  const uniqueVisitorsToday = new Set(
+    pageViews.filter(pv => toLocalDateStr(pv.created_at) === todayStr).map(pv => pv.session_id)
+  ).size;
+  const uniqueVisitorsWeek = new Set(pageViews.map(pv => pv.session_id)).size;
 
   // Daily stats for last 7 days
   const dayNames = ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'];
   const dailyStats: DayStats[] = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Prague' });
     const label = i === 6 ? 'Dnes' : i === 5 ? 'Včera' : dayNames[d.getDay()];
+    const dayPvs = pageViews.filter(pv => toLocalDateStr(pv.created_at) === dateStr);
     return {
       date: dateStr,
       label,
-      orders: orders.filter(o => o.created_at.startsWith(dateStr)).length,
-      newContacts: contacts.filter(c => c.created_at.startsWith(dateStr)).length,
-      registrations: userDates.filter(d2 => d2.startsWith(dateStr)).length,
-      pageViews: pageViews.filter(pv => pv.created_at.startsWith(dateStr)).length,
+      orders: orders.filter(o => toLocalDateStr(o.created_at) === dateStr).length,
+      newContacts: contacts.filter(c => toLocalDateStr(c.created_at) === dateStr).length,
+      registrations: userDates.filter(d2 => toLocalDateStr(d2) === dateStr).length,
+      // Unique visitors = unique session_ids that day
+      pageViews: new Set(dayPvs.map(pv => pv.session_id)).size,
     };
   });
   const maxDayOrders = Math.max(...dailyStats.map(d => d.orders), 1);
@@ -177,9 +190,9 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
         </div>
         <div className="bg-gradient-to-br from-cyan-500/10 border border-cyan-500/20 rounded-xl p-4">
           <Eye className="w-4 h-4 mb-1.5 text-cyan-400 opacity-60" />
-          <span className="text-xl font-bold text-white block">{pageViewsToday}</span>
-          <p className="text-gray-500 text-[10px]">zobrazení dnes</p>
-          <p className="text-cyan-400/60 text-[9px] mt-0.5">{pageViewsTotal} za 7 dní</p>
+          <span className="text-xl font-bold text-white block">{uniqueVisitorsToday}</span>
+          <p className="text-gray-500 text-[10px]">návštěvníků dnes</p>
+          <p className="text-cyan-400/60 text-[9px] mt-0.5">{uniqueVisitorsWeek} za 7 dní</p>
         </div>
         <div className="bg-gradient-to-br from-orange-500/10 border border-orange-500/20 rounded-xl p-4">
           <ShoppingCart className="w-4 h-4 mb-1.5 text-orange-400 opacity-60" />
@@ -223,8 +236,8 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
       <div className="bg-black/30 border border-white/5 rounded-xl p-5">
         <div className="flex items-center gap-2 mb-4">
           <BarChart2 className="w-4 h-4 text-emerald-400" />
-          <span className="text-sm font-bold text-white">Denní aktivita (posledních 7 dní)</span>
-          <span className="text-[10px] text-gray-500 ml-auto">Zobrazení · Objednávky</span>
+          <span className="text-sm font-bold text-white">Denní traffic (posledních 7 dní)</span>
+          <span className="text-[10px] text-gray-500 ml-auto">Unikátní návštěvníci · Objednávky</span>
         </div>
         <div className="grid grid-cols-7 gap-2">
           {dailyStats.map((day, i) => {
@@ -235,7 +248,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
               <div key={day.date} className={`flex flex-col items-center gap-1 ${isToday ? 'opacity-100' : 'opacity-70'}`}>
                 {/* Bar chart area */}
                 <div className="flex items-end gap-0.5 h-16">
-                  {/* Page views bar (cyan) */}
+                  {/* Unique visitors bar (cyan) */}
                   <div className="flex flex-col items-center">
                     {day.pageViews > 0 && (
                       <span className="text-[8px] text-cyan-400 font-bold mb-0.5">{day.pageViews}</span>
@@ -260,7 +273,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
                 <span className={`text-[10px] font-bold ${isToday ? 'text-white' : 'text-gray-500'}`}>{day.label}</span>
                 {/* Totals below */}
                 <div className="text-[8px] text-center leading-tight">
-                  {day.pageViews > 0 && <div className="text-cyan-400">{day.pageViews} zobr.</div>}
+                  {day.pageViews > 0 && <div className="text-cyan-400">{day.pageViews} vis.</div>}
                   {day.orders > 0 && <div className="text-emerald-400">{day.orders} obj.</div>}
                 </div>
               </div>
@@ -270,7 +283,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
         <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/5">
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-sm bg-cyan-400" />
-            <span className="text-[10px] text-gray-500">Zobrazení stránek</span>
+            <span className="text-[10px] text-gray-500">Unikátní návštěvníci</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-sm bg-emerald-400" />
