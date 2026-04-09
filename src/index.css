@@ -8,6 +8,12 @@
   * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Apply transitions only to interactive elements, not all elements */
+  /* This prevents massive GPU overhead from animating 128+ decorative elements */
+  a, button, input, select, textarea,
+  [role="button"], [tabindex] {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -16,6 +22,17 @@
     overflow-x: clip;
     overscroll-behavior-x: none;
     background-color: #0a0a14;
+  }
+
+  /* GPU optimization for all animated/decorative elements */
+  [aria-hidden="true"],
+  .animate-ambient-float,
+  .animate-ping,
+  .animate-pulse,
+  .animate-spin,
+  .animate-bounce {
+    contain: layout style paint;
+    will-change: transform;
   }
 
   body {
