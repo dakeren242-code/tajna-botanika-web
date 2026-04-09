@@ -345,33 +345,22 @@ async function sendToFacebookCAPI(eventName: string, data?: TrackingEvent, event
     }
 
     const capiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/facebook-capi`;
-    const body = JSON.stringify(payload);
-
-    // Use sendBeacon for reliability (survives page navigation)
-    // Falls back to fetch if sendBeacon unavailable
-    if (navigator.sendBeacon) {
-      const blob = new Blob([body], { type: 'application/json' });
-      const sent = navigator.sendBeacon(capiUrl, blob);
-      if (!sent) {
-        // sendBeacon failed (queue full), fallback to fetch
-        fetch(capiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` },
-          body,
-          keepalive: true,
-        }).then(r => { if (!r.ok) r.json().catch(() => ({})).then(err => console.error('CAPI error:', r.status, err)); }).catch(() => {});
-      }
-    } else {
-      const response = await fetch(capiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` },
-        body,
-        keepalive: true,
-      });
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        console.error('CAPI error:', response.status, err);
-      }
+    // keepalive: true survives page navigation (same benefit as sendBeacon) but
+    // works with custom headers. sendBeacon sets credentials:'include' which
+    // requires Access-Control-Allow-Credentials in the CORS preflight — our edge
+    // function doesn't send that, so sendBeacon always fails with a CORS error.
+    const response = await fetch(capiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      console.error('CAPI error:', response.status, err);
     }
   } catch (error) {
     console.error('Failed to send Facebook CAPI event:', error);
