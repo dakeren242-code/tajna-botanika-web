@@ -1,4 +1,4 @@
-import { Mail, MessageCircle, Clock, MapPin } from 'lucide-react';
+import { Phone, MessageCircle, Clock, MapPin } from 'lucide-react';
 
 export default function ContactSection() {
   return (
@@ -48,6 +48,24 @@ export default function ContactSection() {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-2xl p-8 border border-amber-500/20 hover:border-amber-500/40 transition-all duration-300 text-center">
+          <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 p-4 rounded-xl border border-amber-500/30 inline-block mb-4">
+            <Phone className="w-8 h-8 text-amber-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-2">Potřebujete poradit hned?</h3>
+          <p className="text-gray-300 mb-4">
+            Pro vážné zájemce, kteří chtějí prodat rychle a osobně.
+          </p>
+          <a
+            href="tel:+420739385030"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:scale-[1.02] transition-all text-lg"
+          >
+            <Phone className="w-5 h-5" />
+            739 385 030
+          </a>
+          <p className="text-gray-500 text-sm mt-3">Volejte kdykoliv, rádi poradíme</p>
         </div>
 
       </div>
