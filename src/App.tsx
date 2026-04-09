@@ -1,4 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
+import { initPostHog, phPage } from './lib/posthog';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -208,6 +209,19 @@ function ScrollToTop() {
 function PageViewTracker() {
   const location = useLocation();
   useEffect(() => {
+    // Capture fbclid from URL and store for Meta EMQ improvement
+    const params = new URLSearchParams(window.location.search);
+    const fbclid = params.get('fbclid');
+    if (fbclid) {
+      // Store fbclid with timestamp — used later in CAPI Purchase events
+      const fbc = `fb.1.${Date.now()}.${fbclid}`;
+      sessionStorage.setItem('tb_fbclid', fbclid);
+      sessionStorage.setItem('tb_fbc', fbc);
+      // Also store in cookie for _fbc (Meta format)
+      const expires = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = `_fbc=${fbc}; expires=${expires}; path=/; SameSite=Lax`;
+    }
+
     trackPageView(location.pathname);
     // Track in Supabase for admin dashboard stats (fire-and-forget, no await)
     let sid = sessionStorage.getItem('vsid');
@@ -222,12 +236,15 @@ function PageViewTracker() {
         user_id: data?.user?.id ?? null,
       }).then(() => {/* silent */});
     });
+    phPage(location.pathname);
   }, [location.pathname]);
   return null;
 }
 
 function TrackingWrapper({ children }: { children: React.ReactNode }) {
   useTracking();
+  // Init PostHog once
+  useEffect(() => { initPostHog(); }, []);
   return <>{children}</>;
 }
 

@@ -191,6 +191,9 @@ export default function Checkout() {
         user_zip: customerData.zip,
         user_country: 'cz',
         user_id: user?.id,
+        // fbclid for Meta EMQ — captured from landing URL param
+        fbc: sessionStorage.getItem('tb_fbc') || undefined,
+        fbclid: sessionStorage.getItem('tb_fbclid') || undefined,
       });
 
       // Send admin notification (fire-and-forget, don't block checkout)
