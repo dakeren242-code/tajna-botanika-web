@@ -29,36 +29,68 @@ function ExitIntentPopup() {
       return;
     }
 
-    const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 5 && !hasShown) {
+    const triggerPopup = () => {
+      if (!hasShown && !sessionStorage.getItem('exitPopupShown')) {
         setShow(true);
         setHasShown(true);
         sessionStorage.setItem('exitPopupShown', 'true');
       }
     };
 
-    // Also trigger after inactivity
+    // Desktop: mouse leaves viewport
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 5) triggerPopup();
+    };
+
+    // Mobile: detect scroll-up toward top (like pulling to leave)
+    let lastScrollY = window.scrollY;
+    let scrollUpDistance = 0;
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      if (currentY < lastScrollY) {
+        scrollUpDistance += lastScrollY - currentY;
+      } else {
+        scrollUpDistance = 0;
+      }
+      // Trigger after fast scroll-up of 300px+ while already scrolled down 500px+
+      if (scrollUpDistance > 300 && lastScrollY > 500) {
+        scrollUpDistance = 0;
+        triggerPopup();
+      }
+      lastScrollY = currentY;
+    };
+
+    // Mobile: back button / visibility change (user switching tabs)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        // Mark that user tried to leave; show on return
+        sessionStorage.setItem('exitIntentPending', 'true');
+      } else if (sessionStorage.getItem('exitIntentPending')) {
+        sessionStorage.removeItem('exitIntentPending');
+        triggerPopup();
+      }
+    };
+
+    // Inactivity fallback (works on both mobile & desktop)
     let inactivityTimer: ReturnType<typeof setTimeout>;
     const resetInactivity = () => {
       clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(() => {
-        if (!hasShown && !sessionStorage.getItem('exitPopupShown')) {
-          setShow(true);
-          setHasShown(true);
-          sessionStorage.setItem('exitPopupShown', 'true');
-        }
-      }, 75000);
+      inactivityTimer = setTimeout(triggerPopup, 75000);
     };
 
     document.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('mousemove', resetInactivity);
-    document.addEventListener('scroll', resetInactivity);
+    document.addEventListener('touchstart', resetInactivity, { passive: true });
     resetInactivity();
 
     return () => {
       document.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('mousemove', resetInactivity);
-      document.removeEventListener('scroll', resetInactivity);
+      document.removeEventListener('touchstart', resetInactivity);
       clearTimeout(inactivityTimer);
     };
   }, [hasShown]);

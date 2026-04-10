@@ -46,26 +46,26 @@ function UrgencyBanner() {
   if (dismissed) return null;
 
   return (
-    <div className={`hidden md:block fixed z-40 top-[73px] left-0 right-0 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
+    <div className={`fixed z-40 top-[56px] md:top-[73px] left-0 right-0 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
       <div className="relative bg-gradient-to-r from-emerald-900/95 via-emerald-800/95 to-teal-900/95 backdrop-blur-md border-b border-emerald-500/20">
-        <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-center gap-3 text-sm">
-          <Truck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+        <div className="max-w-7xl mx-auto px-3 md:px-4 py-2 md:py-2.5 flex items-center justify-center gap-2 md:gap-3 text-xs md:text-sm">
+          <Truck className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-400 flex-shrink-0" />
           <span className="text-emerald-100/90 font-medium">
             <span className="hidden sm:inline">Objednejte dnes a </span>
             <span className="text-white font-bold">doprava zdarma</span>
             <span className="hidden sm:inline"> nad 999 Kč</span>
           </span>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/30 border border-emerald-500/20">
-            <Clock className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-emerald-300 font-mono font-bold text-xs tracking-wider">
+          <div className="flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-0.5 md:py-1 rounded-lg bg-black/30 border border-emerald-500/20">
+            <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-400" />
+            <span className="text-emerald-300 font-mono font-bold text-[10px] md:text-xs tracking-wider">
               {timeLeft}
             </span>
           </div>
           <button
             onClick={() => setDismissed(true)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400/40 hover:text-white transition-colors"
+            className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 text-emerald-400/40 hover:text-white transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
           </button>
         </div>
       </div>
