@@ -101,7 +101,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
       supabase.from('orders').select('id, order_number, total_amount, payment_status, status, created_at, customer_email, customer_first_name, customer_last_name, first_name, last_name, email, payment_method, shipping_method, discount_amount').order('created_at', { ascending: false }),
       supabase.from('discount_codes').select('*').order('created_at', { ascending: false }),
       supabase.from('user_profiles').select('id, created_at').order('created_at', { ascending: false }),
-      supabase.from('page_views').select('session_id, created_at').gte('created_at', sevenDaysAgo),
+      supabase.from('page_views').select('session_id, created_at').gte('created_at', sevenDaysAgo).is('user_id', null).or('user_id.neq.b6cf33be-f211-4740-945e-5dac9d1c470f'),
       supabase.from('cart_sessions').select('item_count, total_value, updated_at').gt('item_count', 0),
       supabase.from('order_items').select('product_id, product_name, quantity, total_price, created_at').order('created_at', { ascending: false }),
     ]);

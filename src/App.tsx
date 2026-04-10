@@ -56,7 +56,6 @@ const SupportChat = lazy(() => import('./components/SupportChat'));
 const UrgencyBanner = lazy(() => import('./components/UrgencyBanner'));
 const ExitIntentPopup = lazy(() => import('./components/ExitIntentPopup'));
 const ProductComparisonSection = lazy(() => import('./components/ProductComparisonSection'));
-const InstagramSection = lazy(() => import('./components/InstagramSection'));
 const SeasonalBanner = lazy(() => import('./components/SeasonalBanner'));
 const ReferralSection = lazy(() => import('./components/ReferralSection'));
 const FloatingRegisterCTA = lazy(() => import('./components/FloatingRegisterCTA'));
@@ -170,11 +169,7 @@ function Home() {
           </ScrollReveal>
         </Suspense>
 
-        <Suspense fallback={null}>
-          <ScrollReveal direction="fade">
-            <InstagramSection />
-          </ScrollReveal>
-        </Suspense>
+        {/* InstagramSection removed — fake engagement metrics */}
 
         <Suspense fallback={null}>
           <ScrollReveal direction="fade">

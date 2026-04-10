@@ -85,11 +85,11 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <h1 className="text-3xl md:text-7xl lg:text-8xl font-black mb-5 md:mb-8 tracking-tight hero-fade-in" style={{ animationDelay: '0.3s' }}>
-          <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent drop-shadow-2xl whitespace-nowrap" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
+        <h1 className="text-3xl md:text-5xl lg:text-7xl xl:text-8xl font-black mb-5 md:mb-8 tracking-tight hero-fade-in overflow-hidden" style={{ animationDelay: '0.3s' }}>
+          <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent drop-shadow-2xl" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
             ČISTOTA V
           </span>
-          <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent drop-shadow-2xl whitespace-nowrap" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
+          <span className="block bg-gradient-to-r from-green-300 via-emerald-300 to-green-400 bg-clip-text text-transparent drop-shadow-2xl" style={{ textShadow: '0 0 80px rgba(34, 197, 94, 0.5)' }}>
             KAŽDÉM DETAILU
           </span>
           <span className="block text-lg md:text-4xl mt-3 md:mt-4 bg-gradient-to-r from-cyan-200 via-blue-200 to-purple-300 bg-clip-text text-transparent font-light tracking-wide">
