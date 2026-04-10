@@ -78,6 +78,8 @@ interface OrderItem {
   quantity: number;
   total_price: number;
   created_at: string;
+  gram_amount: string;
+  order_id: string;
 }
 
 export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
@@ -103,7 +105,7 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
       supabase.from('user_profiles').select('id, created_at').order('created_at', { ascending: false }),
       supabase.from('page_views').select('session_id, created_at').gte('created_at', sevenDaysAgo).is('user_id', null).or('user_id.neq.b6cf33be-f211-4740-945e-5dac9d1c470f'),
       supabase.from('cart_sessions').select('item_count, total_value, updated_at').gt('item_count', 0),
-      supabase.from('order_items').select('product_id, product_name, quantity, total_price, created_at').order('created_at', { ascending: false }),
+      supabase.from('order_items').select('product_id, product_name, quantity, total_price, created_at, gram_amount, order_id').order('created_at', { ascending: false }),
     ]);
     if (c.data) setContacts(c.data);
     if (p.data) setProducts(p.data);
@@ -178,6 +180,19 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
   const orders7d = orders.filter(o => new Date(o.created_at) >= startOf7days).length;
   const orders30d = orders.filter(o => new Date(o.created_at) >= startOf30days).length;
   const conversionToday = uniqueVisitorsToday > 0 ? ((ordersToday / uniqueVisitorsToday) * 100).toFixed(1) : '0.0';
+
+  // Total grams needed to fulfill all unfulfilled orders
+  const gramMap: Record<string, number> = { '1g': 1, '3g': 3, '5g': 5, '10g': 10, '50g': 50, '100g': 100 };
+  const pendingItems = orderItems.filter(oi => {
+    const order = orders.find(o => o.id === (oi as any).order_id);
+    return !order || order.status !== 'delivered' && order.status !== 'cancelled';
+  });
+  const totalGramsNeeded = orderItems.reduce((sum, oi) => sum + (gramMap[oi.gram_amount] || 0) * oi.quantity, 0);
+  const unfulfilledGrams = pendingItems.reduce((sum, oi) => sum + (gramMap[oi.gram_amount] || 0) * oi.quantity, 0);
+
+  // Unique customers today
+  const customersToday = new Set(orders.filter(o => toLocalDateStr(o.created_at) === todayStr).map(o => o.customer_email || o.email)).size;
+  const customers7d = new Set(orders.filter(o => new Date(o.created_at) >= startOf7days).map(o => o.customer_email || o.email)).size;
 
   // Top products (from orderItems, aggregate by product_name)
   const productMap: Record<string, { name: string; qty: number; revenue: number }> = {};
@@ -267,6 +282,34 @@ export default function LivePanel({ liveVisitors }: { liveVisitors: number }) {
             </div>
           );
         })}
+      </div>
+
+      {/* Grams + Customers */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 -mt-3">
+        <div className="bg-gradient-to-br from-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
+          <Package className="w-4 h-4 mb-1.5 text-yellow-400 opacity-60" />
+          <span className="text-xl font-bold text-white block">{totalGramsNeeded}g</span>
+          <p className="text-gray-500 text-[10px]">Celkem gramů objednáno</p>
+          <p className="text-yellow-400/60 text-[9px] mt-0.5">{unfulfilledGrams}g čeká na odeslání</p>
+        </div>
+        <div className="bg-gradient-to-br from-cyan-500/10 border border-cyan-500/20 rounded-xl p-4">
+          <UserCheck className="w-4 h-4 mb-1.5 text-cyan-400 opacity-60" />
+          <span className="text-xl font-bold text-white block">{customersToday}</span>
+          <p className="text-gray-500 text-[10px]">Zákazníků dnes</p>
+          <p className="text-cyan-400/60 text-[9px] mt-0.5">{customers7d} za 7 dní</p>
+        </div>
+        <div className="bg-gradient-to-br from-red-500/10 border border-red-500/20 rounded-xl p-4">
+          <AlertTriangle className="w-4 h-4 mb-1.5 text-red-400 opacity-60" />
+          <span className="text-xl font-bold text-white block">{orders.filter(o => o.status === 'pending').length}</span>
+          <p className="text-gray-500 text-[10px]">Čeká na zpracování</p>
+          <p className="text-red-400/60 text-[9px] mt-0.5">{orders.filter(o => o.payment_method === 'bank_transfer' && o.payment_status === 'pending').length} čeká na platbu</p>
+        </div>
+        <div className="bg-gradient-to-br from-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
+          <Ticket className="w-4 h-4 mb-1.5 text-emerald-400 opacity-60" />
+          <span className="text-xl font-bold text-white block">{orders.filter(o => o.status === 'shipped').length}</span>
+          <p className="text-gray-500 text-[10px]">Odesláno</p>
+          <p className="text-emerald-400/60 text-[9px] mt-0.5">{orders.length} celkem obj.</p>
+        </div>
       </div>
 
       {/* Revenue + Conversion */}
