@@ -268,8 +268,7 @@ export default function ProductManagement() {
               >
                 <option value="flower">Květy</option>
                 <option value="concentrate">Koncentráty</option>
-                <option value="edible">Jedlé</option>
-                <option value="vape">Vape</option>
+                <option value="collectible">Sběratelské</option>
               </select>
             </div>
 

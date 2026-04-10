@@ -23,7 +23,7 @@ export default function ExperienceSection() {
     {
       icon: Zap,
       title: 'Vynikající Profil',
-      description: 'Precizně vyvážené aróma, chuť a konzistence. Sběratelský kousek nejvyšší kvality.',
+      description: 'Precizně vyvážené aromatické a botanické vlastnosti. Sběratelský kousek nejvyšší kvality.',
       color: '#C084FC',
     },
   ];

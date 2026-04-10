@@ -550,7 +550,7 @@ export default function ProductDetail() {
                 {[
                   { name: 'Martin K.', city: 'Praha', rating: 5, text: 'Výborná kvalita, krásné aroma. Doručení do druhého dne. Určitě objednám znovu!', date: 'před 3 dny' },
                   { name: 'Lucie P.', city: 'Brno', rating: 5, text: 'Konečně kvalitní THC-X v ČR. Balení je prémiové a produkt odpovídá popisu na 100%.', date: 'před týdnem' },
-                  { name: 'Tomáš H.', city: 'Ostrava', rating: 4, text: 'Velmi spokojený. Efekt přesně jak popisují. Jen doprava mohla být rychlejší.', date: 'před 2 týdny' },
+                  { name: 'Tomáš H.', city: 'Ostrava', rating: 4, text: 'Velmi spokojený. Botanický profil přesně jak popisují. Jen doprava mohla být rychlejší.', date: 'před 2 týdny' },
                 ].map((review, i) => (
                   <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl">
                     <div className="flex items-center justify-between mb-2">

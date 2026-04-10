@@ -139,7 +139,7 @@ export default function ProductComparisonSection() {
             </span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Kompletní přehled terpenových profilů, chutí a efektů všech našich odrůd
+            Kompletní přehled terpenových a aromatických profilů všech našich odrůd
           </p>
         </div>
 
@@ -159,13 +159,13 @@ export default function ProductComparisonSection() {
                 <th className="text-left py-4 px-4 text-gray-500 text-xs font-semibold uppercase tracking-wider">
                   <div className="flex items-center gap-1.5">
                     <Leaf className="w-3.5 h-3.5" />
-                    Chuť
+                    Aroma
                   </div>
                 </th>
                 <th className="text-left py-4 px-4 text-gray-500 text-xs font-semibold uppercase tracking-wider">
                   <div className="flex items-center gap-1.5">
                     <Star className="w-3.5 h-3.5" />
-                    Efekt
+                    Charakter
                   </div>
                 </th>
                 <th className="text-center py-4 px-4 text-gray-500 text-xs font-semibold uppercase tracking-wider">Intenzita</th>
@@ -229,11 +229,11 @@ export default function ProductComparisonSection() {
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <span className="text-gray-500 text-xs">Chuť</span>
+                    <span className="text-gray-500 text-xs">Aroma</span>
                     <p className="text-gray-300">{profile.flavor}</p>
                   </div>
                   <div>
-                    <span className="text-gray-500 text-xs">Efekt</span>
+                    <span className="text-gray-500 text-xs">Charakter</span>
                     <p className="text-gray-300">{profile.effect}</p>
                   </div>
                 </div>
