@@ -224,18 +224,22 @@ function PageViewTracker() {
 
     trackPageView(location.pathname);
     // Track in Supabase for admin dashboard stats (fire-and-forget, no await)
-    let sid = sessionStorage.getItem('vsid');
-    if (!sid) {
-      sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-      sessionStorage.setItem('vsid', sid);
+    // Skip page_view logging for admin devices to avoid inflating stats
+    const isAdminDevice = localStorage.getItem('tb_admin') === '1';
+    if (!isAdminDevice) {
+      let sid = sessionStorage.getItem('vsid');
+      if (!sid) {
+        sid = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+        sessionStorage.setItem('vsid', sid);
+      }
+      supabase.auth.getUser().then(({ data }) => {
+        supabase.from('page_views').insert({
+          session_id: sid,
+          path: location.pathname,
+          user_id: data?.user?.id ?? null,
+        }).then(() => {/* silent */});
+      });
     }
-    supabase.auth.getUser().then(({ data }) => {
-      supabase.from('page_views').insert({
-        session_id: sid,
-        path: location.pathname,
-        user_id: data?.user?.id ?? null,
-      }).then(() => {/* silent */});
-    });
     phPage(location.pathname);
   }, [location.pathname]);
   return null;
