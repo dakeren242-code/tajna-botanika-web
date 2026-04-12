@@ -151,13 +151,33 @@ export default function SupportAdmin() {
 
   const sendReply = async () => {
     if (!reply.trim() || !selectedConv) return;
+    const replyText = reply.trim();
     try {
       await supabase.from('support_messages').insert({
         conversation_id: selectedConv,
         sender: 'admin',
-        message: reply.trim(),
+        message: replyText,
       });
       setReply('');
+
+      // If customer is offline, send email notification
+      const conv = conversations.find(c => c.conversation_id === selectedConv);
+      const customerEmail = conv?.user_email;
+      const isOffline = !conv?.presence?.is_online;
+
+      if (customerEmail && isOffline) {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        fetch(`${supabaseUrl}/functions/v1/support-notify-customer`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversation_id: selectedConv,
+            customer_email: customerEmail,
+            reply_preview: replyText,
+          }),
+        }).catch(() => {}); // fire and forget
+      }
+
       await loadConversations();
     } catch (err) {
       console.error('Error sending reply:', err);
