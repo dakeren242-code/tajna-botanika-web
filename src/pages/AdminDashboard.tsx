@@ -7,6 +7,7 @@ import ProductManagement from '../components/admin/ProductManagement';
 import FacebookCatalogManager from '../components/admin/FacebookCatalogManager';
 import SupportAdmin from '../components/admin/SupportAdmin';
 import LivePanel from '../components/admin/LivePanel';
+import CrmPanel from '../components/admin/CrmPanel';
 import { getVisitorCount, onVisitorCountChange } from '../App';
 
 // Error boundary to prevent black screen crashes
@@ -74,7 +75,7 @@ const paymentStatusLabels = {
 export default function AdminDashboard() {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'products' | 'catalog' | 'support'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'products' | 'catalog' | 'support' | 'crm'>('overview');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
@@ -487,6 +488,17 @@ export default function AdminDashboard() {
               Facebook Catalog
             </button>
             <button
+              onClick={() => setActiveTab('crm')}
+              className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-colors border-b-2 whitespace-nowrap ${
+                activeTab === 'crm'
+                  ? 'text-emerald-400 border-emerald-400'
+                  : 'text-gray-400 border-transparent hover:text-white'
+              }`}
+            >
+              <Users className="w-5 h-5" />
+              CRM
+            </button>
+            <button
               onClick={() => setActiveTab('support')}
               className={`flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2.5 md:py-3 text-sm md:text-base font-semibold transition-colors border-b-2 whitespace-nowrap ${
                 activeTab === 'support'
@@ -811,6 +823,8 @@ export default function AdminDashboard() {
           )}
 
           {activeTab === 'products' && <AdminErrorBoundary><ProductManagement /></AdminErrorBoundary>}
+
+          {activeTab === 'crm' && <AdminErrorBoundary><CrmPanel /></AdminErrorBoundary>}
 
           {activeTab === 'catalog' && <AdminErrorBoundary><FacebookCatalogManager /></AdminErrorBoundary>}
 

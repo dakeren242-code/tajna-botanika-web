@@ -41,6 +41,7 @@ const OrderHistory = lazy(() => import('./pages/OrderHistory'));
 const OrderDetail = lazy(() => import('./pages/OrderDetail'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
 const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 const Deals = lazy(() => import('./pages/Deals'));
 const BundleBuilder = lazy(() => import('./pages/BundleBuilder'));
@@ -335,6 +336,7 @@ function App() {
                     <Route path="/orders/:orderId" element={<OrderDetail />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/update-password" element={<UpdatePassword />} />
                     <Route path="/auth/callback" element={<AuthCallback />} />
                     <Route path="/akce" element={<Deals />} />
                     <Route path="/balicek" element={<BundleBuilder />} />

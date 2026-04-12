@@ -37,9 +37,9 @@ export default function AuthCallback() {
         return;
       }
 
-      // If type is recovery (password reset), redirect to reset page
+      // If type is recovery (password reset), redirect to update password page
       if (type === 'recovery') {
-        navigate('/reset-password');
+        navigate('/update-password' + window.location.hash);
         return;
       }
 
